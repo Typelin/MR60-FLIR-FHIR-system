@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FHIR IoT 穿牆連線控制面板</title>
+    <!-- 引入 Google Fonts 現代字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(20, 30, 55, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-color: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.35);
+            --success-color: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.3);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            /* 背景漸變與光圈 */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            perspective: 1000px;
+        }
+
+        /* 磨砂玻璃效果 (Glassmorphism) */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 16px 32px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* 測試結果面板 */
+        .result-panel {
+            margin-top: 35px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: none;
+        }
+
+        .result-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-online {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+
+        .badge-offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #34d399;
+        }
+
+        /* 載入動畫 */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <header>
+            <h1>FHIR 穿牆連線控制面板</h1>
+            <p class="subtitle">Cloudflare Tunnel 後端連線可用性測試</p>
+        </header>
+
+        <div class="form-group">
+            <label for="apiUrl">後端 API 網址</label>
+            <div class="input-wrapper">
+                <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="請輸入 Cloudflare 分配的 trycloudflare.com 網址">
+            </div>
+        </div>
+
+        <button id="testBtn" onclick="testConnection()">
+            <span id="btnSpinner" class="spinner hidden"></span>
+            <span id="btnText">發送測試請求 (GET)</span>
+        </button>
+
+        <div id="resultPanel" class="result-panel">
+            <div class="result-title">
+                <h3>伺服器回應結果</h3>
+                <span id="statusBadge" class="badge">ONLINE</span>
+            </div>
+            <pre id="jsonResult"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function testConnection() {
+        const urlInput = document.getElementById("apiUrl").value.trim();
+        const testBtn = document.getElementById("testBtn");
+        const btnSpinner = document.getElementById("btnSpinner");
+        const btnText = document.getElementById("btnText");
+        const resultPanel = document.getElementById("resultPanel");
+        const statusBadge = document.getElementById("statusBadge");
+        const jsonResult = document.getElementById("jsonResult");
+
+        if (!urlInput) {
+            alert("請輸入 API 網址！");
+            return;
+        }
+
+        // 格式化 API 網址，確保以 http/https 開頭
+        let targetUrl = urlInput;
+        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+            targetUrl = "https://" + targetUrl;
+        }
+
+        // 開始讀取狀態，切換按鈕動畫
+        testBtn.disabled = true;
+        btnSpinner.classList.remove("hidden");
+        btnText.innerText = "正在連線...";
+        resultPanel.style.display = "none";
+
+        const startTime = Date.now();
+
+        try {
+            // 發送 GET 請求
+            const response = await fetch(targetUrl, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            const latency = Date.now() - startTime;
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // 成功連線
+                statusBadge.className = "badge badge-online";
+                statusBadge.innerText = `ONLINE (${latency}ms)`;
+                
+                // 將回傳的 JSON 美化輸出
+                jsonResult.style.color = "#34d399";
+                jsonResult.innerText = JSON.stringify(data, null, 4);
+            } else {
+                throw new Error(`HTTP 錯誤代碼: ${response.status}`);
+            }
+
+        } catch (error) {
+            // 連線失敗
+            statusBadge.className = "badge badge-offline";
+            statusBadge.innerText = "OFFLINE";
+            jsonResult.style.color = "#ef4444";
+            jsonResult.innerText = JSON.stringify({
+                "error": "連線失敗",
+                "reason": error.message,
+                "tip": "請確認後端 Python 伺服器 (server.py) 是否有開著，以及 Cloudflare Tunnel 是否處於啟動狀態。"
+            }, null, 4);
+        } finally {
+            // 恢復按鈕狀態
+            testBtn.disabled = false;
+            btnSpinner.classList.add("hidden");
+            btnText.innerText = "發送測試請求 (GET)";
+            resultPanel.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>
