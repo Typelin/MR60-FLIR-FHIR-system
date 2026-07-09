@@ -251,6 +251,17 @@
 </div>
 
 <script>
+    // 網頁載入時自動讀取網址 Query Parameter
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tunnelUrl = urlParams.get('tunnel');
+        if (tunnelUrl) {
+            document.getElementById("apiUrl").value = tunnelUrl;
+            // 自動發送測試連線
+            testConnection();
+        }
+    };
+
     async function testConnection() {
         const urlInput = document.getElementById("apiUrl").value.trim();
         const testBtn = document.getElementById("testBtn");
