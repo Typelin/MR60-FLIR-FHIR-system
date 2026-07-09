@@ -1,4 +1,4 @@
-:: UTF-8 BOM 保護行，請勿刪除此行
+REM UTF-8
 @echo off
 chcp 65001 >nul
 title 一鍵啟動測試服務
