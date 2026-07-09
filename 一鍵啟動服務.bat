@@ -30,9 +30,9 @@ start "" "local_db_api\index.html"
 
 echo.
 echo ==================================================
-echo  啟動完成！
-echo  請在 [Cloudflare 穿牆隧道] 視窗中複製產生的 trycloudflare.com 網址，
-echo  並貼入網頁的輸入框中，點選「發送測試請求」按鈕進行連線測試。
+echo 啟動完成！
+echo 請在 [Cloudflare 穿牆隧道] 視窗中複製產生的 trycloudflare.com 網址。
+echo 並貼入網頁的輸入框中，點選「發送測試請求」按鈕進行連線測試。
 echo ==================================================
 echo.
 pause
