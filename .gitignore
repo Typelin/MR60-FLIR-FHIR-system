@@ -1,0 +1,22 @@
+# Python 暫存與快取檔案
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 編輯器與系統暫存
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 本地臨時安裝包與測試記錄
+*.msi
+wsl_log.txt
+wsl_log_*.txt
