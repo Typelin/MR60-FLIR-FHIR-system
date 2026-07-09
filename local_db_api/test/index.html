@@ -36,7 +36,6 @@
             align-items: center;
             padding: 20px;
             overflow-x: hidden;
-            /* 背景漸變與光圈 */
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
@@ -48,7 +47,6 @@
             perspective: 1000px;
         }
 
-        /* 磨砂玻璃效果 (Glassmorphism) */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
@@ -92,7 +90,7 @@
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         label {
@@ -115,7 +113,7 @@
             background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             color: #fff;
             font-size: 1rem;
             outline: none;
@@ -126,35 +124,52 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
         button {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
             border: none;
             border-radius: 12px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            padding: 16px 32px;
+            padding: 14px 20px;
             cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        button:hover {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            box-shadow: 0 4px 15px var(--success-glow);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--success-glow);
         }
 
         button:active {
             transform: translateY(1px);
         }
 
-        /* 測試結果面板 */
         .result-panel {
-            margin-top: 35px;
+            margin-top: 30px;
             border-top: 1px solid var(--border-color);
-            padding-top: 30px;
+            padding-top: 25px;
             display: none;
         }
 
@@ -189,7 +204,7 @@
         pre {
             background: rgba(0, 0, 0, 0.4);
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9rem;
             overflow-x: auto;
@@ -197,16 +212,15 @@
             color: #34d399;
         }
 
-        /* 載入動畫 */
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+            margin-right: 8px;
             vertical-align: middle;
         }
 
@@ -225,24 +239,37 @@
     <div class="card">
         <header>
             <h1>FHIR 穿牆連線控制面板</h1>
-            <p class="subtitle">Cloudflare Tunnel 後端連線可用性測試</p>
+            <p class="subtitle">Cloudflare Tunnel 後端互動測試</p>
         </header>
 
         <div class="form-group">
             <label for="apiUrl">後端 API 網址</label>
             <div class="input-wrapper">
-                <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="請輸入 Cloudflare 分配的 trycloudflare.com 網址">
+                <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="請輸入 trycloudflare.com 網址">
             </div>
         </div>
 
-        <button id="testBtn" onclick="testConnection()">
-            <span id="btnSpinner" class="spinner hidden"></span>
-            <span id="btnText">發送測試請求 (GET)</span>
-        </button>
+        <div class="form-group">
+            <label for="patientName">模擬病人姓名 (POST 測試)</label>
+            <div class="input-wrapper">
+                <input type="text" id="patientName" value="王大明" placeholder="請輸入病人姓名進行體溫登錄測試">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="getBtn" class="btn-primary" onclick="sendGetRequest()">
+                <span id="getSpinner" class="spinner hidden"></span>
+                <span>測試連線 (GET)</span>
+            </button>
+            <button id="postBtn" class="btn-success" onclick="sendPostRequest()">
+                <span id="postSpinner" class="spinner hidden"></span>
+                <span>模擬上傳數據 (POST)</span>
+            </button>
+        </div>
 
         <div id="resultPanel" class="result-panel">
             <div class="result-title">
-                <h3>伺服器回應結果</h3>
+                <h3 id="panelTitle">伺服器回應結果</h3>
                 <span id="statusBadge" class="badge">ONLINE</span>
             </div>
             <pre id="jsonResult"></pre>
@@ -257,81 +284,123 @@
         const tunnelUrl = urlParams.get('tunnel');
         if (tunnelUrl) {
             document.getElementById("apiUrl").value = tunnelUrl;
-            // 自動發送測試連線
-            testConnection();
+            // 自動發送 GET 連線測試
+            sendGetRequest();
         }
     };
 
-    async function testConnection() {
-        const urlInput = document.getElementById("apiUrl").value.trim();
-        const testBtn = document.getElementById("testBtn");
-        const btnSpinner = document.getElementById("btnSpinner");
-        const btnText = document.getElementById("btnText");
+    function formatUrl(url) {
+        let target = url.trim();
+        if (!target) return "";
+        if (!target.startsWith("http://") && !target.startsWith("https://")) {
+            target = "https://" + target;
+        }
+        return target;
+    }
+
+    // 發送 GET 連線測試
+    async function sendGetRequest() {
+        const urlInput = document.getElementById("apiUrl").value;
+        const targetUrl = formatUrl(urlInput);
+        if (!targetUrl) return alert("請輸入 API 網址！");
+
+        const getBtn = document.getElementById("getBtn");
+        const getSpinner = document.getElementById("getSpinner");
         const resultPanel = document.getElementById("resultPanel");
         const statusBadge = document.getElementById("statusBadge");
         const jsonResult = document.getElementById("jsonResult");
+        const panelTitle = document.getElementById("panelTitle");
 
-        if (!urlInput) {
-            alert("請輸入 API 網址！");
-            return;
-        }
-
-        // 格式化 API 網址，確保以 http/https 開頭
-        let targetUrl = urlInput;
-        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-            targetUrl = "https://" + targetUrl;
-        }
-
-        // 開始讀取狀態，切換按鈕動畫
-        testBtn.disabled = true;
-        btnSpinner.classList.remove("hidden");
-        btnText.innerText = "正在連線...";
+        getBtn.disabled = true;
+        getSpinner.classList.remove("hidden");
         resultPanel.style.display = "none";
+        panelTitle.innerText = "GET 測試回應";
 
         const startTime = Date.now();
 
         try {
-            // 發送 GET 請求
-            const response = await fetch(targetUrl, {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-
+            const response = await fetch(targetUrl, { method: "GET" });
             const latency = Date.now() - startTime;
             
             if (response.ok) {
                 const data = await response.json();
-                
-                // 成功連線
                 statusBadge.className = "badge badge-online";
                 statusBadge.innerText = `ONLINE (${latency}ms)`;
-                
-                // 將回傳的 JSON 美化輸出
                 jsonResult.style.color = "#34d399";
                 jsonResult.innerText = JSON.stringify(data, null, 4);
             } else {
-                throw new Error(`HTTP 錯誤代碼: ${response.status}`);
+                throw new Error(`HTTP 錯誤: ${response.status}`);
             }
-
         } catch (error) {
-            // 連線失敗
-            statusBadge.className = "badge badge-offline";
-            statusBadge.innerText = "OFFLINE";
-            jsonResult.style.color = "#ef4444";
-            jsonResult.innerText = JSON.stringify({
-                "error": "連線失敗",
-                "reason": error.message,
-                "tip": "請確認後端 Python 伺服器 (server.py) 是否有開著，以及 Cloudflare Tunnel 是否處於啟動狀態。"
-            }, null, 4);
+            showError(error);
         } finally {
-            // 恢復按鈕狀態
-            testBtn.disabled = false;
-            btnSpinner.classList.add("hidden");
-            btnText.innerText = "發送測試請求 (GET)";
+            getBtn.disabled = false;
+            getSpinner.classList.add("hidden");
             resultPanel.style.display = "block";
         }
+    }
+
+    // 發送 POST 模擬體溫上傳
+    async function sendPostRequest() {
+        const urlInput = document.getElementById("apiUrl").value;
+        const patientName = document.getElementById("patientName").value.trim();
+        const targetUrl = formatUrl(urlInput);
+        if (!targetUrl) return alert("請輸入 API 網址！");
+        if (!patientName) return alert("請輸入模擬病人姓名！");
+
+        const postBtn = document.getElementById("postBtn");
+        const postSpinner = document.getElementById("postSpinner");
+        const resultPanel = document.getElementById("resultPanel");
+        const statusBadge = document.getElementById("statusBadge");
+        const jsonResult = document.getElementById("jsonResult");
+        const panelTitle = document.getElementById("panelTitle");
+
+        postBtn.disabled = true;
+        postSpinner.classList.remove("hidden");
+        resultPanel.style.display = "none";
+        panelTitle.innerText = "POST 模擬數據回應";
+
+        const startTime = Date.now();
+
+        try {
+            const response = await fetch(targetUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ patient_name: patientName })
+            });
+            const latency = Date.now() - startTime;
+            
+            if (response.ok) {
+                const data = await response.json();
+                statusBadge.className = "badge badge-online";
+                statusBadge.innerText = `成功寫入 (${latency}ms)`;
+                jsonResult.style.color = "#34d399";
+                jsonResult.innerText = JSON.stringify(data, null, 4);
+            } else {
+                throw new Error(`HTTP 錯誤: ${response.status}`);
+            }
+        } catch (error) {
+            showError(error);
+        } finally {
+            postBtn.disabled = false;
+            postSpinner.classList.add("hidden");
+            resultPanel.style.display = "block";
+        }
+    }
+
+    function showError(error) {
+        const statusBadge = document.getElementById("statusBadge");
+        const jsonResult = document.getElementById("jsonResult");
+        statusBadge.className = "badge badge-offline";
+        statusBadge.innerText = "OFFLINE";
+        jsonResult.style.color = "#ef4444";
+        jsonResult.innerText = JSON.stringify({
+            "error": "連線失敗",
+            "reason": error.message,
+            "tip": "請確認後端 Python 伺服器 (server.py) 是否有開著，以及 Cloudflare Tunnel 是否處於啟動狀態。"
+        }, null, 4);
     }
 </script>
 
