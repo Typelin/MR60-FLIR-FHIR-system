@@ -195,13 +195,18 @@ def launch_cloudflare_tunnel():
         webbrowser.open("http://localhost:8080")
         return
         
-    print(f"偵測到桌面 cloudflared.exe，正在啟動背景穿牆通道...")
-    
+    print(f"偵測到桌面 cloudflared.exe，正在啟動永久命名隧道 [school-fhir]...")
+
+    # 永久固定公網網址（使用命名隧道 school-fhir，綁定 60gigahertz.uk）
+    global ACTIVE_TUNNEL_URL
+    ACTIVE_TUNNEL_URL = "https://60gigahertz.uk"
+
     creationflags = 0
     if sys.platform == "win32":
         creationflags = 0x08000000
 
-    cmd = [cloudflared_path, "tunnel", "--url", "http://localhost:8080"]
+    # 使用命名永久隧道，不再是每次隨機產生臨時網址的快速通道
+    cmd = [cloudflared_path, "tunnel", "run", "--url", "http://localhost:8080", "school-fhir"]
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -211,29 +216,21 @@ def launch_cloudflare_tunnel():
         errors="ignore",
         creationflags=creationflags
     )
-    
+
     running_subprocesses.append(proc)
-    
-    browser_opened = False  # 用於記錄瀏覽器是否已開過
-    
-    # 讀取日誌抓取公網連結
+
+    browser_opened = False
+
     for line in iter(proc.stdout.readline, ""):
         print(f"[Cloudflare] {line.strip()}")
-        
-        # 只有在瀏覽器尚未開啟時，才解析網址並開啟
-        if ".trycloudflare.com" in line and not browser_opened:
-            match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-            if match:
-                tunnel_url = match.group(0)
-                ACTIVE_TUNNEL_URL = tunnel_url
-                print("\n" + "="*50)
-                print(f"🎉 穿牆成功！您的公網測試網址為:")
-                print(f"   {tunnel_url}")
-                print("="*50 + "\n")
-                
-                # 自動開啟本地 8080 網頁
-                webbrowser.open("http://localhost:8080")
-                browser_opened = True  # 鎖定旗標，防二次彈出
+
+        # 當隧道成功連上後，開啟本地網頁（只開一次）
+        if "Connection" in line and "registered" in line and not browser_opened:
+            print("\n" + "="*50)
+            print(f"永久公網網址: {ACTIVE_TUNNEL_URL}")
+            print("="*50 + "\n")
+            webbrowser.open("http://localhost:8080")
+            browser_opened = True
 
 def run_server(port=8080):
     server_address = ("", port)
