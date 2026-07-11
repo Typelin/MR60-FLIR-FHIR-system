@@ -3,9 +3,10 @@
 伺服器連線與靜態網頁伺服 (server.py)
 定位: 位於 local_db_api/test/。
 功能: 
-  1. 靜態網頁伺服: 讀取並回傳 web_frontend/index.html，支援帶參數的路由網址 (如 /?tunnel=...)。
+  1. 靜態網頁伺服: 讀取並回傳 web_frontend/index.html，並在伺服端動態注入當前活躍的 Cloudflare 穿牆網址。
   2. 資料庫 API: GET/POST /api 讀寫 PostgreSQL 資料庫。
   3. 背景穿牆: 在背景自動調用 cloudflared 建立隧道。
+  4. 自動清理: atexit 機制確保 Python 關閉時背景 cloudflared 子程序被乾淨清除。
 """
 
 import os
@@ -17,9 +18,14 @@ import datetime
 import subprocess
 import webbrowser
 import threading
+import atexit
 import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse  # 用於解析與剝離網址問號參數
+from urllib.parse import urlparse
+
+# 全局變數：儲存目前活躍的穿牆網址
+ACTIVE_TUNNEL_URL = "無 (僅限本地連線)"
+running_subprocesses = []
 
 def get_db_connection():
     # 建立 PostgreSQL 資料庫連線
@@ -31,18 +37,37 @@ def get_db_connection():
         port="5432"
     )
 
+def cleanup_subprocesses():
+    # 當伺服器關閉時，強制關閉背景所有子進程 (cloudflared.exe)
+    for proc in running_subprocesses:
+        try:
+            print(f"正在釋放背景穿牆通道 (PID: {proc.pid})...")
+            proc.terminate()
+            proc.wait(timeout=2)
+        except Exception:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+
+# 註冊退出清理機制
+atexit.register(cleanup_subprocesses)
+
 class SimpleServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # 使用 urlparse 解析路徑，剝離問號參數 (例如: /?tunnel=... 剝離後 path 僅為 /)
         parsed_url = urlparse(self.path)
         path = parsed_url.path
 
-        # 1. 靜態網頁伺服：如果是首頁請求，回傳 web_frontend/index.html
+        # 1. 靜態網頁伺服：如果是首頁請求，讀取 index.html 並將公網網址動態替換進去
         if path == '/' or path == '/index.html':
             html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
             try:
                 with open(html_path, "r", encoding="utf-8") as f:
                     content = f.read()
+                
+                # 伺服端動態網頁渲染：將 {{TUNNEL_URL}} 替換為目前實時的穿牆網址
+                content = content.replace("{{TUNNEL_URL}}", ACTIVE_TUNNEL_URL)
+                
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.end_headers()
@@ -156,6 +181,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 def launch_cloudflare_tunnel():
+    global ACTIVE_TUNNEL_URL
     # 尋找桌面（相對於 local_db_api/test/ 三層上）
     cloudflared_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "cloudflared.exe"))
     
@@ -183,6 +209,9 @@ def launch_cloudflare_tunnel():
         creationflags=creationflags
     )
     
+    # 將子進程存入列表以供結束時清理
+    running_subprocesses.append(proc)
+    
     # 讀取日誌抓取公網連結
     for line in iter(proc.stdout.readline, ""):
         print(f"[Cloudflare] {line.strip()}")
@@ -191,13 +220,14 @@ def launch_cloudflare_tunnel():
             match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
             if match:
                 tunnel_url = match.group(0)
+                ACTIVE_TUNNEL_URL = tunnel_url
                 print("\n" + "="*50)
                 print(f"🎉 穿牆成功！您的公網測試網址為:")
                 print(f"   {tunnel_url}")
                 print("="*50 + "\n")
                 
-                # 自動開啟本地 8080 網頁，並附帶載入穿牆的 URL 參數做設定
-                webbrowser.open(f"http://localhost:8080?tunnel={tunnel_url}")
+                # 自動開啟本地 8080 網頁 (無任何 query 參數，純淨 URL)
+                webbrowser.open("http://localhost:8080")
 
 def run_server(port=8080):
     server_address = ("", port)
@@ -211,7 +241,8 @@ def run_server(port=8080):
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\n正在關閉測試伺服器與釋放穿牆通道...")
+        print("\n正在關閉測試伺服器...")
+        cleanup_subprocesses()
         httpd.server_close()
 
 if __name__ == "__main__":
