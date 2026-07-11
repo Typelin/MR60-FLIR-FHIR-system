@@ -48,7 +48,6 @@
             perspective: 1000px;
         }
 
-        /* 磨砂玻璃面板 */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(18px);
@@ -85,7 +84,6 @@
             font-size: 0.95rem;
         }
 
-        /* 設定控制列 */
         .config-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -160,7 +158,6 @@
             box-shadow: 0 8px 25px var(--success-glow);
         }
 
-        /* 歷史紀錄面板 */
         .records-panel {
             border-top: 1px solid var(--border-color);
             padding-top: 30px;
@@ -182,7 +179,6 @@
             padding-right: 5px;
         }
 
-        /* 滾動條樣式 */
         .records-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -194,7 +190,6 @@
             border-radius: 3px;
         }
 
-        /* 每一列紀錄的卡片 */
         .record-item {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -261,6 +256,7 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -272,11 +268,10 @@
             <p class="subtitle">PostgreSQL 連線與數據庫資料監控</p>
         </header>
 
-        <!-- 設定配置列 -->
         <div class="config-grid">
             <div class="form-group">
                 <label for="apiUrl">後端 API 網址</label>
-                <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="請輸入 api 網址">
+                <input type="text" id="apiUrl" value="" placeholder="請輸入 API 網址">
             </div>
             <div class="form-group">
                 <label for="patientName">病人姓名</label>
@@ -302,11 +297,10 @@
             </button>
         </div>
 
-        <!-- 歷史紀錄列表 -->
         <div class="records-panel">
             <div class="records-header">
                 <h3>PostgreSQL 體溫數據紀錄</h3>
-                <span id="dbStatusBadge" style="font-size: 0.8rem; color: var(--success-color);">資料庫已連線</span>
+                <span id="dbStatusBadge" style="font-size: 0.8rem; color: var(--success-color);">正在初始化...</span>
             </div>
             
             <div id="recordsList" class="records-list">
@@ -317,13 +311,19 @@
 </div>
 
 <script>
-    // 網頁載入時自動讀取網址 Query Parameter，並自動載入資料
+    // 網頁載入時自動設定 API 網址
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         const tunnelUrl = urlParams.get('tunnel');
+        
         if (tunnelUrl) {
-            document.getElementById("apiUrl").value = tunnelUrl;
+            // 如果有帶入穿牆參數，使用它
+            document.getElementById("apiUrl").value = tunnelUrl + "/api";
+        } else {
+            // 否則，直接以當前載入的 HTTP 網域作為基礎 (例如 http://localhost:8080/api)
+            document.getElementById("apiUrl").value = window.location.origin + "/api";
         }
+        
         loadDatabaseRecords();
     };
 
@@ -336,7 +336,6 @@
         return target;
     }
 
-    // 載入資料庫內部的所有紀錄 (GET)
     async function loadDatabaseRecords() {
         const urlInput = document.getElementById("apiUrl").value;
         const targetUrl = formatUrl(urlInput);
@@ -356,8 +355,6 @@
                 const result = await response.json();
                 dbStatusBadge.innerText = "資料庫連線中";
                 dbStatusBadge.style.color = "var(--success-color)";
-                
-                // 渲染資料表
                 renderRecords(result.records);
             } else {
                 throw new Error();
@@ -365,14 +362,13 @@
         } catch (error) {
             dbStatusBadge.innerText = "連線失敗";
             dbStatusBadge.style.color = "var(--danger-color)";
-            recordsList.innerHTML = `<div class="no-records" style="color: var(--danger-color);">無法連線至後端伺服器，請確認 server.py 已啟動且穿牆網址正確。</div>`;
+            recordsList.innerHTML = `<div class="no-records" style="color: var(--danger-color);">無法連線至後端伺服器，請確認伺服器已啟動且 API 網址正確。</div>`;
         } finally {
             getBtn.disabled = false;
             getSpinner.classList.add("hidden");
         }
     }
 
-    // 寫入一筆新體溫紀錄 (POST)
     async function uploadTemperatureRecord() {
         const urlInput = document.getElementById("apiUrl").value;
         const patientName = document.getElementById("patientName").value.trim();
@@ -400,7 +396,6 @@
             });
 
             if (response.ok) {
-                // 寫入成功後，重新拉取最新數據
                 await loadDatabaseRecords();
             } else {
                 alert("寫入失敗，請確認後端服務狀態。");
@@ -413,7 +408,6 @@
         }
     }
 
-    // 渲染 JSON 紀錄至網頁
     function renderRecords(records) {
         const recordsList = document.getElementById("recordsList");
         
@@ -424,7 +418,6 @@
 
         let html = "";
         records.forEach(item => {
-            // 體溫高於 37.5 度顯示發燒警戒色 (紅色)
             const isFever = item.temperature > 37.5;
             const badgeClass = isFever ? "temp-badge temp-fever" : "temp-badge temp-normal";
             

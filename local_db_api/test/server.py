@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-伺服器連線與互動測試 (server.py)
-定位: 位於 local_db_api/test/，連線 PostgreSQL 資料庫以處理 GET/POST 連線測試，並在背景啟動桌面 3 層上的 cloudflared.exe。
+伺服器連線與與靜態網頁伺服 (server.py)
+定位: 位於 local_db_api/test/。
+功能: 
+  1. 靜態網頁伺服: GET / 或 /index.html 會直接讀取並回傳 web_frontend/index.html。
+  2. 資料庫 API: GET/POST /api 會讀寫 PostgreSQL 資料庫。
+  3. 背景穿牆: 在背景自動調用 cloudflared 建立隧道。
 """
 
 import os
@@ -28,93 +32,115 @@ def get_db_connection():
 
 class SimpleServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # 處理連線可用性測試 - 從 PostgreSQL 讀取所有體溫紀錄
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            # 依據時間降序排列讀取紀錄
-            cursor.execute("""
-                SELECT id, patient_name, temperature, 
-                       to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') 
-                FROM test_temperature 
-                ORDER BY recorded_at DESC;
-            """)
-            rows = cursor.fetchall()
-            
-            records = []
-            for row in rows:
-                records.append({
-                    "id": row[0],
-                    "patient_name": row[1],
-                    "temperature": float(row[2]),
-                    "timestamp": row[3]
-                })
+        # 1. 靜態網頁伺服：如果是首頁請求，回傳 web_frontend/index.html
+        if self.path == '/' or self.path.startswith('/index.html'):
+            html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
+            try:
+                with open(html_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(content.encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(f"讀取 index.html 失敗: {str(e)}".encode("utf-8"))
                 
-            cursor.close()
-            conn.close()
-            
-            response = {
-                "status": "success",
-                "database": "connected",
-                "records": records
-            }
-            status_code = 200
-        except Exception as e:
-            response = {
-                "status": "error",
-                "message": f"資料庫讀取失敗: {str(e)}",
-                "records": []
-            }
-            status_code = 500
+        # 2. 資料庫 API：如果是 /api，從資料庫撈取資料
+        elif self.path.startswith('/api'):
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT id, patient_name, temperature, 
+                           to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') 
+                    FROM test_temperature 
+                    ORDER BY recorded_at DESC;
+                """)
+                rows = cursor.fetchall()
+                
+                records = []
+                for row in rows:
+                    records.append({
+                        "id": row[0],
+                        "patient_name": row[1],
+                        "temperature": float(row[2]),
+                        "timestamp": row[3]
+                    })
+                    
+                cursor.close()
+                conn.close()
+                
+                response = {
+                    "status": "success",
+                    "database": "connected",
+                    "records": records
+                }
+                status_code = 200
+            except Exception as e:
+                response = {
+                    "status": "error",
+                    "message": f"資料庫讀取失敗: {str(e)}",
+                    "records": []
+                }
+                status_code = 500
 
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
+            self.send_response(status_code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
+            
+        else:
+            self.send_response(404)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Not Found")
 
     def do_POST(self):
-        # 處理體溫寫入資料庫測試 (POST)
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        
-        try:
-            data = json.loads(post_data.decode('utf-8'))
-            patient_name = data.get("patient_name", "未指定")
-            temperature = data.get("temperature", 37.0)
+        # 處理體溫寫入資料庫測試 (POST /api)
+        if self.path.startswith('/api'):
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
             
-            # 寫入 PostgreSQL 資料庫
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO test_temperature (patient_name, temperature) VALUES (%s, %s);",
-                (patient_name, temperature)
-            )
-            conn.commit()
-            cursor.close()
-            conn.close()
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                patient_name = data.get("patient_name", "未指定")
+                temperature = data.get("temperature", 37.0)
+                
+                # 寫入 PostgreSQL 資料庫
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO test_temperature (patient_name, temperature) VALUES (%s, %s);",
+                    (patient_name, temperature)
+                )
+                conn.commit()
+                cursor.close()
+                conn.close()
+                
+                response = {
+                    "status": "success",
+                    "message": f"成功將「{patient_name}」的體溫 {temperature} °C 寫入 PostgreSQL 資料庫！"
+                }
+                status_code = 200
+            except Exception as e:
+                response = {
+                    "status": "error",
+                    "message": f"寫入資料庫失敗: {str(e)}"
+                }
+                status_code = 500
             
-            response = {
-                "status": "success",
-                "message": f"成功將「{patient_name}」的體溫 {temperature} °C 寫入 PostgreSQL 資料庫！"
-            }
-            status_code = 200
-        except Exception as e:
-            response = {
-                "status": "error",
-                "message": f"寫入資料庫失敗: {str(e)}"
-            }
-            status_code = 500
-        
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
-        self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
+            self.send_response(status_code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
+            self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
 
     def do_OPTIONS(self):
-        # 處理跨網域 CORS 預檢請求
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -122,12 +148,14 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 def launch_cloudflare_tunnel():
-    # 尋找桌面（相對於 local_db_api/test/ 三層上，即 C:\Users\xxx\Desktop\cloudflared.exe）
+    # 尋找桌面（相對於 local_db_api/test/ 三層上）
     cloudflared_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "cloudflared.exe"))
     
     if not os.path.exists(cloudflared_path):
         print(f"\n[提示] 未在桌面找到 cloudflared.exe。期望路徑: {cloudflared_path}")
-        print("將僅啟動本地 API，不啟動 Cloudflare 穿牆通道。")
+        print("將僅啟動本地 API 與靜態伺服器，不啟動 Cloudflare 穿牆通道。")
+        # 未偵測到穿牆，直接開啟本地 localhost 首頁
+        webbrowser.open("http://localhost:8080")
         return
         
     print(f"偵測到桌面 cloudflared.exe，正在啟動背景穿牆通道...")
@@ -161,9 +189,8 @@ def launch_cloudflare_tunnel():
                 print(f"   {tunnel_url}")
                 print("="*50 + "\n")
                 
-                # 自動開啟網頁控制面板，並帶入 URL 參數 (新位置在 web_frontend)
-                html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
-                webbrowser.open(f"file:///{html_path}?tunnel={tunnel_url}")
+                # 自動開啟本地 8080 網頁，並附帶載入穿牆的 URL 參數做設定
+                webbrowser.open(f"http://localhost:8080?tunnel={tunnel_url}")
 
 def run_server(port=8080):
     server_address = ("", port)
@@ -171,7 +198,6 @@ def run_server(port=8080):
     
     print(f"測試伺服器已啟動！正在監聽 Port: {port}")
     
-    # 用獨立執行緒（Thread）啟動 Cloudflare 穿牆，避免阻擋 HTTP 伺服器
     tunnel_thread = threading.Thread(target=launch_cloudflare_tunnel, daemon=True)
     tunnel_thread.start()
     
