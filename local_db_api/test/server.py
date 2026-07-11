@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-伺服器連線與與靜態網頁伺服 (server.py)
+伺服器連線與靜態網頁伺服 (server.py)
 定位: 位於 local_db_api/test/。
 功能: 
-  1. 靜態網頁伺服: GET / 或 /index.html 會直接讀取並回傳 web_frontend/index.html。
-  2. 資料庫 API: GET/POST /api 會讀寫 PostgreSQL 資料庫。
+  1. 靜態網頁伺服: 讀取並回傳 web_frontend/index.html，支援帶參數的路由網址 (如 /?tunnel=...)。
+  2. 資料庫 API: GET/POST /api 讀寫 PostgreSQL 資料庫。
   3. 背景穿牆: 在背景自動調用 cloudflared 建立隧道。
 """
 
@@ -19,6 +19,7 @@ import webbrowser
 import threading
 import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse  # 用於解析與剝離網址問號參數
 
 def get_db_connection():
     # 建立 PostgreSQL 資料庫連線
@@ -32,8 +33,12 @@ def get_db_connection():
 
 class SimpleServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # 使用 urlparse 解析路徑，剝離問號參數 (例如: /?tunnel=... 剝離後 path 僅為 /)
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+
         # 1. 靜態網頁伺服：如果是首頁請求，回傳 web_frontend/index.html
-        if self.path == '/' or self.path.startswith('/index.html'):
+        if path == '/' or path == '/index.html':
             html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
             try:
                 with open(html_path, "r", encoding="utf-8") as f:
@@ -49,7 +54,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 self.wfile.write(f"讀取 index.html 失敗: {str(e)}".encode("utf-8"))
                 
         # 2. 資料庫 API：如果是 /api，從資料庫撈取資料
-        elif self.path.startswith('/api'):
+        elif path == '/api' or path.startswith('/api/'):
             try:
                 conn = get_db_connection()
                 cursor = conn.cursor()
@@ -100,8 +105,11 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
 
     def do_POST(self):
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+
         # 處理體溫寫入資料庫測試 (POST /api)
-        if self.path.startswith('/api'):
+        if path == '/api' or path.startswith('/api/'):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
@@ -154,7 +162,6 @@ def launch_cloudflare_tunnel():
     if not os.path.exists(cloudflared_path):
         print(f"\n[提示] 未在桌面找到 cloudflared.exe。期望路徑: {cloudflared_path}")
         print("將僅啟動本地 API 與靜態伺服器，不啟動 Cloudflare 穿牆通道。")
-        # 未偵測到穿牆，直接開啟本地 localhost 首頁
         webbrowser.open("http://localhost:8080")
         return
         
