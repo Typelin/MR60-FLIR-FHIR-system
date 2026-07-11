@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-伺服器連線與靜態網頁伺服 (server.py)
+多執行緒伺服器與靜態網頁伺服 (server.py)
 定位: 位於 local_db_api/test/。
 功能: 
-  1. 靜態網頁伺服: 讀取並回傳 web_frontend/index.html，並在伺服端動態注入當前活躍的 Cloudflare 穿牆網址。
-  2. 資料庫 API: GET/POST /api 讀寫 PostgreSQL 資料庫。
-  3. 背景穿牆: 在背景自動調用 cloudflared 建立隧道。
-  4. 自動清理: atexit 機制確保 Python 關閉時背景 cloudflared 子程序被乾淨清除。
+  1. 多執行緒伺服：繼承 ThreadingMixIn 實現並行處理，解決 Cloudflare Tunnel 保持連線 (Keep-Alive) 導致的單執行緒阻塞/轉圈問題。
+  2. 靜態網頁與資料庫 API 分流。
+  3. 資料庫連線安全釋放：使用 try-finally 結構，確保不論成功或失敗都會關閉 PostgreSQL 連線。
 """
 
 import os
@@ -21,11 +20,17 @@ import threading
 import atexit
 import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn  # 導入多執行緒混入類別
 from urllib.parse import urlparse
 
 # 全局變數：儲存目前活躍的穿牆網址
 ACTIVE_TUNNEL_URL = "無 (僅限本地連線)"
 running_subprocesses = []
+
+# 自訂多執行緒 HTTP 伺服器
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    # daemon_threads = True 確保主程式退出時，子執行緒也會跟著被銷毀
+    daemon_threads = True
 
 def get_db_connection():
     # 建立 PostgreSQL 資料庫連線
@@ -55,6 +60,7 @@ atexit.register(cleanup_subprocesses)
 
 class SimpleServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # 使用 urlparse 解析路徑，剝離問號參數
         parsed_url = urlparse(self.path)
         path = parsed_url.path
 
@@ -80,6 +86,8 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 
         # 2. 資料庫 API：如果是 /api，從資料庫撈取資料
         elif path == '/api' or path.startswith('/api/'):
+            conn = None
+            cursor = None
             try:
                 conn = get_db_connection()
                 cursor = conn.cursor()
@@ -99,9 +107,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                         "temperature": float(row[2]),
                         "timestamp": row[3]
                     })
-                    
-                cursor.close()
-                conn.close()
                 
                 response = {
                     "status": "success",
@@ -116,6 +121,12 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     "records": []
                 }
                 status_code = 500
+            finally:
+                # 確保不論成功或失敗，必定關閉連線，防資料庫連線洩漏
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
 
             self.send_response(status_code)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -138,6 +149,8 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
+            conn = None
+            cursor = None
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 patient_name = data.get("patient_name", "未指定")
@@ -151,8 +164,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     (patient_name, temperature)
                 )
                 conn.commit()
-                cursor.close()
-                conn.close()
                 
                 response = {
                     "status": "success",
@@ -165,6 +176,12 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     "message": f"寫入資料庫失敗: {str(e)}"
                 }
                 status_code = 500
+            finally:
+                # 確保關閉連線
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
             
             self.send_response(status_code)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -226,14 +243,15 @@ def launch_cloudflare_tunnel():
                 print(f"   {tunnel_url}")
                 print("="*50 + "\n")
                 
-                # 自動開啟本地 8080 網頁 (無任何 query 參數，純淨 URL)
+                # 自動開啟本地 8080 網頁
                 webbrowser.open("http://localhost:8080")
 
 def run_server(port=8080):
+    # 使用多執行緒伺服器 ThreadingHTTPServer 代替預設的單執行緒 HTTPServer
     server_address = ("", port)
-    httpd = HTTPServer(server_address, SimpleServerHandler)
+    httpd = ThreadingHTTPServer(server_address, SimpleServerHandler)
     
-    print(f"測試伺服器已啟動！正在監聽 Port: {port}")
+    print(f"多執行緒測試伺服器已啟動！正在監聽 Port: {port}")
     
     tunnel_thread = threading.Thread(target=launch_cloudflare_tunnel, daemon=True)
     tunnel_thread.start()
