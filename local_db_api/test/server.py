@@ -3,9 +3,10 @@
 多執行緒伺服器與靜態網頁伺服 (server.py)
 定位: 位於 local_db_api/test/。
 功能: 
-  1. 多執行緒伺服：繼承 ThreadingMixIn 實現並行處理，解決 Cloudflare Tunnel 保持連線 (Keep-Alive) 導致的單執行緒阻塞/轉圈問題。
+  1. 多執行緒伺服：解決 Keep-Alive 連線阻塞問題。
   2. 靜態網頁與資料庫 API 分流。
-  3. 資料庫連線安全釋放：使用 try-finally 結構，確保不論成功或失敗都會關閉 PostgreSQL 連線。
+  3. 防止二次彈窗 Bug：加入 browser_opened 鎖定旗標，確保 webbrowser.open 只在啟動時執行一次。
+  4. 自動清理機制。
 """
 
 import os
@@ -20,20 +21,17 @@ import threading
 import atexit
 import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from socketserver import ThreadingMixIn  # 導入多執行緒混入類別
+from socketserver import ThreadingMixIn
 from urllib.parse import urlparse
 
-# 全局變數：儲存目前活躍的穿牆網址
+# 全局變數
 ACTIVE_TUNNEL_URL = "無 (僅限本地連線)"
 running_subprocesses = []
 
-# 自訂多執行緒 HTTP 伺服器
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
-    # daemon_threads = True 確保主程式退出時，子執行緒也會跟著被銷毀
     daemon_threads = True
 
 def get_db_connection():
-    # 建立 PostgreSQL 資料庫連線
     return psycopg2.connect(
         host="localhost",
         database="postgres",
@@ -43,7 +41,6 @@ def get_db_connection():
     )
 
 def cleanup_subprocesses():
-    # 當伺服器關閉時，強制關閉背景所有子進程 (cloudflared.exe)
     for proc in running_subprocesses:
         try:
             print(f"正在釋放背景穿牆通道 (PID: {proc.pid})...")
@@ -55,23 +52,19 @@ def cleanup_subprocesses():
             except Exception:
                 pass
 
-# 註冊退出清理機制
 atexit.register(cleanup_subprocesses)
 
 class SimpleServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # 使用 urlparse 解析路徑，剝離問號參數
         parsed_url = urlparse(self.path)
         path = parsed_url.path
 
-        # 1. 靜態網頁伺服：如果是首頁請求，讀取 index.html 並將公網網址動態替換進去
         if path == '/' or path == '/index.html':
             html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
             try:
                 with open(html_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 
-                # 伺服端動態網頁渲染：將 {{TUNNEL_URL}} 替換為目前實時的穿牆網址
                 content = content.replace("{{TUNNEL_URL}}", ACTIVE_TUNNEL_URL)
                 
                 self.send_response(200)
@@ -84,7 +77,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(f"讀取 index.html 失敗: {str(e)}".encode("utf-8"))
                 
-        # 2. 資料庫 API：如果是 /api，從資料庫撈取資料
         elif path == '/api' or path.startswith('/api/'):
             conn = None
             cursor = None
@@ -122,7 +114,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 }
                 status_code = 500
             finally:
-                # 確保不論成功或失敗，必定關閉連線，防資料庫連線洩漏
                 if cursor:
                     cursor.close()
                 if conn:
@@ -144,7 +135,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
         parsed_url = urlparse(self.path)
         path = parsed_url.path
 
-        # 處理體溫寫入資料庫測試 (POST /api)
         if path == '/api' or path.startswith('/api/'):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
@@ -156,7 +146,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 patient_name = data.get("patient_name", "未指定")
                 temperature = data.get("temperature", 37.0)
                 
-                # 寫入 PostgreSQL 資料庫
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 cursor.execute(
@@ -177,7 +166,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 }
                 status_code = 500
             finally:
-                # 確保關閉連線
                 if cursor:
                     cursor.close()
                 if conn:
@@ -199,7 +187,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
 
 def launch_cloudflare_tunnel():
     global ACTIVE_TUNNEL_URL
-    # 尋找桌面（相對於 local_db_api/test/ 三層上）
     cloudflared_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "cloudflared.exe"))
     
     if not os.path.exists(cloudflared_path):
@@ -210,10 +197,9 @@ def launch_cloudflare_tunnel():
         
     print(f"偵測到桌面 cloudflared.exe，正在啟動背景穿牆通道...")
     
-    # 在 Windows 下設定 CREATE_NO_WINDOW 避免彈出額外的 cmd 視窗
     creationflags = 0
     if sys.platform == "win32":
-        creationflags = 0x08000000  # CREATE_NO_WINDOW
+        creationflags = 0x08000000
 
     cmd = [cloudflared_path, "tunnel", "--url", "http://localhost:8080"]
     proc = subprocess.Popen(
@@ -226,14 +212,16 @@ def launch_cloudflare_tunnel():
         creationflags=creationflags
     )
     
-    # 將子進程存入列表以供結束時清理
     running_subprocesses.append(proc)
+    
+    browser_opened = False  # 用於記錄瀏覽器是否已開過
     
     # 讀取日誌抓取公網連結
     for line in iter(proc.stdout.readline, ""):
         print(f"[Cloudflare] {line.strip()}")
         
-        if ".trycloudflare.com" in line:
+        # 只有在瀏覽器尚未開啟時，才解析網址並開啟
+        if ".trycloudflare.com" in line and not browser_opened:
             match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
             if match:
                 tunnel_url = match.group(0)
@@ -245,9 +233,9 @@ def launch_cloudflare_tunnel():
                 
                 # 自動開啟本地 8080 網頁
                 webbrowser.open("http://localhost:8080")
+                browser_opened = True  # 鎖定旗標，防二次彈出
 
 def run_server(port=8080):
-    # 使用多執行緒伺服器 ThreadingHTTPServer 代替預設的單執行緒 HTTPServer
     server_address = ("", port)
     httpd = ThreadingHTTPServer(server_address, SimpleServerHandler)
     
