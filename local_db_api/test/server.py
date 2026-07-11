@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-資料庫對接測試伺服器 (server.py)
-定位: 位於 local_db_api/test/，處理前端 GET/POST 請求，讀寫 PostgreSQL 資料庫，並啟動背景穿牆。
+伺服器連線與互動測試 (server.py)
+定位: 位於 local_db_api/test/，連線 PostgreSQL 資料庫以處理 GET/POST 連線測試，並在背景啟動桌面 3 層上的 cloudflared.exe。
 """
 
 import os
@@ -10,39 +10,35 @@ import sys
 import json
 import random
 import datetime
-import psycopg2
 import subprocess
 import webbrowser
 import threading
+import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# PostgreSQL 連線設定值
-DB_CONFIG = {
-    "host": "localhost",
-    "database": "postgres",
-    "user": "postgres",
-    "password": "Yusheng1214",
-    "port": "5432"
-}
+def get_db_connection():
+    # 建立 PostgreSQL 資料庫連線
+    return psycopg2.connect(
+        host="localhost",
+        database="postgres",
+        user="postgres",
+        password="Yusheng1214",
+        port="5432"
+    )
 
 class SimpleServerHandler(BaseHTTPRequestHandler):
-    def get_db_connection(self):
-        # 建立資料庫連線
-        return psycopg2.connect(**DB_CONFIG)
-
     def do_GET(self):
-        # 處理前端 GET 請求，回傳資料庫中所有體溫紀錄
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        
+        # 處理連線可用性測試 - 從 PostgreSQL 讀取所有體溫紀錄
         try:
-            conn = self.get_db_connection()
+            conn = get_db_connection()
             cursor = conn.cursor()
-            
-            # 從 PostgreSQL 查詢 test_temperature 資料表並按時間排序
-            cursor.execute("SELECT id, patient_name, temperature, recorded_at FROM test_temperature ORDER BY recorded_at DESC;")
+            # 依據時間降序排列讀取紀錄
+            cursor.execute("""
+                SELECT id, patient_name, temperature, 
+                       to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') 
+                FROM test_temperature 
+                ORDER BY recorded_at DESC;
+            """)
             rows = cursor.fetchall()
             
             records = []
@@ -51,77 +47,70 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     "id": row[0],
                     "patient_name": row[1],
                     "temperature": float(row[2]),
-                    "recorded_at": row[3].strftime("%Y-%m-%d %H:%M:%S")
+                    "timestamp": row[3]
                 })
-            
+                
             cursor.close()
             conn.close()
             
-            # 回傳查詢結果
-            self.wfile.write(json.dumps(records, ensure_ascii=False).encode("utf-8"))
-            
-        except Exception as e:
-            # 資料庫連線失敗或無資料表時，回傳錯誤訊息
-            error_response = {
-                "error": "資料庫讀取失敗",
-                "details": str(e),
-                "tip": "請確認您的 PostgreSQL 是否已啟動，且已執行 SQL 建立 test_temperature 資料表。"
+            response = {
+                "status": "success",
+                "database": "connected",
+                "records": records
             }
-            self.wfile.write(json.dumps(error_response, ensure_ascii=False).encode("utf-8"))
+            status_code = 200
+        except Exception as e:
+            response = {
+                "status": "error",
+                "message": f"資料庫讀取失敗: {str(e)}",
+                "records": []
+            }
+            status_code = 500
+
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
 
     def do_POST(self):
-        # 處理前端 POST 請求，將體溫模擬數據寫入 PostgreSQL 資料庫
+        # 處理體溫寫入資料庫測試 (POST)
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         
         try:
             data = json.loads(post_data.decode('utf-8'))
             patient_name = data.get("patient_name", "未指定")
-        except Exception:
-            patient_name = "解析失敗"
+            temperature = data.get("temperature", 37.0)
             
-        # 模擬產生合理的體溫 (36.2 到 38.2 度)
-        simulated_temp = round(random.uniform(36.2, 38.2), 1)
-        
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
-        
-        try:
             # 寫入 PostgreSQL 資料庫
-            conn = self.get_db_connection()
+            conn = get_db_connection()
             cursor = conn.cursor()
-            
             cursor.execute(
-                "INSERT INTO test_temperature (patient_name, temperature) VALUES (%s, %s) RETURNING id, recorded_at;",
-                (patient_name, simulated_temp)
+                "INSERT INTO test_temperature (patient_name, temperature) VALUES (%s, %s);",
+                (patient_name, temperature)
             )
-            new_id, recorded_at = cursor.fetchone()
-            
-            conn.commit()  # 提交變更
+            conn.commit()
             cursor.close()
             conn.close()
             
             response = {
                 "status": "success",
-                "message": f"成功寫入 PostgreSQL 資料庫！已為「{patient_name}」模擬寫入體溫 {simulated_temp} °C",
-                "data": {
-                    "id": new_id,
-                    "patient": patient_name,
-                    "temperature": simulated_temp,
-                    "timestamp": recorded_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    "loinc_code": "8310-5 (Body temperature)"
-                }
+                "message": f"成功將「{patient_name}」的體溫 {temperature} °C 寫入 PostgreSQL 資料庫！"
             }
+            status_code = 200
         except Exception as e:
             response = {
                 "status": "error",
-                "message": "資料庫寫入失敗",
-                "details": str(e)
+                "message": f"寫入資料庫失敗: {str(e)}"
             }
-            
+            status_code = 500
+        
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
         self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8"))
 
     def do_OPTIONS(self):
@@ -133,7 +122,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 def launch_cloudflare_tunnel():
-    # 尋找桌面（相對於 local_db_api/test/ 三層上）
+    # 尋找桌面（相對於 local_db_api/test/ 三層上，即 C:\Users\xxx\Desktop\cloudflared.exe）
     cloudflared_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "cloudflared.exe"))
     
     if not os.path.exists(cloudflared_path):
@@ -143,6 +132,7 @@ def launch_cloudflare_tunnel():
         
     print(f"偵測到桌面 cloudflared.exe，正在啟動背景穿牆通道...")
     
+    # 在 Windows 下設定 CREATE_NO_WINDOW 避免彈出額外的 cmd 視窗
     creationflags = 0
     if sys.platform == "win32":
         creationflags = 0x08000000  # CREATE_NO_WINDOW
@@ -171,8 +161,8 @@ def launch_cloudflare_tunnel():
                 print(f"   {tunnel_url}")
                 print("="*50 + "\n")
                 
-                # 自動開啟網頁控制面板，並帶入 URL 參數
-                html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "index.html"))
+                # 自動開啟網頁控制面板，並帶入 URL 參數 (新位置在 web_frontend)
+                html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "web_frontend", "index.html"))
                 webbrowser.open(f"file:///{html_path}?tunnel={tunnel_url}")
 
 def run_server(port=8080):
