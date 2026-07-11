@@ -15,6 +15,8 @@
             --primary-glow: rgba(59, 130, 246, 0.35);
             --success-color: #10b981;
             --success-glow: rgba(16, 185, 129, 0.3);
+            --warning-color: #ef4444;
+            --warning-glow: rgba(239, 68, 68, 0.3);
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
         }
@@ -34,7 +36,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
             overflow-x: hidden;
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
@@ -43,7 +45,7 @@
 
         .container {
             width: 100%;
-            max-width: 650px;
+            max-width: 750px;
             perspective: 1000px;
         }
 
@@ -129,6 +131,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-top: 10px;
+            margin-bottom: 30px;
         }
 
         button {
@@ -166,6 +169,88 @@
             transform: translateY(1px);
         }
 
+        /* 資料庫內容表格區 */
+        .db-panel {
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            margin-top: 30px;
+        }
+
+        .db-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .refresh-link {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .temp-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .temp-normal {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .temp-fever {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--warning-color);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 10px var(--warning-glow);
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+        }
+
+        /* 測試結果面板 */
         .result-panel {
             margin-top: 30px;
             border-top: 1px solid var(--border-color);
@@ -192,7 +277,6 @@
             background: rgba(16, 185, 129, 0.15);
             color: var(--success-color);
             border: 1px solid var(--success-color);
-            box-shadow: 0 0 10px var(--success-glow);
         }
 
         .badge-offline {
@@ -238,8 +322,8 @@
 <div class="container">
     <div class="card">
         <header>
-            <h1>FHIR 穿牆連線控制面板</h1>
-            <p class="subtitle">Cloudflare Tunnel 後端互動測試</p>
+            <h1>FHIR IoT 穿牆連線控制面板</h1>
+            <p class="subtitle">Cloudflare Tunnel 與 PostgreSQL 資料庫連線測試</p>
         </header>
 
         <div class="form-group">
@@ -257,9 +341,9 @@
         </div>
 
         <div class="btn-group">
-            <button id="getBtn" class="btn-primary" onclick="sendGetRequest()">
+            <button id="getBtn" class="btn-primary" onclick="fetchDatabaseRecords()">
                 <span id="getSpinner" class="spinner hidden"></span>
-                <span>測試連線 (GET)</span>
+                <span>載入/更新資料庫 (GET)</span>
             </button>
             <button id="postBtn" class="btn-success" onclick="sendPostRequest()">
                 <span id="postSpinner" class="spinner hidden"></span>
@@ -267,13 +351,40 @@
             </button>
         </div>
 
+        <!-- 伺服器 RAW JSON 回應區 -->
         <div id="resultPanel" class="result-panel">
             <div class="result-title">
-                <h3 id="panelTitle">伺服器回應結果</h3>
+                <h3 id="panelTitle">最後一次操作 API 回應結果</h3>
                 <span id="statusBadge" class="badge">ONLINE</span>
             </div>
             <pre id="jsonResult"></pre>
         </div>
+
+        <!-- 資料庫表格區 -->
+        <div class="db-panel">
+            <div class="db-title">
+                <h2>📊 PostgreSQL 即時數據庫內容</h2>
+                <span class="refresh-link" onclick="fetchDatabaseRecords()">重新整理</span>
+            </div>
+            <div class="table-container">
+                <table id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%">ID</th>
+                            <th style="width: 30%">病人姓名</th>
+                            <th style="width: 25%">量測體溫</th>
+                            <th style="width: 35%">記錄時間</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="4" class="no-data">請點選上方「載入/更新資料庫 (GET)」按鈕獲取數據</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -284,9 +395,9 @@
         const tunnelUrl = urlParams.get('tunnel');
         if (tunnelUrl) {
             document.getElementById("apiUrl").value = tunnelUrl;
-            // 自動發送 GET 連線測試
-            sendGetRequest();
         }
+        // 自動載入資料庫紀錄
+        fetchDatabaseRecords();
     };
 
     function formatUrl(url) {
@@ -298,11 +409,11 @@
         return target;
     }
 
-    // 發送 GET 連線測試
-    async function sendGetRequest() {
+    // 載入資料庫所有體溫紀錄 (GET)
+    async function fetchDatabaseRecords() {
         const urlInput = document.getElementById("apiUrl").value;
         const targetUrl = formatUrl(urlInput);
-        if (!targetUrl) return alert("請輸入 API 網址！");
+        if (!targetUrl) return;
 
         const getBtn = document.getElementById("getBtn");
         const getSpinner = document.getElementById("getSpinner");
@@ -310,24 +421,46 @@
         const statusBadge = document.getElementById("statusBadge");
         const jsonResult = document.getElementById("jsonResult");
         const panelTitle = document.getElementById("panelTitle");
+        const tableBody = document.getElementById("tableBody");
 
         getBtn.disabled = true;
         getSpinner.classList.remove("hidden");
-        resultPanel.style.display = "none";
-        panelTitle.innerText = "GET 測試回應";
-
-        const startTime = Date.now();
+        panelTitle.innerText = "資料庫載入回應 (GET)";
 
         try {
             const response = await fetch(targetUrl, { method: "GET" });
-            const latency = Date.now() - startTime;
             
             if (response.ok) {
                 const data = await response.json();
+                
+                // 更新 JSON 回應區
                 statusBadge.className = "badge badge-online";
-                statusBadge.innerText = `ONLINE (${latency}ms)`;
+                statusBadge.innerText = "ONLINE";
                 jsonResult.style.color = "#34d399";
                 jsonResult.innerText = JSON.stringify(data, null, 4);
+
+                // 更新表格內容
+                tableBody.innerHTML = "";
+                if (data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="no-data">目前資料庫中無資料</td></tr>`;
+                } else {
+                    data.forEach(record => {
+                        const tr = document.createElement("tr");
+                        
+                        // 判定體溫是否發燒 (37.5 度以上)
+                        const isFever = record.temperature >= 37.5;
+                        const badgeClass = isFever ? "temp-badge temp-fever" : "temp-badge temp-normal";
+                        
+                        tr.innerHTML = `
+                            <td>${record.id}</td>
+                            <td style="font-weight: 600;">${record.patient_name}</td>
+                            <td><span class="${badgeClass}">${record.temperature} °C</span></td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem;">${record.recorded_at}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                }
+                resultPanel.style.display = "block";
             } else {
                 throw new Error(`HTTP 錯誤: ${response.status}`);
             }
@@ -336,11 +469,10 @@
         } finally {
             getBtn.disabled = false;
             getSpinner.classList.add("hidden");
-            resultPanel.style.display = "block";
         }
     }
 
-    // 發送 POST 模擬體溫上傳
+    // 發送 POST 模擬體溫上傳並自動更新列表
     async function sendPostRequest() {
         const urlInput = document.getElementById("apiUrl").value;
         const patientName = document.getElementById("patientName").value.trim();
@@ -357,10 +489,7 @@
 
         postBtn.disabled = true;
         postSpinner.classList.remove("hidden");
-        resultPanel.style.display = "none";
-        panelTitle.innerText = "POST 模擬數據回應";
-
-        const startTime = Date.now();
+        panelTitle.innerText = "模擬上傳回應 (POST)";
 
         try {
             const response = await fetch(targetUrl, {
@@ -370,14 +499,16 @@
                 },
                 body: JSON.stringify({ patient_name: patientName })
             });
-            const latency = Date.now() - startTime;
             
             if (response.ok) {
                 const data = await response.json();
                 statusBadge.className = "badge badge-online";
-                statusBadge.innerText = `成功寫入 (${latency}ms)`;
+                statusBadge.innerText = "資料已寫入";
                 jsonResult.style.color = "#34d399";
                 jsonResult.innerText = JSON.stringify(data, null, 4);
+                
+                // 自動更新下方資料庫清單
+                fetchDatabaseRecords();
             } else {
                 throw new Error(`HTTP 錯誤: ${response.status}`);
             }
@@ -393,14 +524,18 @@
     function showError(error) {
         const statusBadge = document.getElementById("statusBadge");
         const jsonResult = document.getElementById("jsonResult");
+        const tableBody = document.getElementById("tableBody");
+        
         statusBadge.className = "badge badge-offline";
         statusBadge.innerText = "OFFLINE";
         jsonResult.style.color = "#ef4444";
         jsonResult.innerText = JSON.stringify({
-            "error": "連線失敗",
+            "error": "連線或資料庫讀取失敗",
             "reason": error.message,
-            "tip": "請確認後端 Python 伺服器 (server.py) 是否有開著，以及 Cloudflare Tunnel 是否處於啟動狀態。"
+            "tip": "請確認您的 PostgreSQL 是否已開啟，以及 server.py 正在運行。"
         }, null, 4);
+
+        tableBody.innerHTML = `<tr><td colspan="4" class="no-data" style="color: #ef4444;">❌ 資料庫讀取失敗：${error.message}</td></tr>`;
     }
 </script>
 
