@@ -67,6 +67,10 @@ FHIR 能夠實現全球公認的醫療數據整合，主因在於它滿足了三
 *   **TW Core IG 導入**：
     HAPI FHIR 支援直接載入衛福部的 TW Core IG 驗證包。載入後，伺服器便會自動以台灣本土標準對所有傳入的資料進行核對，是建置本土醫療院所系統的首選。
 
+### ⑤ 衛福部推薦 HAPI FHIR 與 PostgreSQL 的關聯性
+在衛生福利部官方的「臺灣核心實作指引實作範例平台」中，官方將 **HAPI FHIR** 列為首選架設方案。
+因為 HAPI FHIR 的資料庫持久化（JPA）模組需要處理高度複雜的 FHIR JSON 欄位查詢，且必須在不收授權費的開源資料庫上運行，**PostgreSQL 的 JSONB (Binary JSON) 欄位檢索性能為所有開源資料庫之冠**。因此，衛福部推薦使用 HAPI FHIR，**在實務上即等同於強烈推薦採用 PostgreSQL 作為底層資料庫**（此為全球 FHIR 開發社群公認的最優解 / Best Practice）。
+
 ---
 
 ## 5. 官方資料來源與參考文獻 (Citations)
@@ -85,3 +89,9 @@ FHIR 能夠實現全球公認的醫療數據整合，主因在於它滿足了三
 4.  **衛生福利部電子病歷交換標準推動計畫**：
     *   *中華民國衛生福利部資訊處 - 電子病歷交換標準規劃報告*
     *   連結網址：[https://www.mohw.gov.tw/](https://www.mohw.gov.tw/)
+5.  **臺灣核心實作指引實作範例平台（衛福部官方樣章平台）**：
+    *   *MOHW Taiwan Core Sample Sandbox Portal*
+    *   連結網址：[https://twcore.mohw.gov.tw/twsample/](https://twcore.mohw.gov.tw/twsample/)
+6.  **衛福部官方 HAPI FHIR 架設教學與說明指引**：
+    *   *MOHW HAPI FHIR Server Installation Guide*
+    *   連結網址：[https://twcore.mohw.gov.tw/twsample/Server/Hapi](https://twcore.mohw.gov.tw/twsample/Server/Hapi)
