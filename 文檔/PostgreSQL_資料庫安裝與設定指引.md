@@ -15,7 +15,7 @@
 2.  **安裝精靈步驟指引**：
     *   雙擊安裝包執行，一路點選 **Next**。
     *   **選擇元件 (Select Components)**：建議全選（包含 `PostgreSQL Server`、`pgAdmin 4` 視覺化工具、`Stack Builder`、`Command Line Tools`）。
-    *   **設定密碼 (Password)**：請設定資料庫超級管理員 (`postgres`) 的密碼，**建議兩台電腦設定一模一樣的密碼**（例如：`admin123`），這樣您的程式碼就不用改來改去。
+    *   **設定密碼 (Password)**：兩台電腦已統一設定超級管理員 (`postgres`) 的密碼為 **`Yusheng1214`**。
     *   **Port 設定**：預設為 **`5432`**，請保持預設。
     *   **地區設定 (Locale)**：選擇 **[Default locale]** 即可。
     *   一路點選 **Next** 直到安裝完成。
@@ -48,7 +48,7 @@ def test_db_connection():
             host="localhost",
             database="postgres",       # 預設資料庫
             user="postgres",           # 預設超級管理員
-            password="您的密碼",        # 您安裝時設定的密碼
+            password="Yusheng1214",    # 您安裝時設定的密碼 (Yusheng1214)
             port="5432"
         )
         
