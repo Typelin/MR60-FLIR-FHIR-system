@@ -290,7 +290,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": category,
-                                        "display": "Social History" if category == "social-history" else "Vital Signs"
+                                        "display": "Social History" if category == "social-history" else ("Survey" if category == "survey" else "Vital Signs")
                                     }
                                 ]
                             }
