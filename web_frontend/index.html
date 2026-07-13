@@ -1222,7 +1222,6 @@
                         <span><i class="fas fa-project-diagram"></i> 數據生命週期與傳輸流向圖 (Mermaid 橫向渲染)</span>
                         <span style="font-size: 0.8rem; color: var(--medium-gray);">支援大螢幕縮放滾動</span>
                     </div>
-                    
                     <div class="mermaid">
                     sequenceDiagram
                         autonumber
@@ -1232,7 +1231,7 @@
                         participant FE as 護理站監控面板 (index.html)
 
                         S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
-                        Note over B: 2. 依指標自動映射<br/>LOINC & SNOMED CT 代碼<br/>與物理感測器 ID
+                        Note right of B: 2. 映射標準代碼與設備 ID
                         B->>DB: 3. 寫入關聯資料庫 observations 表格
                         FE->>B: 4. 定期輪詢最新狀態 (GET /api)
                         B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
