@@ -1375,6 +1375,45 @@
     <div id="architectureTab" class="tab-content">
         <div class="architecture-grid">
             
+            <!-- 搬移過來的 API Terminal 與 FHIR Bundle 日誌顯示區 (無硬編寫 PX) -->
+            <div class="api-terminal-section">
+                <!-- 左側：即時傳輸日誌 -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製日誌
+                            </button>
+                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
+                    </div>
+                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 1.1rem; border-radius: 0.75rem; height: 28rem; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
+                        <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
+                    </div>
+                </div>
+                <!-- 右側：地端最新 HL7 FHIR Bundle -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
+                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製 FHIR
+                            </button>
+                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
+                    </div>
+                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 1.1rem; border-radius: 0.75rem; height: 28rem; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
+                        正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
+                    </div>
+                </div>
+            </div>
+
             <div class="mermaid-container">
                 <div class="mermaid-title">
                     <span><i class="fas fa-project-diagram"></i> 數據生命週期與傳輸流向圖 (Mermaid 橫向渲染)</span>
@@ -1452,45 +1491,6 @@
   ]
 }
                 </pre>
-            </div>
-
-            <!-- 搬移過來的 API Terminal 與 FHIR Bundle 日誌顯示區 (無硬編寫 PX) -->
-            <div class="api-terminal-section">
-                <!-- 左側：即時傳輸日誌 -->
-                <div>
-                    <div class="terminal-header">
-                        <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-copy"></i> 複製日誌
-                            </button>
-                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                            </button>
-                        </div>
-                    </div>
-                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 1.1rem; border-radius: 0.75rem; height: 28rem; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
-                        <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
-                    </div>
-                </div>
-                <!-- 右側：地端最新 HL7 FHIR Bundle -->
-                <div>
-                    <div class="terminal-header">
-                        <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
-                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-copy"></i> 複製 FHIR
-                            </button>
-                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                            </button>
-                        </div>
-                    </div>
-                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 1.1rem; border-radius: 0.75rem; height: 28rem; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
-                        正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
-                    </div>
-                </div>
             </div>
 
         </div>
