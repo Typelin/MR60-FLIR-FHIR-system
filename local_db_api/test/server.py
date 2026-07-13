@@ -4,9 +4,9 @@
 定位: 位於 local_db_api/test/。
 功能: 
   1. 多執行緒伺服：解決 Keep-Alive 連線阻塞問題。
-  2. 靜態網頁與資料庫 API 分流。
-  3. 防止二次彈窗 Bug：加入 browser_opened 鎖定旗標，確保 webbrowser.open 只在啟動時執行一次。
-  4. 自動清理機制。
+  2. 自動資料庫初始化：啟動時讀取 schema.sql 重設並建立三表關聯結構。
+  3. API 分流：支援多模態生理與行為訊號 (心率、呼吸、體溫、姿態、離床、跌倒) 的對接寫入 (POST) 與撈取 (GET)。
+  4. 靜態網頁替換與自動清理機制。
 """
 
 import os
@@ -39,6 +39,32 @@ def get_db_connection():
         password="Yusheng1214",
         port="5432"
     )
+
+def initialize_database():
+    """啟動時自動讀取 schema.sql 初始化資料表與預設病患、設備資料"""
+    sql_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "schema.sql"))
+    if not os.path.exists(sql_path):
+        print(f"\n[提示] 找不到資料庫腳本: {sql_path}，跳過自動初始化。")
+        return
+        
+    print("\n[DB] 正在根據 schema.sql 重構資料庫三表結構...")
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        with open(sql_path, "r", encoding="utf-8") as f:
+            sql_script = f.read()
+        cursor.execute(sql_script)
+        conn.commit()
+        print("[DB] PostgreSQL 資料庫重構與預設資料初始化成功！")
+    except Exception as e:
+        print(f"[DB] 資料庫初始化失敗: {str(e)}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 def cleanup_subprocesses():
     for proc in running_subprocesses:
@@ -83,11 +109,26 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             try:
                 conn = get_db_connection()
                 cursor = conn.cursor()
+                # 多表 JOIN 查詢所有 Observation 觀測資料與對應的病患、設備資料
                 cursor.execute("""
-                    SELECT id, patient_name, temperature, 
-                           to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') 
-                    FROM test_temperature 
-                    ORDER BY recorded_at DESC;
+                    SELECT 
+                        o.id, 
+                        o.patient_id, 
+                        p.name AS patient_name,
+                        o.device_id,
+                        d.model_number AS device_model,
+                        o.status,
+                        o.category,
+                        o.loinc_code,
+                        o.value_numeric,
+                        o.value_unit,
+                        o.value_code,
+                        o.value_display,
+                        to_char(o.recorded_at, 'YYYY-MM-DD HH24:MI:SS') AS timestamp
+                    FROM observations o
+                    LEFT JOIN patients p ON o.patient_id = p.id
+                    LEFT JOIN devices d ON o.device_id = d.id
+                    ORDER BY o.recorded_at DESC;
                 """)
                 rows = cursor.fetchall()
                 
@@ -95,9 +136,18 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 for row in rows:
                     records.append({
                         "id": row[0],
-                        "patient_name": row[1],
-                        "temperature": float(row[2]),
-                        "timestamp": row[3]
+                        "patient_id": row[1],
+                        "patient_name": row[2],
+                        "device_id": row[3],
+                        "device_model": row[4],
+                        "status": row[5],
+                        "category": row[6],
+                        "loinc_code": row[7],
+                        "value_numeric": float(row[8]) if row[8] is not None else None,
+                        "value_unit": row[9],
+                        "value_code": row[10],
+                        "value_display": row[11],
+                        "timestamp": row[12]
                     })
                 
                 response = {
@@ -143,26 +193,86 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             cursor = None
             try:
                 data = json.loads(post_data.decode('utf-8'))
-                patient_name = data.get("patient_name", "未指定")
-                temperature = data.get("temperature", 37.0)
                 
+                patient_id = data.get("patient_id", "patient-01")
+                device_id = data.get("device_id", "device-radar-01")
+                metric_type = data.get("metric_type")
+                value = data.get("value")
+                
+                # 根據指標類型對照 LOINC 與 SNOMED CT 代碼規範
+                category = "vital-signs"
+                loinc_code = ""
+                value_numeric = None
+                value_unit = None
+                value_code = None
+                value_display = None
+                
+                if metric_type == "heart_rate":
+                    loinc_code = "8867-4"
+                    value_numeric = float(value)
+                    value_unit = "/min"
+                elif metric_type == "respiration_rate":
+                    loinc_code = "9279-1"
+                    value_numeric = float(value)
+                    value_unit = "/min"
+                elif metric_type == "body_temperature":
+                    loinc_code = "8310-5"
+                    value_numeric = float(value)
+                    value_unit = "Cel"
+                    device_id = "device-camera-01" # 體溫由相機量測
+                elif metric_type == "posture":
+                    category = "social-history"
+                    loinc_code = "8361-8"
+                    if value == "lying":
+                        value_code = "102538003"
+                        value_display = "躺著"
+                    elif value == "standing":
+                        value_code = "10904000"
+                        value_display = "站立"
+                elif metric_type == "bed_exit":
+                    category = "survey"
+                    loinc_code = "96773-7"
+                    if value == "in_bed":
+                        value_code = "102539006"
+                        value_display = "在床"
+                    elif value == "out_of_bed":
+                        value_code = "262068006"
+                        value_display = "離床"
+                elif metric_type == "fall":
+                    category = "survey"
+                    loinc_code = "75276-6"
+                    if value == "fallen":
+                        value_code = "242526002"
+                        value_display = "跌倒"
+                    elif value == "present":
+                        value_code = "260385009"
+                        value_display = "有人"
+                    elif value == "absent":
+                        value_code = "272186001"
+                        value_display = "無人"
+                else:
+                    raise ValueError(f"不支援的監測數據指標: {metric_type}")
+                
+                # 寫入 PostgreSQL 資料庫的 observations 資料表
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                cursor.execute(
-                    "INSERT INTO test_temperature (patient_name, temperature) VALUES (%s, %s);",
-                    (patient_name, temperature)
-                )
+                cursor.execute("""
+                    INSERT INTO observations 
+                        (patient_id, device_id, category, loinc_code, recorded_at, value_numeric, value_unit, value_code, value_display)
+                    VALUES 
+                        (%s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s, %s);
+                """, (patient_id, device_id, category, loinc_code, value_numeric, value_unit, value_code, value_display))
                 conn.commit()
                 
                 response = {
                     "status": "success",
-                    "message": f"成功將「{patient_name}」的體溫 {temperature} °C 寫入 PostgreSQL 資料庫！"
+                    "message": f"成功寫入觀測資料！指標類型: {metric_type}，值: {value}"
                 }
                 status_code = 200
             except Exception as e:
                 response = {
                     "status": "error",
-                    "message": f"寫入資料庫失敗: {str(e)}"
+                    "message": f"寫入觀測資料失敗: {str(e)}"
                 }
                 status_code = 500
             finally:
@@ -197,15 +307,13 @@ def launch_cloudflare_tunnel():
         
     print(f"偵測到桌面 cloudflared.exe，正在啟動永久命名隧道 [school-fhir]...")
 
-    # 永久固定公網網址（使用命名隧道 school-fhir，綁定 60gigahertz.uk）
     global ACTIVE_TUNNEL_URL
     ACTIVE_TUNNEL_URL = "https://60gigahertz.uk"
-
+    
     creationflags = 0
     if sys.platform == "win32":
         creationflags = 0x08000000
 
-    # 使用命名永久隧道，不再是每次隨機產生臨時網址的快速通道
     cmd = [cloudflared_path, "tunnel", "run", "--url", "http://localhost:8080", "school-fhir"]
     proc = subprocess.Popen(
         cmd,
@@ -216,15 +324,14 @@ def launch_cloudflare_tunnel():
         errors="ignore",
         creationflags=creationflags
     )
-
+    
     running_subprocesses.append(proc)
-
+    
     browser_opened = False
-
+    
     for line in iter(proc.stdout.readline, ""):
         print(f"[Cloudflare] {line.strip()}")
-
-        # 當隧道成功連上後，開啟本地網頁（只開一次）
+        
         if "Connection" in line and "registered" in line and not browser_opened:
             print("\n" + "="*50)
             print(f"永久公網網址: {ACTIVE_TUNNEL_URL}")
@@ -233,6 +340,9 @@ def launch_cloudflare_tunnel():
             browser_opened = True
 
 def run_server(port=8080):
+    # 啟動時自動重設並建立新三表結構與載入初始資料
+    initialize_database()
+    
     server_address = ("", port)
     httpd = ThreadingHTTPServer(server_address, SimpleServerHandler)
     
