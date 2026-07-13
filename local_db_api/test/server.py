@@ -140,6 +140,12 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     "resourceType": "Bundle",
                     "type": "searchset",
                     "total": len(rows),
+                    "link": [
+                        {
+                            "relation": "self",
+                            "url": "https://60gigahertz.uk/api/fhir"
+                        }
+                    ],
                     "entry": []
                 }
                 
@@ -174,13 +180,32 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                             "resource": {
                                 "resourceType": "Patient",
                                 "id": patient_id,
+                                "meta": {
+                                    "profile": [
+                                        "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Patient-twcore"
+                                    ]
+                                },
+                                "text": {
+                                    "status": "generated",
+                                    "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>病患基本資料：<b>{patient_name}</b> ({"男" if patient_gender == "male" else "女"})，生日：{patient_birth}，病歷號：{patient_mrn}。</p></div>'
+                                },
                                 "identifier": [
                                     {
                                         "use": "official",
-                                        "system": "http://www.mhw.gov.tw/mrn",
+                                        "type": {
+                                            "coding": [
+                                                {
+                                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                                    "code": "MR",
+                                                    "display": "Medical record number"
+                                                }
+                                            ]
+                                        },
+                                        "system": "https://60gigahertz.uk/fhir/sid/patient-mrn",
                                         "value": patient_mrn
                                     }
                                 ],
+                                "active": True,
                                 "name": [
                                     {
                                         "use": "official",
@@ -189,6 +214,9 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                 ],
                                 "gender": patient_gender,
                                 "birthDate": patient_birth
+                            },
+                            "search": {
+                                "mode": "match"
                             }
                         })
                         
@@ -198,6 +226,10 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                             "resource": {
                                 "resourceType": "Linkage",
                                 "id": f"linkage-{patient_id}",
+                                "text": {
+                                    "status": "generated",
+                                    "div": '<div xmlns="http://www.w3.org/1999/xhtml"><p>跨院病歷聯結記錄。</p></div>'
+                                },
                                 "active": True,
                                 "item": [
                                     {
@@ -213,12 +245,44 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                         }
                                     }
                                 ]
+                            },
+                            "search": {
+                                "mode": "match"
                             }
                         })
                         
+                    # 對接官方驗證系統的精確英文描述 (Display Names)
+                    display_name = "Body temperature" if loinc_code == "8310-5" else (
+                                   "Heart rate" if loinc_code == "8867-4" else (
+                                   "Respiratory rate" if loinc_code == "9279-1" else (
+                                   "Body position with respect to gravity" if loinc_code == "8361-8" else (
+                                   "How well do services work together: services talk to each other" if loinc_code == "96773-7" else (
+                                   "Functional status [Interpretation]" if loinc_code == "75276-6" else "Vital Signs"
+                                   )))))
+                    
+                    # 對接官方 SNOMED CT 精確英文描述
+                    snomed_display = val_display
+                    if val_code == "102539006":
+                        snomed_display = "Semi-erect body position"
+                    elif val_code == "260385009":
+                        snomed_display = "Negative"
+                    elif val_code == "102538003":
+                        snomed_display = "Recumbent body position"
+
+                    val_desc = f"{val_num} {val_unit}" if val_num is not None else f"{snomed_display}"
+
                     obs_resource = {
                         "resourceType": "Observation",
                         "id": f"obs-{obs_id}",
+                        "meta": {
+                            "profile": [
+                                "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Observation-vitalSigns-twcore"
+                            ]
+                        },
+                        "text": {
+                            "status": "generated",
+                            "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>量測指標：<b>{display_name}</b>，數值：{val_desc}，時間：{timestamp}。</p></div>'
+                        },
                         "status": status,
                         "category": [
                             {
@@ -226,7 +290,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": category,
-                                        "display": "Vital Signs" if category == "vital-signs" else "Survey"
+                                        "display": "Social History" if category == "social-history" else "Vital Signs"
                                     }
                                 ]
                             }
@@ -236,12 +300,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                 {
                                     "system": "http://loinc.org",
                                     "code": loinc_code,
-                                    "display": "Body temperature" if loinc_code == "8310-5" else (
-                                               "Heart rate" if loinc_code == "8867-4" else (
-                                               "Respiratory rate" if loinc_code == "9279-1" else (
-                                               "Body position" if loinc_code == "8361-8" else (
-                                               "Bed exit status" if loinc_code == "96773-7" else "Accidental fall indicator"
-                                               ))))
+                                    "display": display_name
                                 }
                             ]
                         },
@@ -251,7 +310,13 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                         "device": {
                             "reference": f"Device/{device_id}"
                         },
-                        "effectiveDateTime": timestamp
+                        "effectiveDateTime": timestamp,
+                        "performer": [
+                            {
+                                "reference": f"Device/{device_id or 'device-radar-01'}",
+                                "display": f"{device_manufacturer or 'Infineon'} {device_model or 'MR60-Radar'}"
+                            }
+                        ]
                     }
                     
                     if val_num is not None:
@@ -259,7 +324,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                             "value": val_num,
                             "unit": "Cel" if loinc_code == "8310-5" else "bpm",
                             "system": "http://unitsofmeasure.org",
-                            "code": val_unit
+                            "code": "Cel" if loinc_code == "8310-5" else "/min"
                         }
                     elif val_code is not None:
                         obs_resource["valueCodeableConcept"] = {
@@ -267,14 +332,17 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                 {
                                     "system": "http://snomed.info/sct",
                                     "code": val_code,
-                                    "display": val_display
+                                    "display": snomed_display
                                 }
                             ]
                         }
                         
                     bundle["entry"].append({
                         "fullUrl": f"http://60gigahertz.uk/fhir/Observation/obs-{obs_id}",
-                        "resource": obs_resource
+                        "resource": obs_resource,
+                        "search": {
+                            "mode": "match"
+                        }
                     })
 
                 self.send_response(200)
