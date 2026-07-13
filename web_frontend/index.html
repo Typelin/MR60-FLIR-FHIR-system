@@ -1020,9 +1020,16 @@
                 <div>
                     <div class="terminal-header">
                         <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
-                        <span style="font-size: 0.75rem; color: var(--medium-gray); font-weight: 500;">自動滾動監聽</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製日誌
+                            </button>
+                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.1); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
                     </div>
-                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);">
+                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
                         <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
                     </div>
                 </div>
@@ -1030,9 +1037,17 @@
                 <div>
                     <div class="terminal-header">
                         <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
-                        <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600;">TW Core IG searchset 格式</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
+                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製 FHIR
+                            </button>
+                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.1); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
                     </div>
-                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.82rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">
+                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
                         正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
                     </div>
                 </div>
@@ -1216,7 +1231,7 @@
                         participant FE as 護理站監控面板 (index.html)
 
                         S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
-                        Note right of B: 2. 映射標準代碼與設備 ID
+                        B->>B: 2. 映射標準代碼與設備 ID
                         B->>DB: 3. 寫入關聯資料庫 observations 表格
                         FE->>B: 4. 定期輪詢最新狀態 (GET /api)
                         B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
@@ -1919,6 +1934,33 @@
             rc.stroke();
         }
         drawLoop();
+    }
+
+    // 複製內容
+    function copyTerminalText(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        let text = el.innerText;
+        if (text.includes("[系統提示]") || text.includes("正在從 /api/fhir")) {
+            alert("目前尚無可供複製的真實 JSON 數據包！");
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            alert("📋 JSON 數據已成功複製到剪貼簿！");
+        }).catch(err => {
+            alert("複製失敗: " + err);
+        });
+    }
+
+    // 展開/收合視窗
+    function toggleTerminalHeight(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        if (el.style.height === "800px") {
+            el.style.height = "450px";
+        } else {
+            el.style.height = "800px";
+        }
     }
 </script>
 </body>
