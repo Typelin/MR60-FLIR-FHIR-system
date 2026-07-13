@@ -575,7 +575,7 @@ def launch_cloudflare_tunnel():
         cmd = [cloudflared_path, "tunnel", "--no-autoupdate", "run", "--token", token_val]
     else:
         print(f"偵測到桌面 cloudflared.exe，正在啟動永久命名隧道 [school-fhir]...")
-        cmd = [cloudflared_path, "tunnel", "run", "--url", "http://localhost:8080", "school-fhir"]
+        cmd = [cloudflared_path, "tunnel", "run", "--url", "http://127.0.0.1:8080", "school-fhir"]
 
     proc = subprocess.Popen(
         cmd,
