@@ -1026,29 +1026,14 @@
                         <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
                     </div>
                 </div>
-                <!-- 右側：靜態 API 傳輸規範 -->
+                <!-- 右側：地端最新 HL7 FHIR Bundle (GET /api/fhir) -->
                 <div>
                     <div class="terminal-header">
-                        <span><i class="fas fa-file-code"></i> 上報數據與回應 JSON 格式規格 (Schema)</span>
+                        <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
+                        <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600;">TW Core IG searchset 格式</span>
                     </div>
-                    <div style="background: #0f172a; color: #cbd5e1; border-radius: 12px; padding: 18px; font-family: monospace; font-size: 0.85rem; border: 1px solid #1e293b; height: 260px; overflow-y: auto; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">
-                        <span style="color: #38bdf8; font-weight: 700;">// 1. 數值型生命特徵上報範例 (POST /api)</span><br/>
-                        <span style="color: #e2e8f0;">{
-  "patient_id": "patient-01",
-  "metric_type": "heart_rate",
-  "value": 75.0
-}</span><br/><br/>
-                        <span style="color: #38bdf8; font-weight: 700;">// 2. 狀態型生理行為上報範例 (POST /api)</span><br/>
-                        <span style="color: #e2e8f0;">{
-  "patient_id": "patient-01",
-  "metric_type": "fall",
-  "value": "fallen" // fallen / present / absent
-}</span><br/><br/>
-                        <span style="color: #38bdf8; font-weight: 700;">// 3. 後端成功寫入回應 JSON</span><br/>
-                        <span style="color: #e2e8f0;">{
-  "status": "success",
-  "message": "成功寫入觀測資料！"
-}</span>
+                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.82rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">
+                        正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
                     </div>
                 </div>
             </div>
@@ -1663,6 +1648,7 @@
 
     // 從 API 獲取資料
     function loadTelemetryLogs() {
+        // 1. 輪詢自訂資料庫格式
         fetch(`${API_BASE}/api`)
         .then(res => res.json())
         .then(data => {
@@ -1674,6 +1660,20 @@
         })
         .catch(err => {
             console.error("連線錯誤:", err);
+        });
+
+        // 2. 輪詢標準 HL7 FHIR Bundle 資源包並動態顯示於右下角
+        fetch(`${API_BASE}/api/fhir`)
+        .then(res => res.json())
+        .then(bundle => {
+            const fhirBox = document.getElementById("fhirBundleLog");
+            if (fhirBox) {
+                fhirBox.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">${JSON.stringify(bundle, null, 2)}</pre>`;
+            }
+        })
+        .catch(err => {
+            const fhirBox = document.getElementById("fhirBundleLog");
+            if (fhirBox) fhirBox.innerText = "無法載入 FHIR Bundle 資源包: " + err.message;
         });
     }
 

@@ -103,6 +103,199 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(f"讀取 index.html 失敗: {str(e)}".encode("utf-8"))
                 
+        elif path == '/api/fhir':
+            conn = None
+            cursor = None
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT 
+                        o.id, 
+                        o.patient_id, 
+                        p.name AS patient_name,
+                        p.gender AS patient_gender,
+                        to_char(p.birth_date, 'YYYY-MM-DD') AS patient_birth,
+                        p.mrn AS patient_mrn,
+                        o.device_id,
+                        d.model_number AS device_model,
+                        d.manufacturer AS device_manufacturer,
+                        d.serial_number AS device_serial,
+                        o.status,
+                        o.category,
+                        o.loinc_code,
+                        o.value_numeric,
+                        o.value_unit,
+                        o.value_code,
+                        o.value_display,
+                        to_char(o.recorded_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS timestamp
+                    FROM observations o
+                    LEFT JOIN patients p ON o.patient_id = p.id
+                    LEFT JOIN devices d ON o.device_id = d.id
+                    ORDER BY o.recorded_at DESC;
+                """)
+                rows = cursor.fetchall()
+                
+                bundle = {
+                    "resourceType": "Bundle",
+                    "type": "searchset",
+                    "total": len(rows),
+                    "entry": []
+                }
+                
+                added_patients = set()
+                
+                for row in rows:
+                    obs_id = row[0]
+                    patient_id = row[1]
+                    patient_name = row[2]
+                    patient_gender = row[3]
+                    patient_birth = row[4]
+                    patient_mrn = row[5]
+                    device_id = row[6]
+                    device_model = row[7]
+                    device_manufacturer = row[8]
+                    device_serial = row[9]
+                    status = row[10]
+                    category = row[11]
+                    loinc_code = row[12]
+                    val_num = float(row[13]) if row[13] is not None else None
+                    val_unit = row[14]
+                    val_code = row[15]
+                    val_display = row[16]
+                    timestamp = row[17]
+                    
+                    if patient_id and patient_id not in added_patients:
+                        added_patients.add(patient_id)
+                        
+                        # 插入 Patient
+                        bundle["entry"].append({
+                            "fullUrl": f"http://60gigahertz.uk/fhir/Patient/{patient_id}",
+                            "resource": {
+                                "resourceType": "Patient",
+                                "id": patient_id,
+                                "identifier": [
+                                    {
+                                        "use": "official",
+                                        "system": "http://www.mhw.gov.tw/mrn",
+                                        "value": patient_mrn
+                                    }
+                                ],
+                                "name": [
+                                    {
+                                        "use": "official",
+                                        "text": patient_name
+                                    }
+                                ],
+                                "gender": patient_gender,
+                                "birthDate": patient_birth
+                            }
+                        })
+                        
+                        # 插入 Linkage (跨院聯結示範)
+                        bundle["entry"].append({
+                            "fullUrl": f"http://60gigahertz.uk/fhir/Linkage/linkage-{patient_id}",
+                            "resource": {
+                                "resourceType": "Linkage",
+                                "id": f"linkage-{patient_id}",
+                                "active": true,
+                                "item": [
+                                    {
+                                        "type": "source",
+                                        "resource": {
+                                            "reference": f"Patient/{patient_id}"
+                                        }
+                                    },
+                                    {
+                                        "type": "alternate",
+                                        "resource": {
+                                            "reference": "Patient/patient-alternate-999"
+                                        }
+                                    }
+                                ]
+                            }
+                        })
+                        
+                    obs_resource = {
+                        "resourceType": "Observation",
+                        "id": f"obs-{obs_id}",
+                        "status": status,
+                        "category": [
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                        "code": category,
+                                        "display": "Vital Signs" if category == "vital-signs" else "Survey"
+                                    }
+                                ]
+                            }
+                        ],
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://loinc.org",
+                                    "code": loinc_code,
+                                    "display": "Body temperature" if loinc_code == "8310-5" else (
+                                               "Heart rate" if loinc_code == "8867-4" else (
+                                               "Respiratory rate" if loinc_code == "9279-1" else (
+                                               "Body position" if loinc_code == "8361-8" else (
+                                               "Bed exit status" if loinc_code == "96773-7" else "Accidental fall indicator"
+                                               ))))
+                                }
+                            ]
+                        },
+                        "subject": {
+                            "reference": f"Patient/{patient_id}"
+                        },
+                        "device": {
+                            "reference": f"Device/{device_id}"
+                        },
+                        "effectiveDateTime": timestamp
+                    }
+                    
+                    if val_num is not None:
+                        obs_resource["valueQuantity"] = {
+                            "value": val_num,
+                            "unit": "Cel" if loinc_code == "8310-5" else "bpm",
+                            "system": "http://unitsofmeasure.org",
+                            "code": val_unit
+                        }
+                    elif val_code is not None:
+                        obs_resource["valueCodeableConcept"] = {
+                            "coding": [
+                                {
+                                    "system": "http://snomed.info/sct",
+                                    "code": val_code,
+                                    "display": val_display
+                                }
+                            ]
+                        }
+                        
+                    bundle["entry"].append({
+                        "fullUrl": f"http://60gigahertz.uk/fhir/Observation/obs-{obs_id}",
+                        "resource": obs_resource
+                    })
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps(bundle, ensure_ascii=False).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": f"FHIR Bundle 轉換失敗: {str(e)}"}, ensure_ascii=False).encode("utf-8"))
+                return
+            finally:
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
+
         elif path == '/api' or path.startswith('/api/'):
             conn = None
             cursor = None
