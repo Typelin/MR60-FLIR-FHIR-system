@@ -20,15 +20,15 @@
     </script>
     <style>
         :root {
-            --primary-blue: #1e3a8a;
-            --secondary-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --dark-navy: #0f172a;
-            --light-gray: #f8fafc;
-            --medium-gray: #64748b;
-            --danger-red: #ef4444;
-            --success-green: #10b981;
-            --warning-yellow: #f59e0b;
+            --primary-blue: #1c19d4;       /* 克萊因深藍 (Klein Intense Blue) */
+            --secondary-blue: #3b82f6;     /* 醫療藍 */
+            --accent-cyan: #06b6d4;        /* 醫療青色 */
+            --dark-navy: #090d16;          /* 深邃黑曜石藍 (Obsidian Navy) */
+            --light-gray: #f8fafc;         /* 暖石灰底色 */
+            --medium-gray: #64748b;        /* 輔助灰 */
+            --danger-red: #dc2626;         /* 警報紅色 */
+            --success-green: #059669;      /* 正常綠色 */
+            --warning-yellow: #d97706;      /* 警告黃色 */
             --white: #ffffff;
             --border-color: #cbd5e1;
             --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -88,7 +88,7 @@
         }
 
         .sidebar {
-            width: 300px;
+            width: 320px;
             background: var(--dark-navy);
             color: var(--white);
             padding: 24px;
@@ -105,34 +105,35 @@
         }
 
         .workspace-container {
-            margin-left: 300px;
+            margin-left: 320px;
             flex: 1;
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: calc(100% - 300px);
+            width: calc(100% - 320px);
             min-height: 100vh;
         }
 
         /* 側邊欄病患靜態資訊磁貼 (Patient Context Card) */
         .patient-card {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 18px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            background-image: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
         }
 
         .patient-card-header {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             color: var(--accent-cyan);
             font-weight: 800;
             letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 8px;
             display: flex;
             justify-content: space-between;
         }
@@ -140,17 +141,28 @@
         .patient-name-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.15rem;
-            font-weight: 700;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 800;
         }
 
         .patient-details {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.75);
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-top: 8px;
+        }
+
+        .patient-details div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .patient-details strong {
+            color: var(--white);
         }
 
         /* 側邊導航 Menu */
@@ -164,10 +176,10 @@
             background: transparent;
             color: rgba(255, 255, 255, 0.65);
             border: none;
-            padding: 12px 16px;
+            padding: 14px 18px;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             text-align: left;
             display: flex;
@@ -178,8 +190,8 @@
         }
 
         .menu-item i {
-            font-size: 1.1rem;
-            width: 20px;
+            font-size: 1.15rem;
+            width: 22px;
             text-align: center;
         }
 
@@ -189,9 +201,10 @@
         }
 
         .menu-item.active {
-            background: var(--gradient-primary);
+            background: var(--primary-blue);
             color: var(--white);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(28, 25, 212, 0.3);
+            border-left: 4px solid var(--accent-cyan);
         }
 
         /* 頂部控制面板與全域警報 */
@@ -199,7 +212,7 @@
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 12px;
-            padding: 16px 24px;
+            padding: 18px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -207,15 +220,15 @@
         }
 
         .top-bar-title h2 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--dark-navy);
         }
 
         .top-bar-domain {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--medium-gray);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         #fallEmergencyAlert {
@@ -237,7 +250,7 @@
             50% { opacity: 0.5; box-shadow: 0 0 5px rgba(239, 68, 68, 0.05); }
         }
 
-        /* 分頁面容器 */
+        /* 工作區載入淡入淡出 */
         .tab-content {
             display: none;
             animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -252,10 +265,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ==================== 1. 即時生理監控儀 ==================== */
+        /* ==================== 1. 即時生理監控儀工作區 ==================== */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -264,17 +277,17 @@
             background: var(--white);
             border: 1px solid rgba(0, 0, 0, 0.04);
             border-radius: 12px;
-            padding: 14px;
+            padding: 16px;
             box-shadow: var(--shadow-light);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .stat-icon {
-            font-size: 1.4rem;
-            width: 40px;
-            height: 40px;
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -287,20 +300,20 @@
         .stat-badge.danger .stat-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
 
         .stat-info { flex: 1; }
-        .stat-label { font-size: 0.78rem; color: var(--medium-gray); font-weight: 700; }
-        .stat-value { font-size: 1.3rem; font-weight: 800; color: var(--dark-navy); }
+        .stat-label { font-size: 0.8rem; color: var(--medium-gray); font-weight: 700; }
+        .stat-value { font-size: 1.45rem; font-weight: 800; color: var(--dark-navy); }
 
         .telemetry-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 18px;
+            gap: 20px;
         }
 
         .monitor-card {
             background: var(--white);
             border: 2px solid transparent;
             border-radius: 16px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
             position: relative;
             overflow: hidden;
@@ -316,48 +329,48 @@
             left: 0;
             top: 0;
             height: 100%;
-            width: 5px;
+            width: 6px;
             background: var(--secondary-blue);
         }
 
         .monitor-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-medium);
         }
 
-        .monitor-card.normal { border-color: rgba(16, 185, 129, 0.15); }
+        .monitor-card.normal { border-color: rgba(16, 185, 129, 0.2); }
         .monitor-card.normal::before { background: var(--success-green); }
-        .monitor-card.warning { border-color: rgba(245, 158, 11, 0.25); }
+        .monitor-card.warning { border-color: rgba(245, 158, 11, 0.3); }
         .monitor-card.warning::before { background: var(--warning-yellow); }
-        .monitor-card.danger { border-color: rgba(239, 68, 68, 0.4); animation: pulse-red-border 2s infinite; }
+        .monitor-card.danger { border-color: rgba(239, 68, 68, 0.45); animation: pulse-red-border 2s infinite; }
         .monitor-card.danger::before { background: var(--danger-red); }
 
         @keyframes pulse-red-border {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
-            50% { box-shadow: 0 0 15px 0 rgba(239, 68, 68, 0.15); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); }
+            50% { box-shadow: 0 0 15px 0 rgba(239, 68, 68, 0.2); }
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .card-title {
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
             color: var(--dark-navy);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .card-title i { color: var(--secondary-blue); }
 
         .status-indicator {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             display: inline-block;
         }
@@ -367,27 +380,22 @@
         .status-indicator.danger { background: var(--danger-red); box-shadow: 0 0 8px var(--danger-red); animation: indicator-blink 0.8s infinite; }
         .status-indicator.offline { background: var(--medium-gray); }
 
-        @keyframes indicator-blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
         .value-display {
             display: flex;
             align-items: baseline;
-            gap: 4px;
-            margin: 8px 0;
+            gap: 5px;
+            margin: 10px 0;
         }
 
         .main-val {
-            font-size: 2.3rem;
+            font-size: 2.6rem;
             font-weight: 800;
             color: var(--dark-navy);
             letter-spacing: -1px;
         }
 
         .sub-unit {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--medium-gray);
         }
@@ -395,15 +403,15 @@
         /* wave-canvas 生物波形模擬器 */
         .wave-canvas {
             width: 100%;
-            height: 60px;
+            height: 65px;
             background: #faf9f6;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             margin-top: 10px;
         }
 
         .device-info {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             color: var(--medium-gray);
             border-top: 1px dashed rgba(100, 116, 139, 0.15);
             padding: 8px 0 0 0;
@@ -428,7 +436,7 @@
         }
 
         summary.spec-summary {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--secondary-blue);
             font-weight: 700;
             cursor: pointer;
@@ -451,33 +459,23 @@
             margin-top: 8px;
             font-size: 0.82rem;
             color: var(--medium-gray);
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             line-height: 1.5;
-        }
-
-        .spec-content strong { color: var(--dark-navy); }
-        .spec-quote {
-            border-left: 3px solid var(--secondary-blue);
-            padding-left: 8px;
-            margin-top: 8px;
-            font-style: italic;
-            background: rgba(59, 130, 246, 0.02);
-            color: #475569;
         }
 
         /* ==================== 2. 臨床情境模擬器 (一鍵發送) ==================== */
         .scenario-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 18px;
             margin-bottom: 25px;
         }
 
         .scenario-card {
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 12px;
-            padding: 18px;
+            border-radius: 14px;
+            padding: 20px;
             box-shadow: var(--shadow-light);
             display: flex;
             flex-direction: column;
@@ -492,8 +490,8 @@
         }
 
         .scenario-title {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1.1rem;
+            font-weight: 800;
             color: var(--dark-navy);
             margin-bottom: 12px;
             display: flex;
@@ -507,22 +505,22 @@
 
         .scenario-details-list {
             list-style: none;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             color: var(--medium-gray);
             margin-bottom: 15px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
 
         .scenario-details-list strong { color: var(--dark-navy); }
 
         .btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 6px;
-            font-size: 0.88rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -537,19 +535,20 @@
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
 
         .manual-config-title {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
             margin-top: 30px;
             margin-bottom: 15px;
             border-left: 4px solid var(--secondary-blue);
             padding-left: 10px;
+            color: var(--dark-navy);
         }
 
         .control-card {
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -566,10 +565,10 @@
             gap: 6px;
         }
 
-        .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--medium-gray); }
+        .form-group label { font-size: 0.88rem; font-weight: 700; color: var(--medium-gray); }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 11px 14px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 0.95rem;
@@ -579,7 +578,7 @@
 
         /* 批次上報載入層 */
         #batchLoading {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(9, 13, 22, 0.85);
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 9999;
@@ -592,7 +591,7 @@
         }
 
         .spinner {
-            width: 40px; height: 40px;
+            width: 44px; height: 44px;
             border: 4px solid rgba(255,255,255,0.2);
             border-radius: 50%;
             border-top-color: white;
@@ -601,7 +600,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ==================== 3. 歷史觀測日誌分頁 ==================== */
+        /* ==================== 3. 歷史觀測日誌工作區 ==================== */
         .history-card {
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
@@ -617,24 +616,24 @@
             margin-bottom: 20px;
         }
 
-        .history-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .history-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         .history-title i { color: var(--secondary-blue); }
 
         .table-container {
             width: 100%;
             overflow-x: auto;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             border-radius: 12px;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
-        th { background: #f8fafc; color: var(--medium-gray); font-weight: 700; padding: 14px 18px; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 14px 18px; border-bottom: 1px solid #e2e8f0; color: var(--dark-navy); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th { background: #f8fafc; color: var(--medium-gray); font-weight: 700; padding: 14px 18px; border-bottom: 1px solid #cbd5e1; }
+        td { padding: 14px 18px; border-bottom: 1px solid #cbd5e1; color: var(--dark-navy); }
         tr:last-child td { border-bottom: none; }
-        .no-data { text-align: center; color: var(--medium-gray); padding: 30px; }
 
         /* ==================== 4. 技術架構與 API 預覽 ==================== */
         .architecture-grid { display: flex; flex-direction: column; gap: 20px; }
+        
         .mermaid-container {
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
@@ -650,14 +649,15 @@
 
         .mermaid-title {
             align-self: flex-start;
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.15rem;
+            font-weight: 800;
             margin-bottom: 20px;
             border-left: 4px solid var(--secondary-blue);
             padding-left: 10px;
             width: 100%;
             display: flex;
             justify-content: space-between;
+            color: var(--dark-navy);
         }
 
         .mermaid { width: 100%; min-width: 900px; display: flex; justify-content: center; }
@@ -670,14 +670,14 @@
             box-shadow: var(--shadow-light);
         }
 
-        .api-preview-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; border-left: 4px solid var(--secondary-blue); padding-left: 10px; }
+        .api-preview-card h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 15px; border-left: 4px solid var(--secondary-blue); padding-left: 10px; color: var(--dark-navy); }
 
         .api-block {
             background: #0f172a;
-            color: #f8fafc;
-            border-radius: 8px;
-            padding: 16px;
-            font-family: monospace;
+            color: #38bdf8;
+            border-radius: 10px;
+            padding: 18px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 0.85rem;
             overflow-x: auto;
             line-height: 1.5;
@@ -685,27 +685,27 @@
             border: 1px solid #1e293b;
         }
 
-        .method-tag { background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; margin-right: 8px; }
+        .method-tag { background: #10b981; color: white; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; margin-right: 8px; }
         .method-tag.get { background: #3b82f6; }
 
-        /* ==================== 5. 衛福部與國際醫療標準指引 ==================== */
+        /* ==================== 5. 醫療合規指引文獻工作區 ==================== */
         .spec-card {
             background: var(--white);
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 16px;
-            padding: 25px;
+            padding: 30px;
             box-shadow: var(--shadow-light);
         }
 
-        .spec-card h2 { font-size: 1.25rem; font-weight: 800; border-left: 5px solid var(--secondary-blue); padding-left: 12px; margin-bottom: 25px; }
+        .spec-card h2 { font-size: 1.35rem; font-weight: 800; border-left: 5px solid var(--secondary-blue); padding-left: 12px; margin-bottom: 25px; color: var(--dark-navy); }
         .spec-item { margin-bottom: 30px; border-bottom: 1px dashed rgba(100, 116, 139, 0.15); padding-bottom: 25px; }
         .spec-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .spec-item h3 { font-size: 1.05rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
-        .spec-item p { font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; }
+        .spec-item h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
+        .spec-item p { font-size: 0.92rem; line-height: 1.6; margin-bottom: 10px; color: #334155; }
 
-        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 15px 0; }
-        .standard-table th { background: #f1f5f9; padding: 10px 12px; color: var(--dark-navy); font-weight: 700; border: 1px solid #cbd5e1; }
-        .standard-table td { padding: 10px 12px; border: 1px solid #cbd5e1; color: var(--dark-navy); }
+        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 15px 0; }
+        .standard-table th { background: #f1f5f9; padding: 12px; color: var(--dark-navy); font-weight: 700; border: 1px solid #cbd5e1; }
+        .standard-table td { padding: 12px; border: 1px solid #cbd5e1; color: var(--dark-navy); }
     </style>
 </head>
 <body>
@@ -715,34 +715,33 @@
 <!-- 批次載入提示 -->
 <div id="batchLoading">
     <div class="spinner"></div>
-    <div style="font-weight: 700; font-size: 1.1rem;">正在批次上報情境數據至 PostgreSQL，請稍候...</div>
+    <div style="font-weight: 700; font-size: 1.15rem;">正在向地端伺服器 (PostgreSQL) 批次發送觀測數據...</div>
 </div>
 
 <div class="main-layout">
     
     <!-- EHR 固定左側側邊欄 -->
     <div class="sidebar">
-        <!-- 標題 -->
         <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-heart-pulse" style="color: var(--danger-red); font-size: 1.6rem;"></i>
-            <span style="font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px;">EHR CLINICAL MONITOR</span>
+            <i class="fas fa-heart-pulse" style="color: var(--danger-red); font-size: 1.7rem;"></i>
+            <span style="font-size: 1.25rem; font-weight: 900; letter-spacing: 0.5px;">EHR CLINICAL PANEL</span>
         </div>
 
         <!-- 靜態病患 Context Card -->
         <div class="patient-card">
             <div class="patient-card-header">
-                <span>PATIENT RECORD</span>
-                <span>🟢 正在監護</span>
+                <span>PATIENT PROFILE</span>
+                <span>🟢 連線監護中</span>
             </div>
             <div class="patient-name-row">
                 <i class="fas fa-user-injured" style="color: var(--accent-cyan);"></i>
                 <span>林某某</span>
             </div>
             <div class="patient-details">
-                <div><strong>病歷號:</strong><br/>MRN998877</div>
-                <div><strong>生理性別:</strong><br/>女性 (Female)</div>
-                <div><strong>出生年月日:</strong><br/>1985-04-12</div>
-                <div><strong>目前年齡:</strong><br/>41 歲</div>
+                <div><span>病歷編號:</span> <strong>MRN998877</strong></div>
+                <div><span>生理性別:</span> <strong>女性 (Female)</strong></div>
+                <div><span>出生日期:</span> <strong>1985-04-12</strong></div>
+                <div><span>目前年齡:</span> <strong>41 歲 (生日前)</strong></div>
             </div>
         </div>
 
@@ -765,10 +764,9 @@
             </button>
         </div>
 
-        <!-- 頁尾宣告 -->
         <div style="margin-top: auto; font-size: 0.72rem; color: rgba(255,255,255,0.4); line-height: 1.4;">
-            地端 API 端點: <code>localhost:8080</code><br/>
-            台灣核心 IG (TW Core) 相容
+            地端 API: <code>localhost:8080</code><br/>
+            衛福部 TW Core IG 合規性
         </div>
     </div>
 
@@ -778,16 +776,16 @@
         <!-- 頂部資訊條 -->
         <div class="top-bar">
             <div class="top-bar-title">
-                <h2>臨床電子健康紀錄 (EHR) 系統面板</h2>
+                <h2>臨床電子健康紀錄 (EHR) 護理站監控端</h2>
             </div>
             <div class="top-bar-domain">
-                公網域名: <strong style="color: var(--secondary-blue);">60gigahertz.uk</strong>
+                地端公網域名: <strong style="color: var(--secondary-blue);">60gigahertz.uk</strong>
             </div>
         </div>
 
         <!-- 全域警報條 -->
         <div id="fallEmergencyAlert">
-            ⚠️ 【緊急警報】病患 [林某某] 發生跌倒事件！請醫護人員立即前往現場處置！
+            ⚠️ 【緊急警報】毫米波感測器 (device-radar-02) 判定病患 [林某某] 發生跌倒事件！請醫護人員立即前往處置！
         </div>
 
         <!-- ==================== 1. 即時生理監控儀工作區 ==================== -->
@@ -804,21 +802,21 @@
                 <div class="stat-badge normal">
                     <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
                     <div class="stat-info">
-                        <div class="stat-label">正常指標項目</div>
+                        <div class="stat-label">正常量測項目</div>
                         <div class="stat-value" id="statNormalVal">0 / 6</div>
                     </div>
                 </div>
                 <div class="stat-badge warning">
                     <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
                     <div class="stat-info">
-                        <div class="stat-label">預警/異常項目</div>
+                        <div class="stat-label">異常/預警項目</div>
                         <div class="stat-value" id="statWarningVal">0 / 6</div>
                     </div>
                 </div>
                 <div class="stat-badge danger">
                     <div class="stat-icon"><i class="fas fa-radiation"></i></div>
                     <div class="stat-info">
-                        <div class="stat-label">緊急跌倒狀態</div>
+                        <div class="stat-label">跌倒警報狀態</div>
                         <div class="stat-value" id="statDangerVal">無</div>
                     </div>
                 </div>
@@ -838,7 +836,7 @@
                         <span class="sub-unit">°C</span>
                     </div>
                     <div class="device-info">
-                        <span>設備: <strong>E53-Camera</strong></span>
+                        <span>量測硬體: <strong>E53-Camera</strong></span>
                         <span class="device-id-tag">device-camera-01</span>
                     </div>
                     <details class="spec-details">
@@ -867,7 +865,7 @@
                     <!-- 心動圖 Waveform -->
                     <canvas class="wave-canvas" id="heartCanvas"></canvas>
                     <div class="device-info">
-                        <span>設備: <strong>MR60-Radar</strong></span>
+                        <span>量測硬體: <strong>MR60-Radar</strong></span>
                         <span class="device-id-tag">device-radar-01</span>
                     </div>
                     <details class="spec-details">
@@ -896,7 +894,7 @@
                     <!-- 呼吸波 Waveform -->
                     <canvas class="wave-canvas" id="respCanvas"></canvas>
                     <div class="device-info">
-                        <span>設備: <strong>MR60-Radar</strong></span>
+                        <span>量測硬體: <strong>MR60-Radar</strong></span>
                         <span class="device-id-tag">device-radar-01</span>
                     </div>
                     <details class="spec-details">
@@ -922,7 +920,7 @@
                         <span class="main-val" id="postureVal">--</span>
                     </div>
                     <div class="device-info">
-                        <span>設備: <strong>E53-Camera</strong></span>
+                        <span>量測硬體: <strong>E53-Camera</strong></span>
                         <span class="device-id-tag">device-camera-01</span>
                     </div>
                     <details class="spec-details">
@@ -947,7 +945,7 @@
                         <span class="main-val" id="bedVal">--</span>
                     </div>
                     <div class="device-info">
-                        <span>設備: <strong>E53-Camera</strong></span>
+                        <span>量測硬體: <strong>E53-Camera</strong></span>
                         <span class="device-id-tag">device-camera-01</span>
                     </div>
                     <details class="spec-details">
@@ -972,7 +970,7 @@
                         <span class="main-val" id="fallVal">--</span>
                     </div>
                     <div class="device-info">
-                        <span>設備: <strong>MR60-Fall-Radar</strong></span>
+                        <span>量測硬體: <strong>MR60-Fall-Radar</strong></span>
                         <span class="device-id-tag">device-radar-02</span>
                     </div>
                     <details class="spec-details">
@@ -994,7 +992,7 @@
         <!-- ==================== 2. 臨床情境模擬器工作區 ==================== -->
         <div id="simulatorTab" class="tab-content">
             
-            <div class="manual-config-title">🚀 預設臨床案例 - 一鍵批次上報 (Scenario Dispatcher)</div>
+            <div class="manual-config-title">🚀 預設臨床案例 - 一鍵批次情境上報 (Scenario Dispatcher)</div>
             
             <!-- 一鍵情境發送 Card 矩陣 -->
             <div class="scenario-grid">
@@ -1117,6 +1115,12 @@
                 </div>
             </div>
 
+            <!-- 即時 API 請求/回應日誌終端機 -->
+            <div class="manual-config-title">🖥️ 即時 API 請求與回應傳輸日誌 (Live API Terminal)</div>
+            <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);">
+                <span style="color: #64748b;">[系統提示] 等待上報數據。當您點選「一鍵上報案例」或「發送單項數據」後，此終端機將即時捕獲 HTTP POST 請求與伺服器回傳的 JSON 封包規格...</span>
+            </div>
+
         </div>
 
         <!-- ==================== 3. 歷史觀察日誌工作區 ==================== -->
@@ -1169,7 +1173,7 @@
                         participant FE as 護理站監控面板 (index.html)
 
                         S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
-                        Note over B: 2. 根據指標自動分流並映射醫學標準代碼<br/>- 心率/呼吸 -> device-radar-01 (LOINC 8867-4/9279-1)<br/>- 跌倒偵測 -> device-radar-02 (LOINC 75276-6)<br/>- 體溫/姿勢/離床 -> device-camera-01 (LOINC 8310-5/8361-8/96773-7)
+                        Note over B: 2. 依指標自動映射<br/>LOINC & SNOMED CT 代碼<br/>與物理感測器 ID
                         B->>DB: 3. 寫入關聯資料庫 observations 表格
                         FE->>B: 4. 定期輪詢最新狀態 (GET /api)
                         B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
@@ -1244,7 +1248,7 @@
                 <div class="spec-item">
                     <h3>1. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
                     <p>
-                        在標準的 HAPI FHIR JPA 伺服器架構中，所有資源並非以扁平表（flat table）儲存，而是使用高度關聯的核心索引架構：
+                        在標準的 HAPI FHIR JPA 伺服器架構中，所有資源並非以扁平表儲存，而是使用高度關聯的核心索引架構：
                     </p>
                     <table class="standard-table">
                         <thead>
@@ -1478,6 +1482,39 @@
         ]
     };
 
+    // 終端機日誌列印函數
+    function logToTerminal(method, url, requestBody, status, responseBody) {
+        const logBox = document.getElementById("apiTerminalLog");
+        if (!logBox) return;
+
+        // 如果是第一次列印，先清空預設提示
+        if (logBox.innerHTML.includes("[系統提示]")) {
+            logBox.innerHTML = "";
+        }
+
+        const timestamp = new Date().toLocaleTimeString();
+        const requestHtml = `
+<div style="margin-top: 8px; border-top: 1px dashed #1e293b; padding-top: 8px;">
+    <span style="color: #64748b;">[${timestamp}]</span> 
+    <span style="color: #10b981; font-weight: 700;">&gt;&gt; ${method}</span> 
+    <span style="color: #3b82f6;">${url}</span>
+</div>
+<div style="color: #a7f3d0; margin-left: 15px;">
+    <strong>Headers:</strong> { "Content-Type": "application/json" }<br/>
+    <strong>Payload:</strong> ${JSON.stringify(requestBody)}
+</div>`;
+
+        const responseHtml = `
+<div style="color: #fcd34d; margin-left: 15px; margin-top: 4px;">
+    <span style="color: #f87171; font-weight: 700;">&lt;&lt; HTTP/1.1 ${status}</span><br/>
+    <strong>Response:</strong> ${JSON.stringify(responseBody)}
+</div>`;
+
+        logBox.innerHTML += requestHtml + responseHtml;
+        // 自動滾動到最下方
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
     function submitScenario(type) {
         const dataList = SCENARIOS[type];
         if (!dataList) return;
@@ -1485,17 +1522,25 @@
         const loader = document.getElementById("batchLoading");
         loader.style.display = "flex";
 
-        // 利用循序 Promise.all 發送六筆 API 數據上報
+        // 循序發送 POST
         const promises = dataList.map(item => {
+            const payload = {
+                patient_id: "patient-01",
+                metric_type: item.metric_type,
+                value: item.value
+            };
+
             return fetch(`${API_BASE}/api`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    patient_id: "patient-01",
-                    metric_type: item.metric_type,
-                    value: item.value
-                })
-            }).then(res => res.json());
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                return res.json().then(json => {
+                    logToTerminal("POST", "/api", payload, res.status, json);
+                    return json;
+                });
+            });
         });
 
         Promise.all(promises)
@@ -1544,14 +1589,16 @@
             },
             body: JSON.stringify(payload)
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                loadTelemetryLogs();
-                alert("手動數據微調發送成功！");
-            } else {
-                alert("寫入失敗: " + data.message);
-            }
+        .then(res => {
+            return res.json().then(json => {
+                logToTerminal("POST", "/api", payload, res.status, json);
+                if (data.status === "success") {
+                    loadTelemetryLogs();
+                    alert("手動數據微調發送成功！");
+                } else {
+                    alert("寫入失敗: " + data.message);
+                }
+            });
         })
         .catch(err => {
             console.error(err);
@@ -1750,9 +1797,9 @@
         const rc = respCanvas.getContext("2d");
 
         const width = heartCanvas.width = heartCanvas.clientWidth;
-        const height = heartCanvas.height = 60;
+        const height = heartCanvas.height = 65;
         respCanvas.width = respCanvas.clientWidth;
-        respCanvas.height = 60;
+        respCanvas.height = 65;
 
         const hPoints = new Array(width).fill(height / 2);
         const rPoints = new Array(width).fill(height / 2);
@@ -1763,9 +1810,9 @@
             hc.fillStyle = "#faf9f6"; hc.fillRect(0, 0, width, height);
             rc.fillStyle = "#faf9f6"; rc.fillRect(0, 0, width, height);
 
-            // 繪製格線
-            hc.strokeStyle = "rgba(100, 116, 139, 0.05)"; hc.lineWidth = 1;
-            rc.strokeStyle = "rgba(100, 116, 139, 0.05)"; rc.lineWidth = 1;
+            // 繪製細微格線
+            hc.strokeStyle = "rgba(100, 116, 139, 0.04)"; hc.lineWidth = 1;
+            rc.strokeStyle = "rgba(100, 116, 139, 0.04)"; rc.lineWidth = 1;
             for (let i = 0; i < width; i += 20) {
                 hc.beginPath(); hc.moveTo(i, 0); hc.lineTo(i, height); hc.stroke();
                 rc.beginPath(); rc.moveTo(i, 0); rc.lineTo(i, height); rc.stroke();
@@ -1783,7 +1830,7 @@
 
             const time = Date.now();
 
-            // 心電圖 (ECG) P-Q-R-S-T 模擬演算法
+            // 心電圖 (ECG) P-Q-R-S-T 模擬
             let ecgVal = height / 2;
             const hrPeriod = (60 / hr) * 1000;
             const tInBeat = time % hrPeriod;
@@ -1801,7 +1848,7 @@
             }
             ecgVal += (Math.random() - 0.5) * 0.4;
 
-            // 呼吸波 (正弦波形) 模擬
+            // 呼吸正弦波模擬
             const rrPeriod = (60 / rr) * 1000;
             const respVal = (height / 2) + Math.sin((time / rrPeriod) * 2 * Math.PI) * 10 + (Math.random() - 0.5) * 0.3;
 
