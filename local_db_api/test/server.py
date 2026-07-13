@@ -541,6 +541,20 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
+def kill_existing_cloudflared():
+    """啟動時先清理地端殘留的 cloudflared 進程，防止多重連線造成 502 Bad Gateway 錯誤"""
+    import subprocess
+    import sys
+    print("\n[提示] 正在主動掃描並清理地端殘留的 cloudflared.exe 幽靈進程...")
+    try:
+        if sys.platform == "win32":
+            subprocess.run(["taskkill", "/f", "/im", "cloudflared.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            subprocess.run(["pkill", "-f", "cloudflared"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("[提示] 殘留之舊穿牆通道進程清理完畢。")
+    except Exception as e:
+        print(f"[提示] 清理舊進程時發生錯誤 (可能無殘留): {str(e)}")
+
 def launch_cloudflare_tunnel():
     global ACTIVE_TUNNEL_URL
     cloudflared_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "cloudflared.exe"))
@@ -550,6 +564,9 @@ def launch_cloudflare_tunnel():
         print("將僅啟動本地 API 與靜態伺服器，不啟動 Cloudflare 穿牆通道。")
         webbrowser.open("http://localhost:8080")
         return
+        
+    # 啟動新隧道前強制清理任何舊殘留，從技術層面阻斷 502 異常
+    kill_existing_cloudflared()
         
     token_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tunnel_token.txt"))
     use_token = False
