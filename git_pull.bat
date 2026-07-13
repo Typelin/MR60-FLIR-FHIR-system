@@ -4,7 +4,8 @@ echo ====================================
 echo   Syncing project from GitHub...
 echo ====================================
 echo.
-git pull
+git fetch --all
+git reset --hard origin/main
 echo.
 echo ====================================
 echo   Sync completed! Closing in 3 seconds...
