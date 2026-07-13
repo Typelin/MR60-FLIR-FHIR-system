@@ -37,6 +37,27 @@
             --transition-expo: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* 2K, 4K & Mobile 響應式字型與比例再分配 */
+        html {
+            font-size: 16px;
+        }
+
+        @media (min-width: 1920px) {
+            html { font-size: 17px; }
+        }
+
+        @media (min-width: 2560px) {
+            html { font-size: 19px; } /* 2K 解析度螢幕 */
+        }
+
+        @media (min-width: 3840px) {
+            html { font-size: 24px; } /* 4K 解析度螢幕 */
+        }
+
+        @media (max-width: 768px) {
+            html { font-size: 14px; } /* 手機端縮小比例 */
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -86,8 +107,8 @@
         .top-navbar {
             background: var(--white);
             border-bottom: 1px solid var(--border-color);
-            padding: 0 24px;
-            height: 70px;
+            padding: 0 1.5rem;
+            height: 4.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -102,16 +123,17 @@
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.6rem;
+            flex-shrink: 0;
         }
 
         .nav-brand i {
             color: var(--danger-red);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .nav-brand span {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 900;
             color: var(--dark-navy);
             letter-spacing: 0.5px;
@@ -119,7 +141,7 @@
 
         .nav-menu {
             display: flex;
-            gap: 6px;
+            gap: 0.35rem;
             height: 100%;
             align-items: center;
         }
@@ -128,21 +150,22 @@
             background: transparent;
             color: var(--medium-gray);
             border: none;
-            padding: 10px 16px;
+            padding: 0.5rem 0.9rem;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem;
             transition: var(--transition-expo);
-            height: 42px;
+            height: 2.6rem;
+            white-space: nowrap;
         }
 
         .menu-item i {
-            font-size: 1rem;
-            width: 18px;
+            font-size: 0.95rem;
+            width: 1.1rem;
             text-align: center;
         }
 
@@ -157,41 +180,73 @@
             box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
         }
 
+        /* 手機端 RWD 導航欄最佳化 */
+        @media (max-width: 768px) {
+            .top-navbar {
+                height: auto;
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: flex-start;
+            }
+            .nav-menu {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                display: flex;
+                padding-bottom: 0.3rem;
+                -webkit-overflow-scrolling: touch;
+            }
+            .menu-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                height: 2.3rem;
+            }
+        }
+
         /* 橫向病患資訊摘要條 (Patient Context Strip) */
         .patient-strip {
             background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 14px 24px;
+            padding: 0.8rem 1.5rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--shadow-light);
-            gap: 15px;
+            gap: 0.9rem;
             background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
         }
 
         .patient-strip-info {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 1.2rem;
             flex-wrap: wrap;
         }
 
         .patient-strip-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.15rem;
+            gap: 0.5rem;
+            font-size: 1.1rem;
             font-weight: 800;
             color: var(--dark-navy);
             border-right: 2px solid var(--border-color);
-            padding-right: 20px;
+            padding-right: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .patient-strip-title {
+                border-right: none;
+                padding-right: 0;
+                width: 100%;
+            }
         }
 
         .patient-strip-item {
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: var(--medium-gray);
         }
 
@@ -205,17 +260,17 @@
             padding: 4px 10px;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
 
-        /* 主工作容器 */
+        /* 主工作區 Layout */
         .workspace-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 24px;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.25rem;
             width: 100%;
             flex: 1;
         }
@@ -225,7 +280,7 @@
             background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px 24px;
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -233,13 +288,13 @@
         }
 
         .top-bar-title h2 {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: #0f172a;
         }
 
         .top-bar-domain {
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: var(--medium-gray);
             font-weight: 700;
         }
@@ -252,7 +307,7 @@
             border-radius: 10px;
             text-align: center;
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             animation: blink 1.2s infinite;
             display: none;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);
@@ -290,17 +345,17 @@
             background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px;
+            padding: 1rem;
             box-shadow: var(--shadow-light);
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .stat-icon {
-            font-size: 1.4rem;
-            width: 42px;
-            height: 42px;
+            font-size: 1.3rem;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -313,12 +368,12 @@
         .stat-badge.danger .stat-icon { background: rgba(239, 68, 68, 0.08); color: var(--danger-red); }
 
         .stat-info { flex: 1; }
-        .stat-label { font-size: 0.78rem; color: var(--medium-gray); font-weight: 700; }
-        .stat-value { font-size: 1.35rem; font-weight: 800; color: #0f172a; }
+        .stat-label { font-size: 0.75rem; color: var(--medium-gray); font-weight: 700; }
+        .stat-value { font-size: 1.25rem; font-weight: 800; color: #0f172a; }
 
         .telemetry-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
         }
 
@@ -326,7 +381,7 @@
             background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 14px;
-            padding: 22px;
+            padding: 1.3rem;
             box-shadow: var(--shadow-light);
             position: relative;
             overflow: hidden;
@@ -362,16 +417,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .card-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 800;
             color: #0f172a;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .card-title i { color: var(--primary-blue); }
@@ -392,28 +447,28 @@
             display: flex;
             align-items: baseline;
             gap: 5px;
-            margin: 8px 0;
+            margin: 6px 0;
         }
 
         .main-val {
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -1px;
         }
 
         .sub-unit {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: var(--medium-gray);
         }
 
         .device-info {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: var(--medium-gray);
             border-top: 1px dashed rgba(100, 116, 139, 0.12);
             padding: 8px 0 0 0;
-            margin-top: 10px;
+            margin-top: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -434,7 +489,7 @@
         }
 
         summary.spec-summary {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--primary-blue);
             font-weight: 700;
             cursor: pointer;
@@ -455,36 +510,10 @@
             border-radius: 8px;
             padding: 10px;
             margin-top: 8px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--medium-gray);
             border: 1px solid var(--border-color);
             line-height: 1.5;
-        }
-
-        /* 主頁下方的 API 即時傳輸日誌與規格區 */
-        .main-page-api-section {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 968px) {
-            .main-page-api-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .terminal-header {
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary-blue);
-            padding-left: 10px;
-            color: #0f172a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         /* ==================== 2. 臨床情境模擬器 (一鍵發送) ==================== */
@@ -514,7 +543,7 @@
         }
 
         .scenario-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
             color: #0f172a;
             margin-bottom: 10px;
@@ -529,7 +558,7 @@
 
         .scenario-details-list {
             list-style: none;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: var(--medium-gray);
             margin-bottom: 15px;
             display: flex;
@@ -544,7 +573,7 @@
             padding: 10px 14px;
             border: none;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -559,7 +588,7 @@
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
 
         .manual-config-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 800;
             margin-top: 30px;
             margin-bottom: 15px;
@@ -589,53 +618,75 @@
             gap: 6px;
         }
 
-        .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--medium-gray); }
+        .form-group label { font-size: 0.82rem; font-weight: 700; color: var(--medium-gray); }
+        
+        /* 統一美化輸入框與下拉選單容器 */
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px 12px;
+            height: 2.6rem;
+            padding: 0 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             background: #ffffff;
             color: #0f172a;
+            transition: var(--transition-expo);
+            outline: none;
         }
 
-        /* 批次上報載入層 */
-        #batchLoading {
-            background: rgba(15, 23, 42, 0.8);
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 9999;
-            display: none;
-            justify-content: center;
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        /* 統一美化 Select 下拉選單風格與客製化箭頭 */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px !important;
+        }
+
+        /* ==================== 3. 歷史資料查詢工作區 (精簡橫排收合版) ==================== */
+        .filter-main-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 12px;
             align-items: center;
-            flex-direction: column;
-            color: white;
-            gap: 15px;
         }
 
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
+        @media (max-width: 768px) {
+            .filter-main-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== */
-        .filter-panel {
+        .advanced-filter-drawer {
+            display: none;
             background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 1.25rem;
             margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
-            gap: 15px;
-            align-items: flex-end;
             box-shadow: var(--shadow-light);
+            animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .advanced-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
         }
 
         .history-card {
@@ -653,7 +704,7 @@
             margin-bottom: 18px;
         }
 
-        .history-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .history-title { font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         .history-title i { color: var(--primary-blue); }
 
         .table-container {
@@ -663,7 +714,7 @@
             border-radius: 10px;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
         th { background: #f8fafc; color: var(--medium-gray); font-weight: 700; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
         td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: #334155; }
         tr:last-child td { border-bottom: none; }
@@ -686,7 +737,7 @@
 
         .mermaid-title {
             align-self: flex-start;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             margin-bottom: 18px;
             border-left: 4px solid var(--primary-blue);
@@ -707,7 +758,7 @@
             box-shadow: var(--shadow-light);
         }
 
-        .api-preview-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; border-left: 4px solid var(--primary-blue); padding-left: 10px; color: #0f172a; }
+        .api-preview-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; border-left: 4px solid var(--primary-blue); padding-left: 10px; color: #0f172a; }
 
         .api-block {
             background: #0f172a;
@@ -715,7 +766,7 @@
             border-radius: 10px;
             padding: 16px;
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             overflow-x: auto;
             line-height: 1.5;
             margin: 10px 0 20px 0;
@@ -724,6 +775,20 @@
 
         .method-tag { background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px; }
         .method-tag.get { background: #3b82f6; }
+
+        /* 技術日誌排版 */
+        .api-terminal-section {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 968px) {
+            .api-terminal-section {
+                grid-template-columns: 1fr;
+            }
+        }
 
         /* ==================== 5. 醫療合規指引文獻工作區 ==================== */
         .spec-card {
@@ -734,15 +799,38 @@
             box-shadow: var(--shadow-light);
         }
 
-        .spec-card h2 { font-size: 1.25rem; font-weight: 800; border-left: 5px solid var(--primary-blue); padding-left: 12px; margin-bottom: 20px; color: #0f172a; }
+        .spec-card h2 { font-size: 1.2rem; font-weight: 800; border-left: 5px solid var(--primary-blue); padding-left: 12px; margin-bottom: 20px; color: #0f172a; }
         .spec-item { margin-bottom: 25px; border-bottom: 1px dashed rgba(100, 116, 139, 0.12); padding-bottom: 20px; }
         .spec-item:last-child { border-bottom: none; padding-bottom: 0; }
         .spec-item h3 { font-size: 1.05rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px; }
-        .spec-item p { font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; color: #334155; }
+        .spec-item p { font-size: 0.88rem; line-height: 1.6; margin-bottom: 10px; color: #334155; }
 
-        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 15px 0; }
+        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 15px 0; }
         .standard-table th { background: #f1f5f9; padding: 10px; color: #0f172a; font-weight: 700; border: 1px solid var(--border-color); }
         .standard-table td { padding: 10px; border: 1px solid var(--border-color); color: #334155; }
+
+        /* 外部連結連結卡片 */
+        .external-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(2, 132, 199, 0.06);
+            color: var(--primary-blue);
+            border: 1px solid rgba(2, 132, 199, 0.15);
+            padding: 6px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-top: 5px;
+            transition: var(--transition-expo);
+        }
+
+        .external-link-badge:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -775,12 +863,6 @@
         </div>
     </div>
 </div>
-<style>
-@keyframes modalFadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-</style>
 
 <!-- 頂部導航欄 (Top Navigation Bar) -->
 <div class="top-navbar">
@@ -797,10 +879,10 @@
             <i class="fas fa-paper-plane"></i> 情境模擬器
         </button>
         <button class="menu-item" id="btn-logTab" onclick="switchTab('logTab', this)">
-            <i class="fas fa-database"></i> observations 審計日誌
+            <i class="fas fa-database"></i> 歷史資料查詢
         </button>
         <button class="menu-item" id="btn-architectureTab" onclick="switchTab('architectureTab', this)">
-            <i class="fas fa-project-diagram"></i> 架構與 API 預覽
+            <i class="fas fa-project-diagram"></i> 架架與 API 預覽
         </button>
         <button class="menu-item" id="btn-specTab" onclick="switchTab('specTab', this)">
             <i class="fas fa-book-medical"></i> 合規指引文獻
@@ -1033,45 +1115,6 @@
             </div>
 
         </div>
-
-        <!-- 主頁底部的 API 即時傳輸日誌與規格預覽區 -->
-        <div class="main-page-api-section">
-            <!-- 左側：即時傳輸日誌 -->
-            <div>
-                <div class="terminal-header">
-                    <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                            <i class="fas fa-copy"></i> 複製日誌
-                        </button>
-                        <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                            <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                        </button>
-                    </div>
-                </div>
-                <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
-                    <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
-                </div>
-            </div>
-            <!-- 右側：地端最新 HL7 FHIR Bundle (GET /api/fhir) -->
-            <div>
-                <div class="terminal-header">
-                    <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
-                        <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                            <i class="fas fa-copy"></i> 複製 FHIR
-                        </button>
-                        <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                            <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                        </button>
-                    </div>
-                </div>
-                <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
-                    正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- ==================== 2. 臨床情境模擬器工作區 ==================== -->
@@ -1202,72 +1245,78 @@
 
     </div>
 
-    <!-- ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== -->
+    <!-- ==================== 3. 歷史資料查詢工作區 (收合抽屜版) ==================== -->
     <div id="logTab" class="tab-content">
         
-        <!-- 歷史資料查詢與篩選面板 -->
-        <div class="filter-panel" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 12px; align-items: flex-end;">
-            <div class="form-group">
-                <label>🔍 監護對象姓名</label>
-                <select id="filterPatient" onchange="loadTelemetryLogs()">
-                    <option value="all">顯示所有對象</option>
-                    <option value="林某某">林某某 (MRN998877)</option>
-                </select>
+        <!-- 精簡橫排搜尋列 -->
+        <div class="filter-main-row">
+            <div style="flex: 1; position: relative;">
+                <input type="text" id="filterText" onkeyup="loadTelemetryLogs()" placeholder="💬 輸入診斷時間、數值或對照狀態碼進行即時模糊查詢..." style="width: 100%; height: 2.6rem; padding: 0 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; transition: var(--transition-expo);">
             </div>
-            <div class="form-group">
-                <label>📡 來源感測硬體</label>
-                <select id="filterDevice" onchange="loadTelemetryLogs()">
-                    <option value="all">顯示所有硬體</option>
-                    <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
-                    <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
-                    <option value="MR60-Fall-Radar">MR60-Fall-Radar (跌倒雷達)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>📊 臨床指標類別</label>
-                <select id="filterCategory" onchange="loadTelemetryLogs()">
-                    <option value="all">顯示所有類別</option>
-                    <option value="8310-5">體溫 (LOINC 8310-5)</option>
-                    <option value="8867-4">心率 (LOINC 8867-4)</option>
-                    <option value="9279-1">呼吸率 (LOINC 9279-1)</option>
-                    <option value="8361-8">身體姿態 (LOINC 8361-8)</option>
-                    <option value="96773-7">在床離床 (LOINC 96773-7)</option>
-                    <option value="75276-6">跌倒狀態 (LOINC 75276-6)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>📅 開始時間</label>
-                <input type="datetime-local" id="filterStartTime" onchange="loadTelemetryLogs()">
-            </div>
-            <div class="form-group">
-                <label>📅 結束時間</label>
-                <input type="datetime-local" id="filterEndTime" onchange="loadTelemetryLogs()">
-            </div>
-            <div class="form-group">
-                <label>💬 關鍵字模糊搜尋</label>
-                <input type="text" id="filterText" onkeyup="loadTelemetryLogs()" placeholder="輸入時間、數值或對照碼...">
-            </div>
-            <div>
-                <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
-                    <i class="fas fa-undo"></i> 重設
-                </button>
+            <button onclick="toggleAdvancedFilters()" class="btn" style="width: auto; height: 2.6rem; background: #e2e8f0; color: var(--dark-navy); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 700; white-space: nowrap; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-sliders-h"></i> ⚙️ 進階篩選
+            </button>
+            <button onclick="resetFilters()" class="btn" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 0 14px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 2.6rem; width: auto; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fas fa-undo"></i> 重設
+            </button>
+        </div>
+
+        <!-- 隱藏的進階抽屜區 -->
+        <div id="advancedFilterDrawer" class="advanced-filter-drawer">
+            <div class="advanced-filter-grid">
+                <div class="form-group">
+                    <label>🔍 監護對象姓名</label>
+                    <select id="filterPatient" onchange="loadTelemetryLogs()">
+                        <option value="all">顯示所有對象</option>
+                        <option value="林某某">林某某 (MRN998877)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📡 來源感測硬體</label>
+                    <select id="filterDevice" onchange="loadTelemetryLogs()">
+                        <option value="all">顯示所有硬體</option>
+                        <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
+                        <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
+                        <option value="MR60-Fall-Radar">MR60-Fall-Radar (跌倒雷達)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📊 臨床指標類別</label>
+                    <select id="filterCategory" onchange="loadTelemetryLogs()">
+                        <option value="all">顯示所有類別</option>
+                        <option value="8310-5">體溫 (LOINC 8310-5)</option>
+                        <option value="8867-4">心率 (LOINC 8867-4)</option>
+                        <option value="9279-1">呼吸率 (LOINC 9279-1)</option>
+                        <option value="8361-8">身體姿態 (LOINC 8361-8)</option>
+                        <option value="96773-7">在床離床 (LOINC 96773-7)</option>
+                        <option value="75276-6">跌倒狀態 (LOINC 75276-6)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 開始時間</label>
+                    <input type="datetime-local" id="filterStartTime" onchange="loadTelemetryLogs()">
+                </div>
+                <div class="form-group">
+                    <label>📅 結束時間</label>
+                    <input type="datetime-local" id="filterEndTime" onchange="loadTelemetryLogs()">
+                </div>
             </div>
         </div>
 
         <div class="history-card">
             <div class="history-header" style="flex-wrap: wrap; gap: 10px;">
-                <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測報告紀錄</span>
+                <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測歷史紀錄</span>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="exportToCSV()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--success-green);">
+                    <button class="btn btn-primary" onclick="exportToCSV()" style="width: auto; padding: 6px 12px; font-size: 0.82rem; background: var(--success-green);">
                         <i class="fas fa-file-csv"></i> 📥 匯出 CSV 報表
                     </button>
-                    <button class="btn btn-primary" onclick="downloadFilteredFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--secondary-blue);">
+                    <button class="btn btn-primary" onclick="downloadFilteredFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.82rem; background: var(--secondary-blue);">
                         <i class="fas fa-file-download"></i> 💾 導出 FHIR Bundle
                     </button>
-                    <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--dark-navy);">
+                    <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.82rem; background: var(--dark-navy);">
                         <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR
                     </button>
-                    <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                    <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.82rem;">
                         <i class="fas fa-sync-alt"></i> 重新整理
                     </button>
                 </div>
@@ -1293,7 +1342,7 @@
         </div>
     </div>
 
-    <!-- ==================== 4. 系統技術架構與 API 預覽 ==================== -->
+    <!-- ==================== 4. 系統技術架構與 API 預覽 (含日誌終端) ==================== -->
     <div id="architectureTab" class="tab-content">
         <div class="architecture-grid">
             
@@ -1376,6 +1425,45 @@
                 </pre>
             </div>
 
+            <!-- 搬移過來的 API Terminal 與 FHIR Bundle 日誌顯示區 -->
+            <div class="api-terminal-section">
+                <!-- 左側：即時傳輸日誌 -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製日誌
+                            </button>
+                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
+                    </div>
+                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
+                        <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
+                    </div>
+                </div>
+                <!-- 右側：地端最新 HL7 FHIR Bundle -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
+                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-copy"></i> 複製 FHIR
+                            </button>
+                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                            </button>
+                        </div>
+                    </div>
+                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.88rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
+                        正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1385,7 +1473,31 @@
             <h2>衛生福利部標準規格與 HAPI FHIR 資料庫儲存研析指引</h2>
             
             <div class="spec-item">
-                <h3>1. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
+                <h3>1. 衛福部 TW Core IG 官方範例指引連結</h3>
+                <p>
+                    以下為中華民國衛生福利部 (MHW) 與台灣 HL7 共同維護的官方 FHIR 範例與規範指引：
+                </p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <a href="https://twcore.hl7.org.tw/ig/twcore/" target="_blank" class="external-link-badge">
+                        <i class="fas fa-external-link-alt"></i> 衛福部 TW Core IG 官方首頁
+                    </a>
+                    <a href="https://twcore.hl7.org.tw/ig/twcore/examples.html" target="_blank" class="external-link-badge">
+                        <i class="fas fa-external-link-alt"></i> TW Core IG 官方範例索引手冊
+                    </a>
+                    <a href="https://twcore.hl7.org.tw/ig/twcore/StructureDefinition-Patient-twcore.html" target="_blank" class="external-link-badge">
+                        <i class="fas fa-external-link-alt"></i> 病患 Patient Profile 結構定義與規範
+                    </a>
+                    <a href="https://twcore.hl7.org.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="external-link-badge">
+                        <i class="fas fa-external-link-alt"></i> 生命徵象 Observation Profile 規格
+                    </a>
+                </div>
+                <p>
+                    本系統導出的 JSON 與 API 對接格式均精確符合上述官方實作指引之規範，能無縫對接至衛福部電子病歷伺服器。
+                </p>
+            </div>
+
+            <div class="spec-item">
+                <h3>2. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
                 <p>
                     在標準的 HAPI FHIR JPA 伺服器架構中，所有資源並非以扁平表儲存，而是使用高度關聯的核心索引架構：
                 </p>
@@ -1428,7 +1540,7 @@
             </div>
 
             <div class="spec-item">
-                <h3>2. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
+                <h3>3. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
                 <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
                     <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
                     「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
@@ -1439,10 +1551,10 @@
             </div>
 
             <div class="spec-item">
-                <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
+                <h3>4. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
                 <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
                     <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
-                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫 the Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
+                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
                 </div>
                 <p>
                     <strong>對照與合規要件：</strong>我們將體溫、心率及呼吸數據以 <code>value_numeric</code> 及 <code>value_unit</code> (符合 UCUM 標準，如生命徵象之體溫填寫 <code>Cel</code>) 形式進行分離儲存與 API 交換，以確保跨系統互補一致性。
@@ -1450,7 +1562,7 @@
             </div>
 
             <div class="spec-item">
-                <h3>4. 本專案使用之臨床編碼對照手冊</h3>
+                <h3>5. 本專案使用之臨床編碼對照手冊</h3>
                 <table class="standard-table">
                     <thead>
                         <tr>
@@ -1540,6 +1652,16 @@
             }, 50);
         } else {
             loadTelemetryLogs();
+        }
+    }
+
+    // 展開/收合進階篩選抽屜
+    function toggleAdvancedFilters() {
+        const drawer = document.getElementById("advancedFilterDrawer");
+        if (drawer.style.display === "none" || !drawer.style.display) {
+            drawer.style.display = "block";
+        } else {
+            drawer.style.display = "none";
         }
     }
 
