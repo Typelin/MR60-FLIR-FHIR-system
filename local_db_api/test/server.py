@@ -198,7 +198,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                             "resource": {
                                 "resourceType": "Linkage",
                                 "id": f"linkage-{patient_id}",
-                                "active": true,
+                                "active": True,
                                 "item": [
                                     {
                                         "type": "source",
