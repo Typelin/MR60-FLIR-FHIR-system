@@ -1985,7 +1985,8 @@ CREATE TABLE observations (
         .then(bundle => {
             const fhirBox = document.getElementById("fhirBundleLog");
             if (fhirBox) {
-                fhirBox.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">${JSON.stringify(bundle, null, 2)}</pre>`;
+                fhirBox.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; font-family: inherit;"></pre>`;
+                fhirBox.querySelector("pre").textContent = JSON.stringify(bundle, null, 2);
             }
         })
         .catch(err => {
@@ -2379,7 +2380,8 @@ CREATE TABLE observations (
         .then(bundle => {
             const modal = document.getElementById("fhirModal");
             const codeBox = document.getElementById("modalFhirCode");
-            codeBox.innerHTML = `<pre style="margin:0; white-space: pre-wrap; font-family: inherit;">${JSON.stringify(bundle, null, 2)}</pre>`;
+            codeBox.innerHTML = `<pre style="margin:0; white-space: pre-wrap; font-family: inherit;"></pre>`;
+            codeBox.querySelector("pre").textContent = JSON.stringify(bundle, null, 2);
             modal.style.display = "flex";
         })
         .catch(err => {
