@@ -193,7 +193,7 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             cursor = None
             try:
                 data = json.loads(post_data.decode('utf-8'))
-                                patient_id = data.get("patient_id", "patient-01")
+                patient_id = data.get("patient_id", "patient-01")
                 metric_type = data.get("metric_type")
                 value = data.get("value")
                 
