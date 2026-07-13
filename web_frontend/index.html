@@ -396,16 +396,6 @@
             color: var(--medium-gray);
         }
 
-        /* wave-canvas 生物波形模擬器 */
-        .wave-canvas {
-            width: 100%;
-            height: 60px;
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-
         .device-info {
             font-size: 0.78rem;
             color: var(--medium-gray);
@@ -622,7 +612,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ==================== 3. 歷史觀測日誌工作區 (含搜尋與篩選) ==================== */
+        /* ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== */
         .filter-panel {
             background: var(--white);
             border: 1px solid var(--border-color);
@@ -752,6 +742,33 @@
     <div class="spinner"></div>
     <div style="font-weight: 700; font-size: 1.15rem;">正在向地端伺服器 (PostgreSQL) 批次發送觀測數據...</div>
 </div>
+
+<!-- HL7 FHIR Bundle JSON 詳情彈出視窗 -->
+<div id="fhirModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+    <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; width: 80%; max-width: 850px; height: 80%; display: flex; flex-direction: column; box-shadow: var(--shadow-premium); overflow: hidden; animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="background: var(--dark-navy); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px;"><i class="fas fa-file-medical"></i> 批次 HL7 FHIR Bundle (JSON Document)</h3>
+            <button onclick="closeFhirModal()" style="background: transparent; border: none; color: white; font-size: 1.3rem; cursor: pointer; transition: var(--transition-expo);"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding: 16px 24px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--medium-gray);">規格標準：HL7 FHIR TW Core IG (v0.2.0)</span>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="copyTerminalText('modalFhirCode')" style="background: var(--primary-blue); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-copy"></i> 複製 JSON 文件
+                </button>
+            </div>
+        </div>
+        <div id="modalFhirCode" style="flex: 1; background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 20px; overflow-y: auto; font-size: 0.88rem; line-height: 1.5;">
+            <!-- JSON content goes here -->
+        </div>
+    </div>
+</div>
+<style>
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>
 
 <div class="main-layout">
     
@@ -897,8 +914,6 @@
                         <span class="main-val" id="heartVal">--</span>
                         <span class="sub-unit">bpm</span>
                     </div>
-                    <!-- 心動圖 Waveform -->
-                    <canvas class="wave-canvas" id="heartCanvas"></canvas>
                     <div class="device-info">
                         <span>量測硬體: <strong>MR60-Radar</strong></span>
                         <span class="device-id-tag">device-radar-01</span>
@@ -926,8 +941,6 @@
                         <span class="main-val" id="respVal">--</span>
                         <span class="sub-unit">bpm</span>
                     </div>
-                    <!-- 呼吸波 Waveform -->
-                    <canvas class="wave-canvas" id="respCanvas"></canvas>
                     <div class="device-info">
                         <span>量測硬體: <strong>MR60-Radar</strong></span>
                         <span class="device-id-tag">device-radar-01</span>
@@ -1194,7 +1207,7 @@
         <!-- ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== -->
         <div id="logTab" class="tab-content">
             
-            <!-- 新增：歷史資料查詢與篩選面板 -->
+            <!-- 歷史資料查詢與篩選面板 -->
             <div class="filter-panel">
                 <div class="form-group">
                     <label>🔍 監護對象姓名</label>
@@ -1225,8 +1238,8 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>📅 時間/數值/關鍵字模糊搜尋</label>
-                    <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="搜尋時間或量測值...">
+                    <label>📅 診斷時間/指標值關鍵字搜尋</label>
+                    <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="輸入時間或指標關鍵字...">
                 </div>
                 <div>
                     <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
@@ -1237,26 +1250,30 @@
 
             <div class="history-card">
                 <div class="history-header">
-                    <span class="history-title"><i class="fas fa-database"></i> PostgreSQL 臨床觀察審計日誌 (Observations)</span>
-                    <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
-                        <i class="fas fa-sync-alt"></i> 重新整理
-                    </button>
+                    <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測報告紀錄</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--dark-navy);">
+                            <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR Bundle JSON
+                        </button>
+                        <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                            <i class="fas fa-sync-alt"></i> 重新整理
+                        </button>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>病患</th>
-                                <th>監測時間</th>
-                                <th>指標類別</th>
-                                <th>標準代碼 (LOINC/SNOMED)</th>
-                                <th>量測數值/狀態</th>
-                                <th>資料來源設備</th>
+                                <th>監護病患</th>
+                                <th>臨床診斷時間</th>
+                                <th>生理特徵指標 (LOINC & SNOMED CT 數值摘要)</th>
+                                <th>標準協定規格</th>
+                                <th>HL7 FHIR 交互文件</th>
                             </tr>
                         </thead>
                         <tbody id="logTableBody">
                             <tr>
-                                <td colspan="6" class="no-data">正在從資料庫加載紀錄...</td>
+                                <td colspan="5" class="no-data">正在從資料庫加載紀錄...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1492,7 +1509,6 @@
     window.onload = function() {
         toggleMockValueFields();
         loadTelemetryLogs();
-        initWaveforms(); // 啟動 Canvas 波形繪製
         setInterval(loadTelemetryLogs, 10000); // 10秒自動更新
     };
 
@@ -1758,48 +1774,255 @@
         if (!tbody) return;
         tbody.innerHTML = "";
 
-        // 執行記憶體內過濾
-        const filtered = allTelemetryRecords.filter(rec => {
-            if (patient !== "all" && rec.patient_name !== patient) return false;
-            if (device !== "all" && rec.device_model !== device) return false;
-            if (category !== "all" && rec.loinc_code !== category) return false;
+        // 1. 先按時間戳分組 (批次報告)
+        const groups = {};
+        allTelemetryRecords.forEach(rec => {
+            const time = rec.timestamp;
+            if (!groups[time]) {
+                groups[time] = {
+                    timestamp: time,
+                    patient_name: rec.patient_name,
+                    patient_id: rec.patient_id,
+                    patient_gender: rec.patient_gender || 'female',
+                    patient_birth: rec.patient_birth || '1985-04-12',
+                    patient_mrn: rec.patient_mrn || 'MRN998877',
+                    records: []
+                };
+            }
+            groups[time].records.push(rec);
+        });
+
+        const sessions = Object.values(groups).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+        // 2. 對批次分組進行檢索與過濾
+        const filtered = sessions.filter(session => {
+            if (patient !== "all" && session.patient_name !== patient) return false;
             
+            // 是否包含指定硬體
+            if (device !== "all") {
+                const hasDevice = session.records.some(r => r.device_model === device);
+                if (!hasDevice) return false;
+            }
+
+            // 是否包含指定指標
+            if (category !== "all") {
+                const hasCategory = session.records.some(r => r.loinc_code === category);
+                if (!hasCategory) return false;
+            }
+
+            // 關鍵字模糊檢索
             if (queryText) {
-                const matchName = rec.patient_name.toLowerCase().includes(queryText);
-                const matchTime = rec.timestamp.toLowerCase().includes(queryText);
-                const matchVal = (rec.value_display || "").toLowerCase().includes(queryText) || 
-                                 String(rec.value_numeric || "").includes(queryText);
-                const matchModel = (rec.device_model || "").toLowerCase().includes(queryText);
-                const matchLoinc = rec.loinc_code.toLowerCase().includes(queryText);
-                if (!matchName && !matchTime && !matchVal && !matchModel && !matchLoinc) return false;
+                const matchName = session.patient_name.toLowerCase().includes(queryText);
+                const matchTime = session.timestamp.toLowerCase().includes(queryText);
+                
+                // 檢查該 Session 內的所有量測值與對照碼
+                const matchValue = session.records.some(r => {
+                    const textVal = (r.value_display || "").toLowerCase();
+                    const numVal = r.value_numeric !== null ? String(r.value_numeric) : "";
+                    const modelVal = (r.device_model || "").toLowerCase();
+                    const loincVal = r.loinc_code.toLowerCase();
+                    return textVal.includes(queryText) || numVal.includes(queryText) || modelVal.includes(queryText) || loincVal.includes(queryText);
+                });
+
+                if (!matchName && !matchTime && !matchValue) return false;
             }
             return true;
         });
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="no-data" style="text-align:center; padding: 20px; color: var(--medium-gray);">查無符合篩選條件的臨床紀錄。</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center; padding: 20px; color: var(--medium-gray);">查無符合篩選條件的臨床紀錄。</td></tr>`;
             return;
         }
 
-        filtered.forEach(rec => {
-            let displayVal = "";
-            if (rec.value_numeric !== null) {
-                displayVal = `${rec.value_numeric} ${rec.value_unit}`;
-            } else {
-                displayVal = `${rec.value_display} (${rec.value_code})`;
-            }
+        // 3. 渲染過濾後的分組為臨床報告列
+        filtered.forEach((session, index) => {
+            const summaries = [];
+            session.records.forEach(r => {
+                let name = "";
+                if (r.loinc_code === "8310-5") name = "體溫";
+                else if (r.loinc_code === "8867-4") name = "心率";
+                else if (r.loinc_code === "9279-1") name = "呼吸率";
+                else if (r.loinc_code === "8361-8") name = "姿勢";
+                else if (r.loinc_code === "96773-7") name = "床位";
+                else if (r.loinc_code === "75276-6") name = "跌倒";
+
+                let val = "";
+                if (r.value_numeric !== null) {
+                    val = `${r.value_numeric}${r.value_unit}`;
+                } else {
+                    val = `${r.value_display}`;
+                }
+                summaries.push(`<span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; color: #334155; margin-right: 4px; display: inline-block; margin-bottom: 2px;">${name}: ${val}</span>`);
+            });
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><strong>${rec.patient_name}</strong></td>
-                <td>${rec.timestamp}</td>
-                <td>${rec.category}</td>
-                <td><span class="loinc-tag" style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; font-family: monospace;">${rec.loinc_code}</span></td>
-                <td><strong>${displayVal}</strong></td>
-                <td>${rec.device_model || "未指定"}</td>
+                <td><strong>${session.patient_name}</strong></td>
+                <td>${session.timestamp}</td>
+                <td style="max-width: 450px; line-height: 1.6;">${summaries.join(" ")}</td>
+                <td><span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; font-family: monospace;">HL7 FHIR Bundle</span></td>
+                <td>
+                    <button onclick="viewSessionFhirBundle('${session.timestamp}')" style="background: var(--primary-blue); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                        <i class="fas fa-file-code"></i> 檢視 FHIR JSON
+                    </button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    // 檢視特定批次時間戳的完整 FHIR Bundle JSON 文件
+    function viewSessionFhirBundle(timestamp) {
+        const recs = allTelemetryRecords.filter(r => r.timestamp === timestamp);
+        if (recs.length === 0) return;
+
+        const first = recs[0];
+        
+        const bundle = {
+            "resourceType": "Bundle",
+            "type": "searchset",
+            "total": recs.length + 2,
+            "entry": []
+        };
+
+        // 1. Patient
+        bundle.entry.push({
+            "fullUrl": `http://60gigahertz.uk/fhir/Patient/${first.patient_id}`,
+            "resource": {
+                "resourceType": "Patient",
+                "id": first.patient_id,
+                "identifier": [
+                    {
+                        "use": "official",
+                        "system": "http://www.mhw.gov.tw/mrn",
+                        "value": first.patient_mrn || "MRN998877"
+                    }
+                ],
+                "name": [
+                    {
+                        "use": "official",
+                        "text": first.patient_name
+                    }
+                ],
+                "gender": first.patient_gender || "female",
+                "birthDate": first.patient_birth || "1985-04-12"
+            }
+        });
+
+        // 2. Linkage
+        bundle.entry.push({
+            "fullUrl": `http://60gigahertz.uk/fhir/Linkage/linkage-${first.patient_id}`,
+            "resource": {
+                "resourceType": "Linkage",
+                "id": `linkage-${first.patient_id}`,
+                "active": true,
+                "item": [
+                    {
+                        "type": "source",
+                        "resource": {
+                            "reference": `Patient/${first.patient_id}`
+                        }
+                    },
+                    {
+                        "type": "alternate",
+                        "resource": {
+                            "reference": "Patient/patient-alternate-999"
+                        }
+                    }
+                ]
+            }
+        });
+
+        // 3. Observations
+        recs.forEach(r => {
+            const obs_resource = {
+                "resourceType": "Observation",
+                "id": `obs-${r.id}`,
+                "status": r.status || "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": r.category,
+                                "display": r.category === "vital-signs" ? "Vital Signs" : "Survey"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": r.loinc_code,
+                            "display": r.loinc_code === "8310-5" ? "Body temperature" : (
+                                       r.loinc_code === "8867-4" ? "Heart rate" : (
+                                       r.loinc_code === "9279-1" ? "Respiratory rate" : (
+                                       r.loinc_code === "8361-8" ? "Body position" : (
+                                       r.loinc_code === "96773-7" ? "Bed exit status" : "Accidental fall indicator"
+                                       ))))
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": `Patient/${r.patient_id}`
+                },
+                "device": {
+                    "reference": `Device/${r.device_id}`
+                },
+                "effectiveDateTime": r.timestamp.replace(" ", "T") + "Z"
+            };
+
+            if (r.value_numeric !== null) {
+                obs_resource.valueQuantity = {
+                    "value": r.value_numeric,
+                    "unit": r.loinc_code === "8310-5" ? "Cel" : "bpm",
+                    "system": "http://unitsofmeasure.org",
+                    "code": r.value_unit
+                };
+            } else if (r.value_code !== null) {
+                obs_resource.valueCodeableConcept = {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": r.value_code,
+                            "display": r.value_display
+                        }
+                    ]
+                };
+            }
+
+            bundle.entry.push({
+                "fullUrl": `http://60gigahertz.uk/fhir/Observation/obs-${r.id}`,
+                "resource": obs_resource
+            });
+        });
+
+        // 渲染至彈窗
+        const modal = document.getElementById("fhirModal");
+        const codeBox = document.getElementById("modalFhirCode");
+        codeBox.innerHTML = `<pre style="margin:0; white-space: pre-wrap; font-family: inherit;">${JSON.stringify(bundle, null, 2)}</pre>`;
+        modal.style.display = "flex";
+    }
+
+    // 檢視資料庫全量 FHIR Bundle JSON
+    function viewAllFhirBundle() {
+        fetch(`${API_BASE}/api/fhir`)
+        .then(res => res.json())
+        .then(bundle => {
+            const modal = document.getElementById("fhirModal");
+            const codeBox = document.getElementById("modalFhirCode");
+            codeBox.innerHTML = `<pre style="margin:0; white-space: pre-wrap; font-family: inherit;">${JSON.stringify(bundle, null, 2)}</pre>`;
+            modal.style.display = "flex";
+        })
+        .catch(err => {
+            alert("載入全量 FHIR Bundle 失敗: " + err.message);
+        });
+    }
+
+    // 關閉 Modal
+    function closeFhirModal() {
+        document.getElementById("fhirModal").style.display = "none";
     }
 
     // 重設篩選器
@@ -1832,7 +2055,7 @@
             if (r.loinc_code === "75276-6" && !latest.fall) latest.fall = r;
         }
 
-        // 3. 更新監測卡片 UI 與狀態指標燈
+        // 更新監測卡片 UI
         updateCardUI("tempCard", "tempVal", "tempInd", latest.temp, (val) => val >= 38.0 ? 'danger' : 'normal');
         updateCardUI("heartCard", "heartVal", "heartInd", latest.heart, (val) => (val > 100 || val < 60) ? 'warning' : 'normal');
         updateCardUI("respCard", "respVal", "respInd", latest.resp, (val) => (val > 24 || val < 10) ? 'warning' : 'normal');
@@ -1854,7 +2077,6 @@
             updateStateCardUI("fallCard", "fallVal", "fallInd", latest.fall, (code) => code === "260385009" ? 'normal' : 'normal');
         }
 
-        // 4. 更新統計 Row 磁貼
         calculateStats(latest);
     }
 
@@ -1940,89 +2162,6 @@
         } else {
             valSpan.innerText = "--";
         }
-    }
-
-    // Canvas 生物波形即時繪製迴圈 (PPG/ECG Waveform Simulation)
-    function initWaveforms() {
-        const heartCanvas = document.getElementById("heartCanvas");
-        const respCanvas = document.getElementById("respCanvas");
-        if (!heartCanvas || !respCanvas) return;
-
-        const hc = heartCanvas.getContext("2d");
-        const rc = respCanvas.getContext("2d");
-
-        const width = heartCanvas.width = heartCanvas.clientWidth;
-        const height = heartCanvas.height = 60;
-        respCanvas.width = respCanvas.clientWidth;
-        respCanvas.height = 60;
-
-        const hPoints = new Array(width).fill(height / 2);
-        const rPoints = new Array(width).fill(height / 2);
-
-        function drawLoop() {
-            requestAnimationFrame(drawLoop);
-
-            hc.fillStyle = "#f8fafc"; hc.fillRect(0, 0, width, height);
-            rc.fillStyle = "#f8fafc"; rc.fillRect(0, 0, width, height);
-
-            // 繪製細微格線
-            hc.strokeStyle = "rgba(100, 116, 139, 0.03)"; hc.lineWidth = 1;
-            rc.strokeStyle = "rgba(100, 116, 139, 0.03)"; rc.lineWidth = 1;
-            for (let i = 0; i < width; i += 20) {
-                hc.beginPath(); hc.moveTo(i, 0); hc.lineTo(i, height); hc.stroke();
-                rc.beginPath(); rc.moveTo(i, 0); rc.lineTo(i, height); rc.stroke();
-            }
-            for (let i = 0; i < height; i += 20) {
-                hc.beginPath(); hc.moveTo(0, i); hc.lineTo(width, i); hc.stroke();
-                rc.beginPath(); rc.moveTo(0, i); rc.lineTo(width, i); rc.stroke();
-            }
-
-            // 取得當前生理數值設定波率
-            let hr = parseFloat(document.getElementById("heartVal").innerText) || 72;
-            let rr = parseFloat(document.getElementById("respVal").innerText) || 16;
-            if (hr === 0) hr = 72;
-            if (rr === 0) rr = 16;
-
-            const time = Date.now();
-
-            // 心電圖 (ECG) P-Q-R-S-T 模擬
-            let ecgVal = height / 2;
-            const hrPeriod = (60 / hr) * 1000;
-            const tInBeat = time % hrPeriod;
-            
-            if (tInBeat < 80) { // P波
-                ecgVal -= Math.sin((tInBeat / 80) * Math.PI) * 2;
-            } else if (tInBeat >= 120 && tInBeat < 135) { // Q波
-                ecgVal += 3;
-            } else if (tInBeat >= 135 && tInBeat < 160) { // R尖峰
-                ecgVal -= 18;
-            } else if (tInBeat >= 160 && tInBeat < 185) { // S谷值
-                ecgVal += 6;
-            } else if (tInBeat >= 250 && tInBeat < 380) { // T波
-                ecgVal -= Math.sin(((tInBeat - 250) / 130) * Math.PI) * 4;
-            }
-            ecgVal += (Math.random() - 0.5) * 0.4;
-
-            // 呼吸正弦波模擬
-            const rrPeriod = (60 / rr) * 1000;
-            const respVal = (height / 2) + Math.sin((time / rrPeriod) * 2 * Math.PI) * 10 + (Math.random() - 0.5) * 0.3;
-
-            hPoints.shift(); hPoints.push(ecgVal);
-            rPoints.shift(); rPoints.push(respVal);
-
-            // 繪製心跳線 (綠色)
-            hc.strokeStyle = "#10b981"; hc.lineWidth = 1.8;
-            hc.beginPath(); hc.moveTo(0, hPoints[0]);
-            for (let i = 1; i < width; i++) { hc.lineTo(i, hPoints[i]); }
-            hc.stroke();
-
-            // 繪製呼吸線 (藍色)
-            rc.strokeStyle = "#0284c7"; rc.lineWidth = 1.8;
-            rc.beginPath(); rc.moveTo(0, rPoints[0]);
-            for (let i = 1; i < width; i++) { rc.lineTo(i, rPoints[i]); }
-            rc.stroke();
-        }
-        drawLoop();
     }
 
     // 複製內容
