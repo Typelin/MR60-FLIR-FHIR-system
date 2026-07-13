@@ -632,7 +632,7 @@
             padding: 20px;
             margin-bottom: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
             gap: 15px;
             align-items: flex-end;
             box-shadow: var(--shadow-light);
@@ -1206,17 +1206,17 @@
     <div id="logTab" class="tab-content">
         
         <!-- 歷史資料查詢與篩選面板 -->
-        <div class="filter-panel">
+        <div class="filter-panel" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 12px; align-items: flex-end;">
             <div class="form-group">
                 <label>🔍 監護對象姓名</label>
-                <select id="filterPatient" onchange="filterLogsTable()">
+                <select id="filterPatient" onchange="loadTelemetryLogs()">
                     <option value="all">顯示所有對象</option>
                     <option value="林某某">林某某 (MRN998877)</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>📡 來源感測硬體</label>
-                <select id="filterDevice" onchange="filterLogsTable()">
+                <select id="filterDevice" onchange="loadTelemetryLogs()">
                     <option value="all">顯示所有硬體</option>
                     <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
                     <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
@@ -1225,7 +1225,7 @@
             </div>
             <div class="form-group">
                 <label>📊 臨床指標類別</label>
-                <select id="filterCategory" onchange="filterLogsTable()">
+                <select id="filterCategory" onchange="loadTelemetryLogs()">
                     <option value="all">顯示所有類別</option>
                     <option value="8310-5">體溫 (LOINC 8310-5)</option>
                     <option value="8867-4">心率 (LOINC 8867-4)</option>
@@ -1236,22 +1236,36 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>📅 診斷時間/指標值關鍵字搜尋</label>
-                <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="輸入時間或指標關鍵字...">
+                <label>📅 開始時間</label>
+                <input type="datetime-local" id="filterStartTime" onchange="loadTelemetryLogs()">
+            </div>
+            <div class="form-group">
+                <label>📅 結束時間</label>
+                <input type="datetime-local" id="filterEndTime" onchange="loadTelemetryLogs()">
+            </div>
+            <div class="form-group">
+                <label>💬 關鍵字模糊搜尋</label>
+                <input type="text" id="filterText" onkeyup="loadTelemetryLogs()" placeholder="輸入時間、數值或對照碼...">
             </div>
             <div>
-                <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
+                <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
                     <i class="fas fa-undo"></i> 重設
                 </button>
             </div>
         </div>
 
         <div class="history-card">
-            <div class="history-header">
+            <div class="history-header" style="flex-wrap: wrap; gap: 10px;">
                 <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測報告紀錄</span>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="exportToCSV()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--success-green);">
+                        <i class="fas fa-file-csv"></i> 📥 匯出 CSV 報表
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadFilteredFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--secondary-blue);">
+                        <i class="fas fa-file-download"></i> 💾 導出 FHIR Bundle
+                    </button>
                     <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--dark-navy);">
-                        <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR Bundle JSON
+                        <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR
                     </button>
                     <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
                         <i class="fas fa-sync-alt"></i> 重新整理
@@ -1428,7 +1442,7 @@
                 <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
                 <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
                     <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
-                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
+                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫 the Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
                 </div>
                 <p>
                     <strong>對照與合規要件：</strong>我們將體溫、心率及呼吸數據以 <code>value_numeric</code> 及 <code>value_unit</code> (符合 UCUM 標準，如生命徵象之體溫填寫 <code>Cel</code>) 形式進行分離儲存與 API 交換，以確保跨系統互補一致性。
@@ -1727,16 +1741,40 @@
         });
     }
 
-    // 從 API 獲取資料
+    // 從 API 獲取資料 (整合伺服器端搜尋過濾與時間區間篩選)
     function loadTelemetryLogs() {
-        // 1. 輪詢自訂資料庫格式
-        fetch(`${API_BASE}/api`)
+        let url = `${API_BASE}/api`;
+        const logTabActive = document.getElementById("logTab").classList.contains("active");
+
+        if (logTabActive) {
+            const patient = document.getElementById("filterPatient").value;
+            const device = document.getElementById("filterDevice").value;
+            const category = document.getElementById("filterCategory").value;
+            const startTime = document.getElementById("filterStartTime").value;
+            const endTime = document.getElementById("filterEndTime").value;
+            const queryText = document.getElementById("filterText").value.trim();
+
+            const params = new URLSearchParams();
+            if (patient !== "all") params.append("patient_id", patient);
+            if (device !== "all") params.append("device_model", device);
+            if (category !== "all") params.append("loinc_code", category);
+            if (startTime) params.append("start_time", startTime);
+            if (endTime) params.append("end_time", endTime);
+            if (queryText) params.append("query", queryText);
+
+            url += "?" + params.toString();
+        }
+
+        fetch(url)
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                allTelemetryRecords = data.records; // 緩存以供前端即時檢索過濾
-                renderDashboard(data.records);
-                filterLogsTable(); // 即時套用當前篩選條件
+                if (logTabActive) {
+                    allTelemetryRecords = data.records; // 緩存以供前端即時檢索過濾
+                    filterLogsTable(); // 即時套用當前篩選條件
+                } else {
+                    renderDashboard(data.records);
+                }
             } else {
                 console.error("資料庫讀取失敗: " + data.message);
             }
@@ -1745,7 +1783,7 @@
             console.error("連線錯誤:", err);
         });
 
-        // 2. 輪詢標準 HL7 FHIR Bundle 資源包並動態顯示於右下角
+        // 輪詢標準 HL7 FHIR Bundle 資源包並動態顯示於右下角
         fetch(`${API_BASE}/api/fhir`)
         .then(res => res.json())
         .then(bundle => {
@@ -1760,13 +1798,8 @@
         });
     }
 
-    // 歷史資料即時篩選與檢索引擎 (Subpage Search Filter Engine)
+    // 歷史資料分組渲染引擎
     function filterLogsTable() {
-        const patient = document.getElementById("filterPatient").value;
-        const device = document.getElementById("filterDevice").value;
-        const category = document.getElementById("filterCategory").value;
-        const queryText = document.getElementById("filterText").value.toLowerCase().trim();
-
         const tbody = document.getElementById("logTableBody");
         if (!tbody) return;
         tbody.innerHTML = "";
@@ -1791,48 +1824,13 @@
 
         const sessions = Object.values(groups).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
-        // 2. 對批次分組進行檢索與過濾
-        const filtered = sessions.filter(session => {
-            if (patient !== "all" && session.patient_name !== patient) return false;
-            
-            // 是否包含指定硬體
-            if (device !== "all") {
-                const hasDevice = session.records.some(r => r.device_model === device);
-                if (!hasDevice) return false;
-            }
-
-            // 是否包含指定指標
-            if (category !== "all") {
-                const hasCategory = session.records.some(r => r.loinc_code === category);
-                if (!hasCategory) return false;
-            }
-
-            // 關鍵字模糊檢索
-            if (queryText) {
-                const matchName = session.patient_name.toLowerCase().includes(queryText);
-                const matchTime = session.timestamp.toLowerCase().includes(queryText);
-                
-                // 檢查該 Session 內的所有量測值與對照碼
-                const matchValue = session.records.some(r => {
-                    const textVal = (r.value_display || "").toLowerCase();
-                    const numVal = r.value_numeric !== null ? String(r.value_numeric) : "";
-                    const modelVal = (r.device_model || "").toLowerCase();
-                    const loincVal = r.loinc_code.toLowerCase();
-                    return textVal.includes(queryText) || numVal.includes(queryText) || modelVal.includes(queryText) || loincVal.includes(queryText);
-                });
-
-                if (!matchName && !matchTime && !matchValue) return false;
-            }
-            return true;
-        });
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center; padding: 20px; color: var(--medium-gray);">查無符合篩選條件的臨床紀錄。</td></tr>`;
+        if (sessions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center; padding: 20px; color: var(--medium-gray);">資料庫無匹配的觀測資料包。</td></tr>`;
             return;
         }
 
-        // 3. 渲染過濾後的分組為臨床報告列
-        filtered.forEach((session, index) => {
+        // 2. 渲染為臨床報告列
+        sessions.forEach((session) => {
             const summaries = [];
             session.records.forEach(r => {
                 let name = "";
@@ -2002,6 +2000,182 @@
         modal.style.display = "flex";
     }
 
+    // 匯出當前篩選數據為 Excel-ready CSV
+    function exportToCSV() {
+        if (allTelemetryRecords.length === 0) {
+            alert("目前無符合篩選條件的臨床數據可供匯出！");
+            return;
+        }
+        let csvContent = "\uFEFF"; // 加入 UTF-8 BOM，防止 Excel 開啟時亂碼
+        csvContent += "病患姓名,病歷號,診斷時間,指標項目,國際 LOINC 碼,量測值與單位,資料來源設備,狀態\n";
+        
+        allTelemetryRecords.forEach(r => {
+            let name = "";
+            if (r.loinc_code === "8310-5") name = "體溫";
+            else if (r.loinc_code === "8867-4") name = "心率";
+            else if (r.loinc_code === "9279-1") name = "呼吸率";
+            else if (r.loinc_code === "8361-8") name = "身體姿勢";
+            else if (r.loinc_code === "96773-7") name = "在床離床";
+            else if (r.loinc_code === "75276-6") name = "跌倒偵測";
+
+            let val = "";
+            if (r.value_numeric !== null) {
+                val = `${r.value_numeric} ${r.value_unit || ""}`;
+            } else {
+                val = r.value_display || "";
+            }
+            csvContent += `"${r.patient_name}","${r.patient_mrn}","${r.timestamp}","${name}","${r.loinc_code}","${val}","${r.device_model}","${r.status}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `clinical_records_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 匯出當前篩選數據為標準 HL7 FHIR Bundle JSON 檔案
+    function downloadFilteredFhirBundle() {
+        if (allTelemetryRecords.length === 0) {
+            alert("目前無符合篩選條件的臨床數據可供導出！");
+            return;
+        }
+
+        const bundle = {
+            "resourceType": "Bundle",
+            "type": "searchset",
+            "total": allTelemetryRecords.length + 2,
+            "entry": []
+        };
+
+        const first = allTelemetryRecords[0];
+
+        // 1. Patient
+        bundle.entry.push({
+            "fullUrl": `http://60gigahertz.uk/fhir/Patient/${first.patient_id}`,
+            "resource": {
+                "resourceType": "Patient",
+                "id": first.patient_id,
+                "identifier": [
+                    {
+                        "use": "official",
+                        "system": "http://www.mhw.gov.tw/mrn",
+                        "value": first.patient_mrn
+                    }
+                ],
+                "name": [
+                    {
+                        "use": "official",
+                        "text": first.patient_name
+                    }
+                ],
+                "gender": first.patient_gender || "female",
+                "birthDate": first.patient_birth || "1985-04-12"
+            }
+        });
+
+        // 2. Linkage
+        bundle.entry.push({
+            "fullUrl": `http://60gigahertz.uk/fhir/Linkage/linkage-${first.patient_id}`,
+            "resource": {
+                "resourceType": "Linkage",
+                "id": `linkage-${first.patient_id}`,
+                "active": true,
+                "item": [
+                    {
+                        "type": "source",
+                        "resource": {
+                            "reference": `Patient/${first.patient_id}`
+                        }
+                    },
+                    {
+                        "type": "alternate",
+                        "resource": {
+                            "reference": "Patient/patient-alternate-999"
+                        }
+                    }
+                ]
+            }
+        });
+
+        // 3. Observations
+        allTelemetryRecords.forEach(r => {
+            const obs_resource = {
+                "resourceType": "Observation",
+                "id": `obs-${r.id}`,
+                "status": r.status || "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": r.category,
+                                "display": r.category === "vital-signs" ? "Vital Signs" : "Survey"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": r.loinc_code,
+                            "display": r.loinc_code === "8310-5" ? "Body temperature" : (
+                                       r.loinc_code === "8867-4" ? "Heart rate" : (
+                                       r.loinc_code === "9279-1" ? "Respiratory rate" : (
+                                       r.loinc_code === "8361-8" ? "Body position" : (
+                                       r.loinc_code === "96773-7" ? "Bed exit status" : "Accidental fall indicator"
+                                       ))))
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": `Patient/${r.patient_id}`
+                },
+                "device": {
+                    "reference": `Device/${r.device_id}`
+                },
+                "effectiveDateTime": r.timestamp.replace(" ", "T") + "Z"
+            };
+
+            if (r.value_numeric !== null) {
+                obs_resource.valueQuantity = {
+                    "value": r.value_numeric,
+                    "unit": r.loinc_code === "8310-5" ? "Cel" : "bpm",
+                    "system": "http://unitsofmeasure.org",
+                    "code": r.value_unit
+                };
+            } else if (r.value_code !== null) {
+                obs_resource.valueCodeableConcept = {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": r.value_code,
+                            "display": r.value_display
+                        }
+                    ]
+                };
+            }
+
+            bundle.entry.push({
+                "fullUrl": `http://60gigahertz.uk/fhir/Observation/obs-${r.id}`,
+                "resource": obs_resource
+            });
+        });
+
+        const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `fhir_bundle_export_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     // 檢視資料庫全量 FHIR Bundle JSON
     function viewAllFhirBundle() {
         fetch(`${API_BASE}/api/fhir`)
@@ -2027,8 +2201,10 @@
         document.getElementById("filterPatient").value = "all";
         document.getElementById("filterDevice").value = "all";
         document.getElementById("filterCategory").value = "all";
+        document.getElementById("filterStartTime").value = "";
+        document.getElementById("filterEndTime").value = "";
         document.getElementById("filterText").value = "";
-        filterLogsTable();
+        loadTelemetryLogs();
     }
 
     // 渲染儀表板數據與狀態統計

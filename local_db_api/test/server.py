@@ -22,7 +22,7 @@ import atexit
 import psycopg2
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 # 全局變數
 ACTIVE_TUNNEL_URL = "無 (僅限本地連線)"
@@ -300,10 +300,20 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             conn = None
             cursor = None
             try:
+                # 取得動態搜尋篩選參數
+                query_params = parse_qs(parsed_url.query)
+                patient_filter = query_params.get("patient_id", [None])[0]
+                device_filter = query_params.get("device_model", [None])[0]
+                loinc_filter = query_params.get("loinc_code", [None])[0]
+                start_filter = query_params.get("start_time", [None])[0]
+                end_filter = query_params.get("end_time", [None])[0]
+                search_query = query_params.get("query", [None])[0]
+
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                # 多表 JOIN 查詢所有 Observation 觀測資料與對應的病患、設備資料
-                cursor.execute("""
+
+                # 動態組裝 SQL 語句
+                sql = """
                     SELECT 
                         o.id, 
                         o.patient_id, 
@@ -317,12 +327,48 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                         o.value_unit,
                         o.value_code,
                         o.value_display,
-                        to_char(o.recorded_at, 'YYYY-MM-DD HH24:MI:SS') AS timestamp
+                        to_char(o.recorded_at, 'YYYY-MM-DD HH24:MI:SS') AS timestamp,
+                        p.gender AS patient_gender,
+                        to_char(p.birth_date, 'YYYY-MM-DD') AS patient_birth,
+                        p.mrn AS patient_mrn
                     FROM observations o
                     LEFT JOIN patients p ON o.patient_id = p.id
                     LEFT JOIN devices d ON o.device_id = d.id
-                    ORDER BY o.recorded_at DESC;
-                """)
+                    WHERE 1=1
+                """
+                params = []
+
+                if patient_filter and patient_filter != "all":
+                    sql += " AND p.name = %s"
+                    params.append(patient_filter)
+                if device_filter and device_filter != "all":
+                    sql += " AND d.model_number = %s"
+                    params.append(device_filter)
+                if loinc_filter and loinc_filter != "all":
+                    sql += " AND o.loinc_code = %s"
+                    params.append(loinc_filter)
+                if start_filter:
+                    # 將 T 轉為空格格式以適應 database
+                    db_start = start_filter.replace("T", " ")
+                    sql += " AND o.recorded_at >= %s"
+                    params.append(db_start)
+                if end_filter:
+                    db_end = end_filter.replace("T", " ")
+                    sql += " AND o.recorded_at <= %s"
+                    params.append(db_end)
+                if search_query:
+                    sql += """ AND (
+                        p.name ILIKE %s OR 
+                        o.value_display ILIKE %s OR 
+                        o.loinc_code ILIKE %s OR
+                        to_char(o.recorded_at, 'YYYY-MM-DD HH24:MI:SS') ILIKE %s
+                    )"""
+                    like_str = f"%{search_query}%"
+                    params.extend([like_str, like_str, like_str, like_str])
+
+                sql += " ORDER BY o.recorded_at DESC"
+
+                cursor.execute(sql, params)
                 rows = cursor.fetchall()
                 
                 records = []
@@ -340,7 +386,10 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                         "value_unit": row[9],
                         "value_code": row[10],
                         "value_display": row[11],
-                        "timestamp": row[12]
+                        "timestamp": row[12],
+                        "patient_gender": row[13],
+                        "patient_birth": row[14],
+                        "patient_mrn": row[15]
                     })
                 
                 response = {
