@@ -940,6 +940,9 @@
             <div class="patient-strip-item">當前年齡: <strong>35 歲</strong></div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
+            <button onclick="viewPatientFhirJSON()" style="background: rgba(59, 130, 246, 0.08); color: var(--primary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.35rem 0.75rem; border-radius: 0.5rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: var(--transition-expo);">
+                <i class="fas fa-id-card"></i> 檢視病患 FHIR JSON
+            </button>
             <span class="patient-status-badge">🟢 毫米波雷達與熱感相機連線中</span>
         </div>
     </div>
@@ -2352,6 +2355,54 @@ CREATE TABLE observations (
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // 檢視單一病患 (Patient) FHIR JSON 資源
+    function viewPatientFhirJSON() {
+        const patientResource = {
+            "resourceType": "Patient",
+            "id": "patient-01",
+            "meta": {
+                "profile": [
+                    "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Patient-twcore"
+                ]
+            },
+            "text": {
+                "status": "generated",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>病患基本資料：<b>蘇先生</b> (男)，生日：1991-12-25，病歷號：MRN998877。</p></div>"
+            },
+            "identifier": [
+                {
+                    "use": "official",
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                "code": "MR",
+                                "display": "Medical record number"
+                            }
+                        ]
+                    },
+                    "system": "https://60gigahertz.uk/fhir/sid/patient-mrn",
+                    "value": "MRN998877"
+                }
+            ],
+            "active": true,
+            "name": [
+                {
+                    "use": "official",
+                    "text": "蘇先生"
+                }
+            ],
+            "gender": "male",
+            "birthDate": "1991-12-25"
+        };
+
+        const modal = document.getElementById("fhirModal");
+        const codeBox = document.getElementById("modalFhirCode");
+        codeBox.innerHTML = `<pre style="margin:0; white-space: pre-wrap; font-family: inherit;"></pre>`;
+        codeBox.querySelector("pre").textContent = JSON.stringify(patientResource, null, 2);
+        modal.style.display = "flex";
     }
 
     // 檢視資料庫全量 FHIR Bundle JSON
