@@ -20,10 +20,10 @@
     </script>
     <style>
         :root {
-            --primary-blue: #1c19d4;       /* 克萊因深藍 (Klein Intense Blue) */
+            --primary-blue: #1c19d4;       /* 克萊因深藍 */
             --secondary-blue: #3b82f6;     /* 醫療藍 */
             --accent-cyan: #06b6d4;        /* 醫療青色 */
-            --dark-navy: #090d16;          /* 深邃黑曜石藍 (Obsidian Navy) */
+            --dark-navy: #090d16;          /* 深邃黑曜石藍 */
             --light-gray: #f8fafc;         /* 暖石灰底色 */
             --medium-gray: #64748b;        /* 輔助灰 */
             --danger-red: #dc2626;         /* 警報紅色 */
@@ -461,6 +461,32 @@
             color: var(--medium-gray);
             border: 1px solid #cbd5e1;
             line-height: 1.5;
+        }
+
+        /* 主頁下方的 API 即時傳輸日誌與規格區 */
+        .main-page-api-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 968px) {
+            .main-page-api-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .terminal-header {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--secondary-blue);
+            padding-left: 10px;
+            color: var(--dark-navy);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         /* ==================== 2. 臨床情境模擬器 (一鍵發送) ==================== */
@@ -987,6 +1013,45 @@
                 </div>
 
             </div>
+
+            <!-- 主頁底部的 API 即時傳輸日誌與規格預覽區 -->
+            <div class="main-page-api-section">
+                <!-- 左側：即時傳輸日誌 -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
+                        <span style="font-size: 0.75rem; color: var(--medium-gray); font-weight: 500;">自動滾動監聽</span>
+                    </div>
+                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);">
+                        <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
+                    </div>
+                </div>
+                <!-- 右側：靜態 API 傳輸規範 -->
+                <div>
+                    <div class="terminal-header">
+                        <span><i class="fas fa-file-code"></i> 上報數據與回應 JSON 格式規格 (Schema)</span>
+                    </div>
+                    <div style="background: #0f172a; color: #cbd5e1; border-radius: 12px; padding: 18px; font-family: monospace; font-size: 0.85rem; border: 1px solid #1e293b; height: 260px; overflow-y: auto; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">
+                        <span style="color: #38bdf8; font-weight: 700;">// 1. 數值型生命特徵上報範例 (POST /api)</span><br/>
+                        <span style="color: #e2e8f0;">{
+  "patient_id": "patient-01",
+  "metric_type": "heart_rate",
+  "value": 75.0
+}</span><br/><br/>
+                        <span style="color: #38bdf8; font-weight: 700;">// 2. 狀態型生理行為上報範例 (POST /api)</span><br/>
+                        <span style="color: #e2e8f0;">{
+  "patient_id": "patient-01",
+  "metric_type": "fall",
+  "value": "fallen" // fallen / present / absent
+}</span><br/><br/>
+                        <span style="color: #38bdf8; font-weight: 700;">// 3. 後端成功寫入回應 JSON</span><br/>
+                        <span style="color: #e2e8f0;">{
+  "status": "success",
+  "message": "成功寫入觀測資料！"
+}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ==================== 2. 臨床情境模擬器工作區 ==================== -->
@@ -1113,12 +1178,6 @@
                         <i class="fas fa-paper-plane"></i> 發送單項數據 (POST)
                     </button>
                 </div>
-            </div>
-
-            <!-- 即時 API 請求/回應日誌終端機 -->
-            <div class="manual-config-title">🖥️ 即時 API 請求與回應傳輸日誌 (Live API Terminal)</div>
-            <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 260px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);">
-                <span style="color: #64748b;">[系統提示] 等待上報數據。當您點選「一鍵上報案例」或「發送單項數據」後，此終端機將即時捕獲 HTTP POST 請求與伺服器回傳的 JSON 封包規格...</span>
             </div>
 
         </div>
@@ -1487,7 +1546,6 @@
         const logBox = document.getElementById("apiTerminalLog");
         if (!logBox) return;
 
-        // 如果是第一次列印，先清空預設提示
         if (logBox.innerHTML.includes("[系統提示]")) {
             logBox.innerHTML = "";
         }
@@ -1511,7 +1569,6 @@
 </div>`;
 
         logBox.innerHTML += requestHtml + responseHtml;
-        // 自動滾動到最下方
         logBox.scrollTop = logBox.scrollHeight;
     }
 
@@ -1522,7 +1579,6 @@
         const loader = document.getElementById("batchLoading");
         loader.style.display = "flex";
 
-        // 循序發送 POST
         const promises = dataList.map(item => {
             const payload = {
                 patient_id: "patient-01",
@@ -1592,12 +1648,8 @@
         .then(res => {
             return res.json().then(json => {
                 logToTerminal("POST", "/api", payload, res.status, json);
-                if (data.status === "success") {
-                    loadTelemetryLogs();
-                    alert("手動數據微調發送成功！");
-                } else {
-                    alert("寫入失敗: " + data.message);
-                }
+                loadTelemetryLogs();
+                alert("手動數據微調發送成功！");
             });
         })
         .catch(err => {
