@@ -72,3 +72,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO devices (id, serial_number, manufacturer, model_number, device_type)
 VALUES ('device-camera-01', 'FLIR-SN-5309', 'FLIR', 'E53-Camera', 'Thermal-Camera')
 ON CONFLICT (id) DO NOTHING;
+
+-- 預設跌倒監測雷達設備 (Infineon MR60-Fall-Radar)
+INSERT INTO devices (id, serial_number, manufacturer, model_number, device_type)
+VALUES ('device-radar-02', 'MR60-SN-F992', 'Infineon', 'MR60-Fall-Radar', 'Fall-Radar')
+ON CONFLICT (id) DO NOTHING;

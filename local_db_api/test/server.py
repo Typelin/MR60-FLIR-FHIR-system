@@ -193,19 +193,25 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
             cursor = None
             try:
                 data = json.loads(post_data.decode('utf-8'))
-                
-                patient_id = data.get("patient_id", "patient-01")
-                device_id = data.get("device_id", "device-radar-01")
+                                patient_id = data.get("patient_id", "patient-01")
                 metric_type = data.get("metric_type")
                 value = data.get("value")
                 
-                # 根據指標類型對照 LOINC 與 SNOMED CT 代碼規範
+                # 根據指標類型對應正確的設備與規範代碼
                 category = "vital-signs"
                 loinc_code = ""
                 value_numeric = None
                 value_unit = None
                 value_code = None
                 value_display = None
+                
+                # 自動設備/硬體編號對照分流
+                if metric_type == "heart_rate" or metric_type == "respiration_rate":
+                    device_id = "device-radar-01"   # 心率呼吸雷達
+                elif metric_type == "fall":
+                    device_id = "device-radar-02"   # 跌倒監測雷達
+                else:
+                    device_id = "device-camera-01"  # 體溫、姿態、離床均由熱感影像解析
                 
                 if metric_type == "heart_rate":
                     loinc_code = "8867-4"
@@ -219,7 +225,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                     loinc_code = "8310-5"
                     value_numeric = float(value)
                     value_unit = "Cel"
-                    device_id = "device-camera-01" # 體溫由相機量測
                 elif metric_type == "posture":
                     category = "social-history"
                     loinc_code = "8361-8"
@@ -252,7 +257,6 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                         value_display = "無人"
                 else:
                     raise ValueError(f"不支援的監測數據指標: {metric_type}")
-                
                 # 寫入 PostgreSQL 資料庫的 observations 資料表
                 conn = get_db_connection()
                 cursor = conn.cursor()
