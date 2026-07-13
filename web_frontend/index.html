@@ -63,6 +63,7 @@
             color: #0f172a;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             position: relative;
             overflow-x: hidden;
         }
@@ -81,131 +82,142 @@
             pointer-events: none;
         }
 
-        /* EHR 臨床左側側邊欄 Layout */
-        .main-layout {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 300px;
-            background: var(--dark-navy);
-            color: var(--white);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            border-right: 1px solid rgba(226, 232, 240, 0.1);
-            position: fixed;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            z-index: 100;
-            box-shadow: 2px 0 10px rgba(15, 23, 42, 0.05);
-        }
-
-        .workspace-container {
-            margin-left: 300px;
-            flex: 1;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: calc(100% - 300px);
-            min-height: 100vh;
-        }
-
-        /* 側邊欄病患靜態資訊磁貼 (Patient Context Card) */
-        .patient-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-        }
-
-        .patient-card-header {
-            font-size: 0.72rem;
-            color: var(--accent-cyan);
-            font-weight: 800;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 6px;
+        /* 頂部導航欄 (Top Navigation Bar) Styles */
+        .top-navbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 70px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
         }
 
-        .patient-name-row {
+        .nav-brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.2rem;
-            font-weight: 800;
         }
 
-        .patient-details {
-            font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.7);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.05);
-            padding-top: 6px;
+        .nav-brand i {
+            color: var(--danger-red);
+            font-size: 1.5rem;
         }
 
-        .patient-details div {
+        .nav-brand span {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--dark-navy);
+            letter-spacing: 0.5px;
+        }
+
+        .nav-menu {
             display: flex;
-            justify-content: space-between;
-        }
-
-        .patient-details strong {
-            color: var(--white);
-        }
-
-        /* 側邊導航 Menu */
-        .sidebar-menu {
-            display: flex;
-            flex-direction: column;
             gap: 6px;
+            height: 100%;
+            align-items: center;
         }
 
         .menu-item {
             background: transparent;
-            color: rgba(255, 255, 255, 0.65);
+            color: var(--medium-gray);
             border: none;
-            padding: 12px 16px;
+            padding: 10px 16px;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            text-align: left;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             transition: var(--transition-expo);
-            width: 100%;
+            height: 42px;
         }
 
         .menu-item i {
-            font-size: 1.1rem;
-            width: 20px;
+            font-size: 1rem;
+            width: 18px;
             text-align: center;
         }
 
         .menu-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--white);
+            background: #f1f5f9;
+            color: var(--dark-navy);
         }
 
         .menu-item.active {
             background: var(--primary-blue);
             color: var(--white);
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
-            border-left: 4px solid var(--accent-cyan);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+        }
+
+        /* 橫向病患資訊摘要條 (Patient Context Strip) */
+        .patient-strip {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-light);
+            gap: 15px;
+            background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
+        }
+
+        .patient-strip-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .patient-strip-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--dark-navy);
+            border-right: 2px solid var(--border-color);
+            padding-right: 20px;
+        }
+
+        .patient-strip-item {
+            font-size: 0.88rem;
+            color: var(--medium-gray);
+        }
+
+        .patient-strip-item strong {
+            color: var(--dark-navy);
+        }
+
+        .patient-status-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        /* 主工作容器 */
+        .workspace-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            flex: 1;
         }
 
         /* 頂部控制面板與全域警報 */
@@ -770,555 +782,541 @@
 }
 </style>
 
-<div class="main-layout">
+<!-- 頂部導航欄 (Top Navigation Bar) -->
+<div class="top-navbar">
+    <div class="nav-brand">
+        <i class="fas fa-heart-pulse"></i>
+        <span>EHR CLINICAL SYSTEM</span>
+    </div>
     
-    <!-- EHR 固定左側側邊欄 -->
-    <div class="sidebar">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-heart-pulse" style="color: var(--danger-red); font-size: 1.5rem;"></i>
-            <span style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px;">EHR CLINICAL PANEL</span>
-        </div>
+    <div class="nav-menu">
+        <button class="menu-item active" id="btn-realtimeTab" onclick="switchTab('realtimeTab', this)">
+            <i class="fas fa-desktop"></i> 即時監控儀
+        </button>
+        <button class="menu-item" id="btn-simulatorTab" onclick="switchTab('simulatorTab', this)">
+            <i class="fas fa-paper-plane"></i> 情境模擬器
+        </button>
+        <button class="menu-item" id="btn-logTab" onclick="switchTab('logTab', this)">
+            <i class="fas fa-database"></i> observations 審計日誌
+        </button>
+        <button class="menu-item" id="btn-architectureTab" onclick="switchTab('architectureTab', this)">
+            <i class="fas fa-project-diagram"></i> 架構與 API 預覽
+        </button>
+        <button class="menu-item" id="btn-specTab" onclick="switchTab('specTab', this)">
+            <i class="fas fa-book-medical"></i> 合規指引文獻
+        </button>
+    </div>
 
-        <!-- 靜態病患 Context Card -->
-        <div class="patient-card">
-            <div class="patient-card-header">
-                <span>PATIENT PROFILE</span>
-                <span>🟢 連線監護中</span>
-            </div>
-            <div class="patient-name-row">
-                <i class="fas fa-user-injured" style="color: var(--accent-cyan);"></i>
+    <div style="font-size: 0.75rem; color: var(--medium-gray); text-align: right; line-height: 1.3;">
+        地端服務: <code>localhost:8080</code><br/>
+        公網域名: <code>60gigahertz.uk</code>
+    </div>
+</div>
+
+<!-- 主工作區 -->
+<div class="workspace-container">
+    
+    <!-- 橫向病患摘要狀態條 (Patient Context Strip) -->
+    <div class="patient-strip">
+        <div class="patient-strip-info">
+            <div class="patient-strip-title">
+                <i class="fas fa-user-injured" style="color: var(--primary-blue);"></i>
                 <span>林某某</span>
             </div>
-            <div class="patient-details">
-                <div><span>病歷編號:</span> <strong>MRN998877</strong></div>
-                <div><span>生理性別:</span> <strong>女性 (Female)</strong></div>
-                <div><span>出生日期:</span> <strong>1985-04-12</strong></div>
-                <div><span>目前年齡:</span> <strong>41 歲 (生日前)</strong></div>
-            </div>
+            <div class="patient-strip-item">病歷編號: <strong>MRN998877</strong></div>
+            <div class="patient-strip-item">生理性別: <strong>女性 (Female)</strong></div>
+            <div class="patient-strip-item">出生日期: <strong>1985-04-12</strong></div>
+            <div class="patient-strip-item">當前年齡: <strong>41 歲</strong></div>
         </div>
-
-        <!-- 選單導航 -->
-        <div class="sidebar-menu">
-            <button class="menu-item active" id="btn-realtimeTab" onclick="switchTab('realtimeTab', this)">
-                <i class="fas fa-desktop"></i> 即時生理監控儀
-            </button>
-            <button class="menu-item" id="btn-simulatorTab" onclick="switchTab('simulatorTab', this)">
-                <i class="fas fa-paper-plane"></i> 臨床情境模擬器
-            </button>
-            <button class="menu-item" id="btn-logTab" onclick="switchTab('logTab', this)">
-                <i class="fas fa-database"></i> observations 審計日誌
-            </button>
-            <button class="menu-item" id="btn-architectureTab" onclick="switchTab('architectureTab', this)">
-                <i class="fas fa-project-diagram"></i> 系統架構與 API 預覽
-            </button>
-            <button class="menu-item" id="btn-specTab" onclick="switchTab('specTab', this)">
-                <i class="fas fa-book-medical"></i> 醫療合規指引文獻
-            </button>
-        </div>
-
-        <div style="margin-top: auto; font-size: 0.72rem; color: rgba(255,255,255,0.4); line-height: 1.4;">
-            地端 API: <code>localhost:8080</code><br/>
-            衛福部 TW Core IG 合規性
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="patient-status-badge">🟢 毫米波雷達與熱感相機連線中</span>
         </div>
     </div>
 
-    <!-- 右側主工作區 -->
-    <div class="workspace-container">
-        
-        <!-- 頂部資訊條 -->
-        <div class="top-bar">
-            <div class="top-bar-title">
-                <h2>臨床電子健康紀錄 (EHR) 護理站監控端</h2>
-            </div>
-            <div class="top-bar-domain">
-                地端公網域名: <strong style="color: var(--primary-blue);">60gigahertz.uk</strong>
-            </div>
-        </div>
+    <!-- 全域警報條 -->
+    <div id="fallEmergencyAlert">
+        ⚠️ 【緊急警報】毫米波感測器 (device-radar-02) 判定病患 [林某某] 發生跌倒事件！請醫護人員立即前往處置！
+    </div>
 
-        <!-- 全域警報條 -->
-        <div id="fallEmergencyAlert">
-            ⚠️ 【緊急警報】毫米波感測器 (device-radar-02) 判定病患 [林某某] 發生跌倒事件！請醫護人員立即前往處置！
-        </div>
-
-        <!-- ==================== 1. 即時生理監控儀工作區 ==================== -->
-        <div id="realtimeTab" class="tab-content active">
-            <!-- 狀態統計 Row -->
-            <div class="stats-row">
-                <div class="stat-badge total">
-                    <div class="stat-icon"><i class="fas fa-hospital-user"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">當前監護對象</div>
-                        <div class="stat-value">林某某</div>
-                    </div>
-                </div>
-                <div class="stat-badge normal">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">正常量測項目</div>
-                        <div class="stat-value" id="statNormalVal">0 / 6</div>
-                    </div>
-                </div>
-                <div class="stat-badge warning">
-                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">異常/預警項目</div>
-                        <div class="stat-value" id="statWarningVal">0 / 6</div>
-                    </div>
-                </div>
-                <div class="stat-badge danger">
-                    <div class="stat-icon"><i class="fas fa-radiation"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">跌倒警報狀態</div>
-                        <div class="stat-value" id="statDangerVal">無</div>
-                    </div>
+    <!-- ==================== 1. 即時生理監控儀工作區 ==================== -->
+    <div id="realtimeTab" class="tab-content active">
+        <!-- 狀態統計 Row -->
+        <div class="stats-row">
+            <div class="stat-badge total">
+                <div class="stat-icon"><i class="fas fa-hospital-user"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">當前監護對象</div>
+                    <div class="stat-value">林某某</div>
                 </div>
             </div>
-
-            <!-- 卡片 Grid -->
-            <div class="telemetry-grid">
-                
-                <!-- 1. 體溫監控 (FLIR) -->
-                <div class="monitor-card" id="tempCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-thermometer-half"></i> 體溫監測 (FLIR)</span>
-                        <span class="status-indicator offline" id="tempInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="tempVal">--</span>
-                        <span class="sub-unit">°C</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>E53-Camera</strong></span>
-                        <span class="device-id-tag">device-camera-01</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>8310-5</code> (Body temperature)<br/>
-                            <strong>計量單位</strong>: 攝氏度 (UCUM: <code>Cel</code>)<br/>
-                            <strong>TW Core IG 規範原話</strong>:
-                            <div class="spec-quote">
-                                「本 Profile 繼承自 base Observation Resource... valueQuantity 欄位為 Must Support，且單位必須使用 UCUM 系統之 Cel，以實現跨院體溫數據一致性。」
-                            </div>
-                        </div>
-                    </details>
+            <div class="stat-badge normal">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">正常量測項目</div>
+                    <div class="stat-value" id="statNormalVal">0 / 6</div>
                 </div>
-
-                <!-- 2. 心率監控 (Radar-01) -->
-                <div class="monitor-card" id="heartCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-heartbeat"></i> 心率脈搏 (Radar)</span>
-                        <span class="status-indicator offline" id="heartInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="heartVal">--</span>
-                        <span class="sub-unit">bpm</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>MR60-Radar</strong></span>
-                        <span class="device-id-tag">device-radar-01</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>8867-4</code> (Heart rate)<br/>
-                            <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
-                            <strong>TW Core IG 規範原話</strong>:
-                            <div class="spec-quote">
-                                「生理心率之 Observation.code 必須映射至 LOINC 8867-4，並將心率值寫入 valueQuantity.value，以供心血管系統連續監控稽核。」
-                            </div>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- 3. 呼吸率監控 (Radar-01) -->
-                <div class="monitor-card" id="respCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-wind"></i> 呼吸頻率 (Radar)</span>
-                        <span class="status-indicator offline" id="respInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="respVal">--</span>
-                        <span class="sub-unit">bpm</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>MR60-Radar</strong></span>
-                        <span class="device-id-tag">device-radar-01</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>9279-1</code> (Respiratory rate)<br/>
-                            <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
-                            <strong>TW Core IG 規範原話</strong>:
-                            <div class="spec-quote">
-                                「呼吸頻率屬核心生理指標 Profile，數據必須強制綁定 Patient 對象，以供急重症監護分析。」
-                            </div>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- 4. 身體姿態 (FLIR) -->
-                <div class="monitor-card" id="postureCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-user-check"></i> 身體姿態 (FLIR)</span>
-                        <span class="status-indicator offline" id="postureInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="postureVal">--</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>E53-Camera</strong></span>
-                        <span class="device-id-tag">device-camera-01</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>8361-8</code> (Body position)<br/>
-                            <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                            <strong>對照編碼</strong>:<br/>
-                            - 躺著 (Lying position): <code>102538003</code><br/>
-                            - 站立 (Standing): <code>10904000</code>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- 5. 離床監測 (FLIR) -->
-                <div class="monitor-card" id="bedCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-bed"></i> 在床/離床狀態 (FLIR)</span>
-                        <span class="status-indicator offline" id="bedInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="bedVal">--</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>E53-Camera</strong></span>
-                        <span class="device-id-tag">device-camera-01</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>96773-7</code> (Bed exit status)<br/>
-                            <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                            <strong>對照編碼</strong>:<br/>
-                            - 在床 (Lying in bed): <code>102539006</code><br/>
-                            - 離床 (Out of bed): <code>262068006</code>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- 6. 跌倒監測 (Radar-02) -->
-                <div class="monitor-card" id="fallCard">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-user-injured"></i> 跌倒偵測警報 (Radar)</span>
-                        <span class="status-indicator offline" id="fallInd"></span>
-                    </div>
-                    <div class="value-display">
-                        <span class="main-val" id="fallVal">--</span>
-                    </div>
-                    <div class="device-info">
-                        <span>量測硬體: <strong>MR60-Fall-Radar</strong></span>
-                        <span class="device-id-tag">device-radar-02</span>
-                    </div>
-                    <details class="spec-details">
-                        <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                        <div class="spec-content">
-                            <strong>國際標準代碼</strong>: LOINC <code>75276-6</code> (Accidental fall indicator)<br/>
-                            <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                            <strong>對照編碼</strong>:<br/>
-                            - 跌倒 (Accidental fall): <code>242526002</code><br/>
-                            - 有人 (Present): <code>260385009</code><br/>
-                            - 無人 (Absent): <code>272186001</code>
-                        </div>
-                    </details>
-                </div>
-
             </div>
-
-            <!-- 主頁底部的 API 即時傳輸日誌與規格預覽區 -->
-            <div class="main-page-api-section">
-                <!-- 左側：即時傳輸日誌 -->
-                <div>
-                    <div class="terminal-header">
-                        <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-copy"></i> 複製日誌
-                            </button>
-                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                            </button>
-                        </div>
-                    </div>
-                    <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
-                        <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
-                    </div>
+            <div class="stat-badge warning">
+                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">異常/預警項目</div>
+                    <div class="stat-value" id="statWarningVal">0 / 6</div>
                 </div>
-                <!-- 右側：地端最新 HL7 FHIR Bundle (GET /api/fhir) -->
-                <div>
-                    <div class="terminal-header">
-                        <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
-                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-copy"></i> 複製 FHIR
-                            </button>
-                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
-                                <i class="fas fa-arrows-alt-v"></i> 展開/收合
-                            </button>
-                        </div>
-                    </div>
-                    <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
-                        正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
-                    </div>
+            </div>
+            <div class="stat-badge danger">
+                <div class="stat-icon"><i class="fas fa-radiation"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">跌倒警報狀態</div>
+                    <div class="stat-value" id="statDangerVal">無</div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== 2. 臨床情境模擬器工作區 ==================== -->
-        <div id="simulatorTab" class="tab-content">
+        <!-- 卡片 Grid -->
+        <div class="telemetry-grid">
             
-            <div class="manual-config-title">🚀 預設臨床案例 - 一鍵批次情境上報 (Scenario Dispatcher)</div>
-            
-            <!-- 一鍵情境發送 Card 矩陣 -->
-            <div class="scenario-grid">
-                
-                <!-- 情境 1: 正常在床 -->
-                <div class="scenario-card">
-                    <div>
-                        <div class="scenario-title"><i class="fas fa-bed"></i> 正常作息在床</div>
-                        <ul class="scenario-details-list">
-                            <li><strong>體溫:</strong> 36.5 °C (正常)</li>
-                            <li><strong>心率/呼吸:</strong> 72 bpm / 16 bpm</li>
-                            <li><strong>姿態/離床:</strong> 躺著 / 在床</li>
-                            <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-primary" onclick="submitScenario('normal')">
-                        <i class="fas fa-check"></i> 一鍵上報此案例
-                    </button>
+            <!-- 1. 體溫監控 (FLIR) -->
+            <div class="monitor-card" id="tempCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-thermometer-half"></i> 體溫監測 (FLIR)</span>
+                    <span class="status-indicator offline" id="tempInd"></span>
                 </div>
-
-                <!-- 情境 2: 高燒與心搏過速 -->
-                <div class="scenario-card">
-                    <div>
-                        <div class="scenario-title"><i class="fas fa-fire"></i> 生理高燒預警</div>
-                        <ul class="scenario-details-list">
-                            <li><strong>體溫:</strong> 38.8 °C (<span style="color: var(--danger-red); font-weight: 700;">發燒</span>)</li>
-                            <li><strong>心率/呼吸:</strong> 105 bpm / 22 bpm</li>
-                            <li><strong>姿態/離床:</strong> 躺著 / 在床</li>
-                            <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-primary" onclick="submitScenario('fever')">
-                        <i class="fas fa-check"></i> 一鍵上報此案例
-                    </button>
+                <div class="value-display">
+                    <span class="main-val" id="tempVal">--</span>
+                    <span class="sub-unit">°C</span>
                 </div>
-
-                <!-- 情境 3: 病患正常離床 -->
-                <div class="scenario-card">
-                    <div>
-                        <div class="scenario-title"><i class="fas fa-running"></i> 病患安全離床</div>
-                        <ul class="scenario-details-list">
-                            <li><strong>體溫:</strong> 36.6 °C (正常)</li>
-                            <li><strong>心率/呼吸:</strong> 85 bpm / 18 bpm</li>
-                            <li><strong>姿態/離床:</strong> 站立 / <span style="color: var(--warning-yellow); font-weight: 700;">離床</span></li>
-                            <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-primary" onclick="submitScenario('leave_bed')">
-                        <i class="fas fa-check"></i> 一鍵上報此案例
-                    </button>
+                <div class="device-info">
+                    <span>量測硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
                 </div>
-
-                <!-- 情境 4: 跌倒緊急警報 -->
-                <div class="scenario-card" style="border-color: rgba(239, 68, 68, 0.2);">
-                    <div>
-                        <div class="scenario-title" style="color: var(--danger-red);"><i class="fas fa-radiation"></i> 跌倒緊急警報</div>
-                        <ul class="scenario-details-list">
-                            <li><strong>體溫:</strong> 36.2 °C (偏低)</li>
-                            <li><strong>心率/呼吸:</strong> 115 bpm / 26 bpm (驚恐)</li>
-                            <li><strong>姿態/離床:</strong> 躺著 (地板) / 離床</li>
-                            <li><strong>跌倒狀態:</strong> <span style="color: var(--danger-red); font-weight: 700;">發生跌倒 (Fallen)</span></li>
-                        </ul>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8310-5</code> (Body temperature)<br/>
+                        <strong>計量單位</strong>: 攝氏度 (UCUM: <code>Cel</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「本 Profile 繼承自 base Observation Resource... valueQuantity 欄位為 Must Support，且單位必須使用 UCUM 系統之 Cel，以實現跨院體溫數據一致性。」
+                        </div>
                     </div>
-                    <button class="btn btn-primary" style="background: var(--danger-red);" onclick="submitScenario('fall')">
-                        <i class="fas fa-radiation"></i> 一鍵上報此案例
-                    </button>
-                </div>
-
-                <!-- 情境 5: 空房感測器閒置 -->
-                <div class="scenario-card">
-                    <div>
-                        <div class="scenario-title" style="color: var(--medium-gray);"><i class="fas fa-door-closed"></i> 空房無人狀態</div>
-                        <ul class="scenario-details-list">
-                            <li><strong>體溫/心率:</strong> 0.0 °C / 0 bpm (無信號)</li>
-                            <li><strong>呼吸頻率:</strong> 0 bpm (無信號)</li>
-                            <li><strong>姿態/離床:</strong> 無訊號 / 離床</li>
-                            <li><strong>跌倒狀態:</strong> <span style="color: var(--medium-gray);">無人房 (Absent)</span></li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-primary" style="background: var(--medium-gray);" onclick="submitScenario('empty')">
-                        <i class="fas fa-check"></i> 一鍵上報此案例
-                    </button>
-                </div>
-
+                </details>
             </div>
 
-            <div class="manual-config-title">⚙️ 手動單項微調上報</div>
-            
-            <div class="control-card">
-                <div class="form-group">
-                    <label for="mockMetric">微調指標類別</label>
-                    <select id="mockMetric" onchange="toggleMockValueFields()">
-                        <option value="heart_rate">心率 (bpm) [Radar-01]</option>
-                        <option value="respiration_rate">呼吸率 (bpm) [Radar-01]</option>
-                        <option value="body_temperature">體溫 (°C) [FLIR-Camera]</option>
-                        <option value="posture">身體姿態 [FLIR-Camera]</option>
-                        <option value="bed_exit">在床/離床 [FLIR-Camera]</option>
-                        <option value="fall">跌倒偵測 [Radar-02]</option>
-                    </select>
+            <!-- 2. 心率監控 (Radar-01) -->
+            <div class="monitor-card" id="heartCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-heartbeat"></i> 心率脈搏 (Radar)</span>
+                    <span class="status-indicator offline" id="heartInd"></span>
                 </div>
+                <div class="value-display">
+                    <span class="main-val" id="heartVal">--</span>
+                    <span class="sub-unit">bpm</span>
+                </div>
+                <div class="device-info">
+                    <span>量測硬體: <strong>MR60-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8867-4</code> (Heart rate)<br/>
+                        <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「生理心率之 Observation.code 必須映射至 LOINC 8867-4，並將心率值寫入 valueQuantity.value，以供心血管系統連續監控稽核。」
+                        </div>
+                    </div>
+                </details>
+            </div>
 
-                <!-- 數值型輸入框 -->
-                <div class="form-group" id="numericInputGroup">
-                    <label for="mockNumVal">數值大小</label>
-                    <input type="number" id="mockNumVal" value="75" step="0.1">
+            <!-- 3. 呼吸率監控 (Radar-01) -->
+            <div class="monitor-card" id="respCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-wind"></i> 呼吸頻率 (Radar)</span>
+                    <span class="status-indicator offline" id="respInd"></span>
                 </div>
+                <div class="value-display">
+                    <span class="main-val" id="respVal">--</span>
+                    <span class="sub-unit">bpm</span>
+                </div>
+                <div class="device-info">
+                    <span>量測硬體: <strong>MR60-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>9279-1</code> (Respiratory rate)<br/>
+                        <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「呼吸頻率屬核心生理指標 Profile，數據必須強制綁定 Patient 對象，以供急重症監護分析。」
+                        </div>
+                    </div>
+                </details>
+            </div>
 
-                <!-- 狀態型選擇框 -->
-                <div class="form-group" id="stateInputGroup" style="display: none;">
-                    <label for="mockStateVal">狀態值</label>
-                    <select id="mockStateVal">
-                        <!-- JS 動態填入 -->
-                    </select>
+            <!-- 4. 身體姿態 (FLIR) -->
+            <div class="monitor-card" id="postureCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-user-check"></i> 身體姿態 (FLIR)</span>
+                    <span class="status-indicator offline" id="postureInd"></span>
                 </div>
+                <div class="value-display">
+                    <span class="main-val" id="postureVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>量測硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8361-8</code> (Body position)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 躺著 (Lying position): <code>102538003</code><br/>
+                        - 站立 (Standing): <code>10904000</code>
+                    </div>
+                </details>
+            </div>
 
-                <div class="form-group" style="grid-column: span 2;">
-                    <button class="btn btn-primary" id="btnSubmitMock" onclick="submitMockData()">
-                        <i class="fas fa-paper-plane"></i> 發送單項數據 (POST)
-                    </button>
+            <!-- 5. 離床監測 (FLIR) -->
+            <div class="monitor-card" id="bedCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-bed"></i> 在床/離床狀態 (FLIR)</span>
+                    <span class="status-indicator offline" id="bedInd"></span>
                 </div>
+                <div class="value-display">
+                    <span class="main-val" id="bedVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>量測硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>96773-7</code> (Bed exit status)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 在床 (Lying in bed): <code>102539006</code><br/>
+                        - 離床 (Out of bed): <code>262068006</code>
+                    </div>
+                </details>
+            </div>
+
+            <!-- 6. 跌倒監測 (Radar-02) -->
+            <div class="monitor-card" id="fallCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-user-injured"></i> 跌倒偵測警報 (Radar)</span>
+                    <span class="status-indicator offline" id="fallInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="fallVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>量測硬體: <strong>MR60-Fall-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-02</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>75276-6</code> (Accidental fall indicator)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 跌倒 (Accidental fall): <code>242526002</code><br/>
+                        - 有人 (Present): <code>260385009</code><br/>
+                        - 無人 (Absent): <code>272186001</code>
+                    </div>
+                </details>
             </div>
 
         </div>
 
-        <!-- ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== -->
-        <div id="logTab" class="tab-content">
-            
-            <!-- 歷史資料查詢與篩選面板 -->
-            <div class="filter-panel">
-                <div class="form-group">
-                    <label>🔍 監護對象姓名</label>
-                    <select id="filterPatient" onchange="filterLogsTable()">
-                        <option value="all">顯示所有對象</option>
-                        <option value="林某某">林某某 (MRN998877)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>📡 來源感測硬體</label>
-                    <select id="filterDevice" onchange="filterLogsTable()">
-                        <option value="all">顯示所有硬體</option>
-                        <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
-                        <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
-                        <option value="MR60-Fall-Radar">MR60-Fall-Radar (跌倒雷達)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>📊 臨床指標類別</label>
-                    <select id="filterCategory" onchange="filterLogsTable()">
-                        <option value="all">顯示所有類別</option>
-                        <option value="8310-5">體溫 (LOINC 8310-5)</option>
-                        <option value="8867-4">心率 (LOINC 8867-4)</option>
-                        <option value="9279-1">呼吸率 (LOINC 9279-1)</option>
-                        <option value="8361-8">身體姿態 (LOINC 8361-8)</option>
-                        <option value="96773-7">在床離床 (LOINC 96773-7)</option>
-                        <option value="75276-6">跌倒狀態 (LOINC 75276-6)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>📅 診斷時間/指標值關鍵字搜尋</label>
-                    <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="輸入時間或指標關鍵字...">
-                </div>
-                <div>
-                    <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
-                        <i class="fas fa-undo"></i> 重設
-                    </button>
-                </div>
-            </div>
-
-            <div class="history-card">
-                <div class="history-header">
-                    <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測報告紀錄</span>
+        <!-- 主頁底部的 API 即時傳輸日誌與規格預覽區 -->
+        <div class="main-page-api-section">
+            <!-- 左側：即時傳輸日誌 -->
+            <div>
+                <div class="terminal-header">
+                    <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--dark-navy);">
-                            <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR Bundle JSON
+                        <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <i class="fas fa-copy"></i> 複製日誌
                         </button>
-                        <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
-                            <i class="fas fa-sync-alt"></i> 重新整理
+                        <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <i class="fas fa-arrows-alt-v"></i> 展開/收合
                         </button>
                     </div>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>監護病患</th>
-                                <th>臨床診斷時間</th>
-                                <th>生理特徵指標 (LOINC & SNOMED CT 數值摘要)</th>
-                                <th>標準協定規格</th>
-                                <th>HL7 FHIR 交互文件</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logTableBody">
-                            <tr>
-                                <td colspan="5" class="no-data">正在從資料庫加載紀錄...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="apiTerminalLog" style="background: #090d16; color: #38bdf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.6; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); transition: height 0.3s ease;">
+                    <span style="color: #64748b;">[系統提示] 等待地端感測器或模擬器發送數據。當有 HTTP POST 請求寫入 SQL 時，此終端機將即時捕獲發送的 JSON 數據與後端 Response 內容...</span>
+                </div>
+            </div>
+            <!-- 右側：地端最新 HL7 FHIR Bundle (GET /api/fhir) -->
+            <div>
+                <div class="terminal-header">
+                    <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
+                        <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <i class="fas fa-copy"></i> 複製 FHIR
+                        </button>
+                        <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <i class="fas fa-arrows-alt-v"></i> 展開/收合
+                        </button>
+                    </div>
+                </div>
+                <div id="fhirBundleLog" style="background: #0f172a; color: #818cf8; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; height: 450px; overflow-y: auto; font-size: 0.92rem; border: 1px solid #1e293b; line-height: 1.5; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: height 0.3s ease;">
+                    正在從 /api/fhir 獲取 HL7 FHIR Bundle 封包...
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- ==================== 4. 系統技術架構與 API 預覽 ==================== -->
-        <div id="architectureTab" class="tab-content">
-            <div class="architecture-grid">
-                
-                <div class="mermaid-container">
-                    <div class="mermaid-title">
-                        <span><i class="fas fa-project-diagram"></i> 數據生命週期與傳輸流向圖 (Mermaid 橫向渲染)</span>
-                        <span style="font-size: 0.8rem; color: var(--medium-gray);">支援大螢幕縮放滾動</span>
-                    </div>
-                    
-                    <div class="mermaid">
-                    sequenceDiagram
-                        autonumber
-                        participant S as 物理感測器 (Radar/FLIR E53)
-                        participant B as Python 後端 (server.py)
-                        participant DB as PostgreSQL 資料庫
-                        participant FE as 護理站監控面板 (index.html)
-
-                        S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
-                        B->>B: 2. 映射標準代碼與設備 ID
-                        B->>DB: 3. 寫入關聯資料庫 observations 表格
-                        FE->>B: 4. 定期輪詢最新狀態 (GET /api)
-                        B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
-                        DB-->>B: 6. 回傳數據與病人、設備資訊
-                        B-->>FE: 7. 渲染前端面板波形與警報 UI
-                    </div>
+    <!-- ==================== 2. 臨床情境模擬器工作區 ==================== -->
+    <div id="simulatorTab" class="tab-content">
+        
+        <div class="manual-config-title">🚀 預設臨床案例 - 一鍵批次情境上報 (Scenario Dispatcher)</div>
+        
+        <!-- 一鍵情境發送 Card 矩陣 -->
+        <div class="scenario-grid">
+            
+            <!-- 情境 1: 正常在床 -->
+            <div class="scenario-card">
+                <div>
+                    <div class="scenario-title"><i class="fas fa-bed"></i> 正常作息在床</div>
+                    <ul class="scenario-details-list">
+                        <li><strong>體溫:</strong> 36.5 °C (正常)</li>
+                        <li><strong>心率/呼吸:</strong> 72 bpm / 16 bpm</li>
+                        <li><strong>姿態/離床:</strong> 躺著 / 在床</li>
+                        <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
+                    </ul>
                 </div>
+                <button class="btn btn-primary" onclick="submitScenario('normal')">
+                    <i class="fas fa-check"></i> 一鍵上報此案例
+                </button>
+            </div>
 
-                <div class="api-preview-card">
-                    <h3><i class="fas fa-code"></i> RESTful API JSON 請求格式規格</h3>
-                    
-                    <p style="font-size: 0.9rem; margin-bottom: 8px;">
-                        <strong>1. 傳送數據 API (POST)</strong>：當感測裝置偵測到信號改變時，向後台推送數據包。
-                    </p>
-                    <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 5px;">
-                        <span class="method-tag">POST</span> <code>http://60gigahertz.uk/api</code>
-                    </div>
-                    <pre class="api-block">
+            <!-- 情境 2: 高燒與心搏過速 -->
+            <div class="scenario-card">
+                <div>
+                    <div class="scenario-title"><i class="fas fa-fire"></i> 生理高燒預警</div>
+                    <ul class="scenario-details-list">
+                        <li><strong>體溫:</strong> 38.8 °C (<span style="color: var(--danger-red); font-weight: 700;">發燒</span>)</li>
+                        <li><strong>心率/呼吸:</strong> 105 bpm / 22 bpm</li>
+                        <li><strong>姿態/離床:</strong> 躺著 / 在床</li>
+                        <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary" onclick="submitScenario('fever')">
+                    <i class="fas fa-check"></i> 一鍵上報此案例
+                </button>
+            </div>
+
+            <!-- 情境 3: 病患正常離床 -->
+            <div class="scenario-card">
+                <div>
+                    <div class="scenario-title"><i class="fas fa-running"></i> 病患安全離床</div>
+                    <ul class="scenario-details-list">
+                        <li><strong>體溫:</strong> 36.6 °C (正常)</li>
+                        <li><strong>心率/呼吸:</strong> 85 bpm / 18 bpm</li>
+                        <li><strong>姿態/離床:</strong> 站立 / <span style="color: var(--warning-yellow); font-weight: 700;">離床</span></li>
+                        <li><strong>跌倒狀態:</strong> 無人跌倒 (有人)</li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary" onclick="submitScenario('leave_bed')">
+                    <i class="fas fa-check"></i> 一鍵上報此案例
+                </button>
+            </div>
+
+            <!-- 情境 4: 跌倒緊急警報 -->
+            <div class="scenario-card" style="border-color: rgba(239, 68, 68, 0.2);">
+                <div>
+                    <div class="scenario-title" style="color: var(--danger-red);"><i class="fas fa-radiation"></i> 跌倒緊急警報</div>
+                    <ul class="scenario-details-list">
+                        <li><strong>體溫:</strong> 36.2 °C (偏低)</li>
+                        <li><strong>心率/呼吸:</strong> 115 bpm / 26 bpm (驚恐)</li>
+                        <li><strong>姿態/離床:</strong> 躺著 (地板) / 離床</li>
+                        <li><strong>跌倒狀態:</strong> <span style="color: var(--danger-red); font-weight: 700;">發生跌倒 (Fallen)</span></li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary" style="background: var(--danger-red);" onclick="submitScenario('fall')">
+                    <i class="fas fa-radiation"></i> 一鍵上報此案例
+                </button>
+            </div>
+
+            <!-- 情境 5: 空房感測器閒置 -->
+            <div class="scenario-card">
+                <div>
+                    <div class="scenario-title" style="color: var(--medium-gray);"><i class="fas fa-door-closed"></i> 空房無人狀態</div>
+                    <ul class="scenario-details-list">
+                        <li><strong>體溫/心率:</strong> 0.0 °C / 0 bpm (無信號)</li>
+                        <li><strong>呼吸頻率:</strong> 0 bpm (無信號)</li>
+                        <li><strong>姿態/離床:</strong> 無訊號 / 離床</li>
+                        <li><strong>跌倒狀態:</strong> <span style="color: var(--medium-gray);">無人房 (Absent)</span></li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary" style="background: var(--medium-gray);" onclick="submitScenario('empty')">
+                    <i class="fas fa-check"></i> 一鍵上報此案例
+                </button>
+            </div>
+
+        </div>
+
+        <div class="manual-config-title">⚙️ 手動單項微調上報</div>
+        
+        <div class="control-card">
+            <div class="form-group">
+                <label for="mockMetric">微調指標類別</label>
+                <select id="mockMetric" onchange="toggleMockValueFields()">
+                    <option value="heart_rate">心率 (bpm) [Radar-01]</option>
+                    <option value="respiration_rate">呼吸率 (bpm) [Radar-01]</option>
+                    <option value="body_temperature">體溫 (°C) [FLIR-Camera]</option>
+                    <option value="posture">身體姿態 [FLIR-Camera]</option>
+                    <option value="bed_exit">在床/離床 [FLIR-Camera]</option>
+                    <option value="fall">跌倒偵測 [Radar-02]</option>
+                </select>
+            </div>
+
+            <!-- 數值型輸入框 -->
+            <div class="form-group" id="numericInputGroup">
+                <label for="mockNumVal">數值大小</label>
+                <input type="number" id="mockNumVal" value="75" step="0.1">
+            </div>
+
+            <!-- 狀態型選擇框 -->
+            <div class="form-group" id="stateInputGroup" style="display: none;">
+                <label for="mockStateVal">狀態值</label>
+                <select id="mockStateVal">
+                    <!-- JS 動態填入 -->
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <button class="btn btn-primary" id="btnSubmitMock" onclick="submitMockData()">
+                    <i class="fas fa-paper-plane"></i> 發送單項數據 (POST)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== -->
+    <div id="logTab" class="tab-content">
+        
+        <!-- 歷史資料查詢與篩選面板 -->
+        <div class="filter-panel">
+            <div class="form-group">
+                <label>🔍 監護對象姓名</label>
+                <select id="filterPatient" onchange="filterLogsTable()">
+                    <option value="all">顯示所有對象</option>
+                    <option value="林某某">林某某 (MRN998877)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📡 來源感測硬體</label>
+                <select id="filterDevice" onchange="filterLogsTable()">
+                    <option value="all">顯示所有硬體</option>
+                    <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
+                    <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
+                    <option value="MR60-Fall-Radar">MR60-Fall-Radar (跌倒雷達)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📊 臨床指標類別</label>
+                <select id="filterCategory" onchange="filterLogsTable()">
+                    <option value="all">顯示所有類別</option>
+                    <option value="8310-5">體溫 (LOINC 8310-5)</option>
+                    <option value="8867-4">心率 (LOINC 8867-4)</option>
+                    <option value="9279-1">呼吸率 (LOINC 9279-1)</option>
+                    <option value="8361-8">身體姿態 (LOINC 8361-8)</option>
+                    <option value="96773-7">在床離床 (LOINC 96773-7)</option>
+                    <option value="75276-6">跌倒狀態 (LOINC 75276-6)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📅 診斷時間/指標值關鍵字搜尋</label>
+                <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="輸入時間或指標關鍵字...">
+            </div>
+            <div>
+                <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
+                    <i class="fas fa-undo"></i> 重設
+                </button>
+            </div>
+        </div>
+
+        <div class="history-card">
+            <div class="history-header">
+                <span class="history-title"><i class="fas fa-database"></i> HL7 FHIR Bundle 臨床觀測報告紀錄</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary" onclick="viewAllFhirBundle()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: var(--dark-navy);">
+                        <i class="fas fa-file-medical"></i> 📄 檢視全量 FHIR Bundle JSON
+                    </button>
+                    <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                        <i class="fas fa-sync-alt"></i> 重新整理
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>監護病患</th>
+                            <th>臨床診斷時間</th>
+                            <th>生理特徵指標 (LOINC & SNOMED CT 數值摘要)</th>
+                            <th>標準協定規格</th>
+                            <th>HL7 FHIR 交互文件</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                        <tr>
+                            <td colspan="5" class="no-data">正在從資料庫加載紀錄...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. 系統技術架構與 API 預覽 ==================== -->
+    <div id="architectureTab" class="tab-content">
+        <div class="architecture-grid">
+            
+            <div class="mermaid-container">
+                <div class="mermaid-title">
+                    <span><i class="fas fa-project-diagram"></i> 數據生命週期與傳輸流向圖 (Mermaid 橫向渲染)</span>
+                    <span style="font-size: 0.8rem; color: var(--medium-gray);">支援大螢幕縮放滾動</span>
+                </div>
+                
+                <div class="mermaid">
+                sequenceDiagram
+                    autonumber
+                    participant S as 物理感測器 (Radar/FLIR E53)
+                    participant B as Python 後端 (server.py)
+                    participant DB as PostgreSQL 資料庫
+                    participant FE as 護理站監控面板 (index.html)
+
+                    S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
+                    B->>B: 2. 映射標準代碼與設備 ID
+                    B->>DB: 3. 寫入關聯資料庫 observations 表格
+                    FE->>B: 4. 定期輪詢最新狀態 (GET /api)
+                    B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
+                    DB-->>B: 6. 回傳數據與病人、設備資訊
+                    B-->>FE: 7. 渲染前端面板波形與警報 UI
+                </div>
+            </div>
+
+            <div class="api-preview-card">
+                <h3><i class="fas fa-code"></i> RESTful API JSON 請求格式規格</h3>
+                
+                <p style="font-size: 0.9rem; margin-bottom: 8px;">
+                    <strong>1. 傳送數據 API (POST)</strong>：當感測裝置偵測到信號改變時，向後台推送數據包。
+                </p>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 5px;">
+                    <span class="method-tag">POST</span> <code>http://60gigahertz.uk/api</code>
+                </div>
+                <pre class="api-block">
 // 數值型生命特徵上報 payload (如心率)
 {
   "patient_id": "patient-01",
@@ -1332,15 +1330,15 @@
   "metric_type": "fall",
   "value": "fallen" // fallen (跌倒) / present (有人) / absent (無人)
 }
-                    </pre>
+                </pre>
 
-                    <p style="font-size: 0.9rem; margin-bottom: 8px;">
-                        <strong>2. 輪詢資料 API (GET)</strong>：前端定期發送輪詢請求。
-                    </p>
-                    <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 5px;">
-                        <span class="method-tag get">GET</span> <code>http://60gigahertz.uk/api</code>
-                    </div>
-                    <pre class="api-block">
+                <p style="font-size: 0.9rem; margin-bottom: 8px;">
+                    <strong>2. 輪詢資料 API (GET)</strong>：前端定期發送輪詢請求。
+                </p>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 5px;">
+                    <span class="method-tag get">GET</span> <code>http://60gigahertz.uk/api</code>
+                </div>
+                <pre class="api-block">
 {
   "status": "success",
   "database": "connected",
@@ -1361,145 +1359,144 @@
     }
   ]
 }
-                    </pre>
-                </div>
-
+                </pre>
             </div>
+
         </div>
-
-        <!-- ==================== 5. 醫療合規指引文獻工作區 ==================== -->
-        <div id="specTab" class="tab-content">
-            <div class="spec-card">
-                <h2>衛生福利部標準規格與 HAPI FHIR 資料庫儲存研析指引</h2>
-                
-                <div class="spec-item">
-                    <h3>1. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
-                    <p>
-                        在標準的 HAPI FHIR JPA 伺服器架構中，所有資源並非以扁平表儲存，而是使用高度關聯的核心索引架構：
-                    </p>
-                    <table class="standard-table">
-                        <thead>
-                            <tr>
-                                <th>核心資料表名稱</th>
-                                <th>儲存內容與技術原理</th>
-                                <th>重要欄位與屬性</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>HFJ_RESOURCE</strong></td>
-                                <td>記錄所有 FHIR 資源的原資料 (Metadata)，是整個 FHIR JPA Server 的核心主表。</td>
-                                <td><code>RES_ID</code> (PK), <code>RES_TYPE</code> (資源類型), <code>RES_VERSION</code> (目前版本)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>HFJ_RES_VER</strong></td>
-                                <td>儲存資源內容的版本紀錄。<strong>FHIR 將原始 JSON/XML 內容以 GZIP 壓縮格式以 BLOB 欄位儲存。</strong></td>
-                                <td><code>RES_TEXT_VC</code> (GZIP 壓縮後之 JSON BLOB), <code>RES_VER</code> (版本號)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>HFJ_SPIDX_STRING</strong></td>
-                                <td>字串型索引表。用於快速搜尋 Patient.name 等字串屬性，避開對大 XML/JSON 進行全表掃描。</td>
-                                <td><code>SP_NAME</code>, <code>SP_VALUE_NORMALIZED</code></td>
-                            </tr>
-                            <tr>
-                                <td><strong>HFJ_SPIDX_QUANTITY</strong></td>
-                                <td>數值型索引表。專用於對應 Observation.valueQuantity 之數值與 UCUM 單位進行快速範圍查詢。</td>
-                                <td><code>SP_VALUE</code>, <code>SP_SYSTEM</code>, <code>SP_UNITS</code></td>
-                            </tr>
-                            <tr>
-                                <td><strong>HFJ_SPIDX_TOKEN</strong></td>
-                                <td>Token 索引表。用於比對代碼對（如：LOINC Code 或身分證字號識別元）。</td>
-                                <td><code>SP_SYSTEM</code>, <code>SP_CODE</code></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="spec-item">
-                    <h3>2. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
-                    <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
-                        <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
-                        「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
-                    </div>
-                    <p>
-                        <strong>對照與合規要件：</strong>在我們的地端資料表 <code>patients</code> 中，<code>mrn</code> (病歷號)、<code>name</code> (姓名) 以及 <code>gender</code> (性別) 均設定為 <code>NOT NULL</code> 強制欄位，完全相容於此規定。
-                    </p>
-                </div>
-
-                <div class="spec-item">
-                    <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
-                    <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
-                        <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
-                        「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
-                    </div>
-                    <p>
-                        <strong>對照與合規要件：</strong>我們將體溫、心率及呼吸數據以 <code>value_numeric</code> 及 <code>value_unit</code> (符合 UCUM 標準，如生命徵象之體溫填寫 <code>Cel</code>) 形式進行分離儲存與 API 交換，以確保跨系統互補一致性。
-                    </p>
-                </div>
-
-                <div class="spec-item">
-                    <h3>4. 本專案使用之臨床編碼對照手冊</h3>
-                    <table class="standard-table">
-                        <thead>
-                            <tr>
-                                <th>監測項目</th>
-                                <th>標準編碼體系 (System)</th>
-                                <th>指標代碼 (Code)</th>
-                                <th>醫學呈現名稱 (Display)</th>
-                                <th>計量單位/狀態值</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>體溫監測</strong></td>
-                                <td><code>http://loinc.org</code></td>
-                                <td><code>8310-5</code></td>
-                                <td>Body temperature</td>
-                                <td>攝氏度 (UCUM: <code>Cel</code>)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>心率監測</strong></td>
-                                <td><code>http://loinc.org</code></td>
-                                <td><code>8867-4</code></td>
-                                <td>Heart rate</td>
-                                <td>次/分 (UCUM: <code>/min</code>)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>呼吸監測</strong></td>
-                                <td><code>http://loinc.org</code></td>
-                                <td><code>9279-1</code></td>
-                                <td>Respiratory rate</td>
-                                <td>次/分 (UCUM: <code>/min</code>)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>姿態辨識</strong></td>
-                                <td><code>http://snomed.info/sct</code></td>
-                                <td><code>8361-8</code></td>
-                                <td>Body position</td>
-                                <td>躺著 (<code>102538003</code>) / 站立 (<code>10904000</code>)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>離床監測</strong></td>
-                                <td><code>http://snomed.info/sct</code></td>
-                                <td><code>96773-7</code></td>
-                                <td>Bed exit status</td>
-                                <td>在床 (<code>102539006</code>) / 離床 (<code>262068006</code>)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>跌倒偵測</strong></td>
-                                <td><code>http://snomed.info/sct</code></td>
-                                <td><code>75276-6</code></td>
-                                <td>Accidental fall indicator</td>
-                                <td>跌倒 (<code>242526002</code>) / 有人 (<code>260385009</code>) / 無人 (<code>272186001</code>)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-        </div>
-
     </div>
+
+    <!-- ==================== 5. 醫療合規指引文獻工作區 ==================== -->
+    <div id="specTab" class="tab-content">
+        <div class="spec-card">
+            <h2>衛生福利部標準規格與 HAPI FHIR 資料庫儲存研析指引</h2>
+            
+            <div class="spec-item">
+                <h3>1. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
+                <p>
+                    在標準的 HAPI FHIR JPA 伺服器架構中，所有資源並非以扁平表儲存，而是使用高度關聯的核心索引架構：
+                </p>
+                <table class="standard-table">
+                    <thead>
+                        <tr>
+                            <th>核心資料表名稱</th>
+                            <th>儲存內容與技術原理</th>
+                            <th>重要欄位與屬性</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>HFJ_RESOURCE</strong></td>
+                            <td>記錄所有 FHIR 資源的原資料 (Metadata)，是整個 FHIR JPA Server 的核心主表。</td>
+                            <td><code>RES_ID</code> (PK), <code>RES_TYPE</code> (資源類型), <code>RES_VERSION</code> (目前版本)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_RES_VER</strong></td>
+                            <td>儲存資源內容的版本紀錄。<strong>FHIR 將原始 JSON/XML 內容以 GZIP 壓縮格式以 BLOB 欄位儲存。</strong></td>
+                            <td><code>RES_TEXT_VC</code> (GZIP 壓縮後之 JSON BLOB), <code>RES_VER</code> (版本號)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_STRING</strong></td>
+                            <td>字串型索引表。用於快速搜尋 Patient.name 等字串屬性，避開對大 XML/JSON 進行全表掃描。</td>
+                            <td><code>SP_NAME</code>, <code>SP_VALUE_NORMALIZED</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_QUANTITY</strong></td>
+                            <td>數值型索引表。專用於對應 Observation.valueQuantity 之數值與 UCUM 單位進行快速範圍查詢。</td>
+                            <td><code>SP_VALUE</code>, <code>SP_SYSTEM</code>, <code>SP_UNITS</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_TOKEN</strong></td>
+                            <td>Token 索引表。用於比對代碼對（如：LOINC Code 或身分證字號識別元）。</td>
+                            <td><code>SP_SYSTEM</code>, <code>SP_CODE</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="spec-item">
+                <h3>2. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
+                <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
+                    <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
+                    「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
+                </div>
+                <p>
+                    <strong>對照與合規要件：</strong>在我們的地端資料表 <code>patients</code> 中，<code>mrn</code> (病歷號)、<code>name</code> (姓名) 以及 <code>gender</code> (性別) 均設定為 <code>NOT NULL</code> 強制欄位，完全相容於此規定。
+                </p>
+            </div>
+
+            <div class="spec-item">
+                <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
+                <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
+                    <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
+                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
+                </div>
+                <p>
+                    <strong>對照與合規要件：</strong>我們將體溫、心率及呼吸數據以 <code>value_numeric</code> 及 <code>value_unit</code> (符合 UCUM 標準，如生命徵象之體溫填寫 <code>Cel</code>) 形式進行分離儲存與 API 交換，以確保跨系統互補一致性。
+                </p>
+            </div>
+
+            <div class="spec-item">
+                <h3>4. 本專案使用之臨床編碼對照手冊</h3>
+                <table class="standard-table">
+                    <thead>
+                        <tr>
+                            <th>監測項目</th>
+                            <th>標準編碼體系 (System)</th>
+                            <th>指標代碼 (Code)</th>
+                            <th>醫學呈現名稱 (Display)</th>
+                            <th>計量單位/狀態值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>體溫監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>8310-5</code></td>
+                            <td>Body temperature</td>
+                            <td>攝氏度 (UCUM: <code>Cel</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>心率監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>8867-4</code></td>
+                            <td>Heart rate</td>
+                            <td>次/分 (UCUM: <code>/min</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>呼吸監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>9279-1</code></td>
+                            <td>Respiratory rate</td>
+                            <td>次/分 (UCUM: <code>/min</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>姿態辨識</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>8361-8</code></td>
+                            <td>Body position</td>
+                            <td>躺著 (<code>102538003</code>) / 站立 (<code>10904000</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>離床監測</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>96773-7</code></td>
+                            <td>Bed exit status</td>
+                            <td>在床 (<code>102539006</code>) / 離床 (<code>262068006</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>跌倒偵測</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>75276-6</code></td>
+                            <td>Accidental fall indicator</td>
+                            <td>跌倒 (<code>242526002</code>) / 有人 (<code>260385009</code>) / 無人 (<code>272186001</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 
 <script>
