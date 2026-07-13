@@ -6,6 +6,8 @@
     <title>MR60-FLIR-FHIR 醫療照護系統 (地端整合測試版)</title>
     <!-- 引入 Google Fonts 專業字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 Font Awesome 圖示庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 Mermaid.js 繪圖引擎 -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
@@ -13,24 +15,27 @@
             startOnLoad: true,
             theme: 'neutral',
             securityLevel: 'loose',
-            flowchart: { useMaxWidth: true, htmlLabels: true }
+            flowchart: { useMaxWidth: false, htmlLabels: true }
         });
     </script>
     <style>
         :root {
-            --bg-color: #faf9f6;          /* 溫潤紙張底色 (Limestone Paper) */
-            --card-bg: #ffffff;           /* 臨床卡片純白底色 */
-            --border-color: #e2e8f0;       /* 淺灰邊框 */
-            --text-main: #0f172a;         /* 深奧石灰黑 */
-            --text-muted: #64748b;        /* 輔助灰色字 */
-            --primary-color: #0d9488;      /* 專業醫療青色 (Teal-600) */
-            --primary-light: rgba(13, 148, 136, 0.06);
-            --success-color: #059669;      /* 正常綠色 */
-            --success-light: rgba(5, 150, 105, 0.06);
-            --danger-color: #dc2626;       /* 警報紅色 */
-            --danger-light: rgba(220, 38, 38, 0.06);
-            --warning-color: #d97706;      /* 警告橙色 */
-            --warning-light: rgba(217, 119, 6, 0.06);
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --dark-navy: #0f172a;
+            --light-gray: #f8fafc;
+            --medium-gray: #64748b;
+            --danger-red: #ef4444;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --white: #ffffff;
+            --border-color: #cbd5e1;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 10px 30px rgba(15, 23, 42, 0.05);
+            --shadow-heavy: 0 20px 40px rgba(15, 23, 42, 0.1);
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --transition-expo: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -40,7 +45,7 @@
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
         }
 
-        /* 抖動漸層紙張噪點背景 */
+        /* 印刷紙張紋理噪點疊加層 */
         .noise-overlay {
             position: fixed;
             top: 0;
@@ -55,102 +60,137 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: #f1f5f9;
+            color: var(--dark-navy);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             justify-content: center;
             position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 舊版經典半透明放射狀背景覆蓋層 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 30%, rgba(6, 182, 212, 0.04) 0%, transparent 60%),
+                radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.04) 0%, transparent 60%),
+                radial-gradient(circle at 50% 80%, rgba(30, 58, 138, 0.03) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             z-index: 10;
         }
 
-        /* 頂部導航欄 */
+        /* 導航列 Header */
         header {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
             border-radius: 16px;
             padding: 20px 30px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.01), 0 1px 3px rgba(0,0,0,0.015);
+            color: var(--white);
+            box-shadow: var(--shadow-medium);
         }
 
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 15px;
         }
 
         .header-title h1 {
-            font-size: 1.45rem;
+            font-size: 1.5rem;
             font-weight: 800;
-            color: var(--text-main);
+            color: var(--white);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .header-title h1 i {
+            color: var(--danger-red);
+            font-size: 1.8rem;
+            animation: pulse-icon 1.5s infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .status-badge {
-            font-size: 0.78rem;
-            padding: 4px 10px;
-            border-radius: 9999px;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 20px;
             font-weight: 700;
-            background: var(--primary-light);
-            color: var(--primary-color);
-            border: 1px solid rgba(13, 148, 136, 0.15);
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.4);
         }
 
         .header-top p {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.6);
             margin-top: 3px;
         }
 
-        /* 分頁切換 Tab Bar */
+        /* Tab 導覽按鈕 */
         .tab-bar {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .tab-btn {
-            background: #f1f5f9;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 18px;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: var(--transition-expo);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .tab-btn:hover {
-            background: #e2e8f0;
-            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--white);
         }
 
         .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-color: var(--secondary-blue);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
 
-        /* 全域緊急警報閃爍條 */
+        /* 緊急警報條 */
         #fallEmergencyAlert {
             background: #fef2f2;
-            border: 2px solid var(--danger-color);
-            color: var(--danger-color);
+            border: 2px solid var(--danger-red);
+            color: var(--danger-red);
             padding: 16px;
             border-radius: 12px;
             text-align: center;
@@ -158,16 +198,15 @@
             font-size: 1.15rem;
             animation: blink 1.2s infinite;
             display: none;
-            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
         }
 
         @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+            0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+            50% { opacity: 0.5; box-shadow: 0 0 5px rgba(239, 68, 68, 0.05); }
         }
 
-        /* 分頁容器 */
+        /* 分頁面切換內容 */
         .tab-content {
             display: none;
             animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -178,46 +217,69 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         /* ==================== 1. 即時監護儀分頁 ==================== */
-        .dashboard-grid {
+        
+        /* 頂部數據統計條 */
+        .stats-row {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        @media (max-width: 968px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+        .stat-badge {
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
+        .stat-icon {
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .stat-badge.total .stat-icon { background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); }
+        .stat-badge.normal .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success-green); }
+        .stat-badge.warning .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning-yellow); }
+        .stat-badge.danger .stat-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
+
+        .stat-info { flex: 1; }
+        .stat-label { font-size: 0.8rem; color: var(--medium-gray); font-weight: 700; }
+        .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--dark-navy); }
+
+        /* 卡片網格 */
         .telemetry-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 18px;
         }
 
         .monitor-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--white);
+            border: 2px solid transparent;
             border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.01);
+            padding: 22px;
+            box-shadow: var(--shadow-light);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .monitor-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: var(--transition-expo);
         }
 
         .monitor-card::before {
@@ -227,84 +289,119 @@
             top: 0;
             height: 100%;
             width: 5px;
-            background: var(--primary-color);
+            background: var(--secondary-blue);
         }
 
+        .monitor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .monitor-card.normal { border-color: rgba(16, 185, 129, 0.15); }
+        .monitor-card.normal::before { background: var(--success-green); }
+
+        .monitor-card.warning { border-color: rgba(245, 158, 11, 0.25); }
+        .monitor-card.warning::before { background: var(--warning-yellow); }
+
+        .monitor-card.danger {
+            border-color: rgba(239, 68, 68, 0.4);
+            animation: pulse-red-border 2s infinite;
+        }
+        .monitor-card.danger::before { background: var(--danger-red); }
+
+        @keyframes pulse-red-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
+            50% { box-shadow: 0 0 15px 0 rgba(239, 68, 68, 0.15); }
+        }
+
+        /* 卡片頭部 */
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .card-title {
             font-size: 0.95rem;
             font-weight: 700;
-            color: var(--text-muted);
+            color: var(--dark-navy);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .loinc-tag {
-            font-size: 0.75rem;
-            background: #f1f5f9;
-            color: var(--text-muted);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: monospace;
+        .card-title i {
+            color: var(--secondary-blue);
+        }
+
+        /* 卡片右上角閃爍指示燈 */
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.normal { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); animation: indicator-blink 2s infinite; }
+        .status-indicator.warning { background: var(--warning-yellow); box-shadow: 0 0 8px var(--warning-yellow); animation: indicator-blink 1.5s infinite; }
+        .status-indicator.danger { background: var(--danger-red); box-shadow: 0 0 8px var(--danger-red); animation: indicator-blink 0.8s infinite; }
+        .status-indicator.offline { background: var(--medium-gray); animation: none; }
+
+        @keyframes indicator-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
         .value-display {
             display: flex;
             align-items: baseline;
-            gap: 5px;
-            margin: 10px 0;
+            gap: 6px;
+            margin: 12px 0;
         }
 
         .main-val {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            color: var(--text-main);
+            color: var(--dark-navy);
             letter-spacing: -1px;
         }
 
         .sub-unit {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--medium-gray);
         }
 
         .device-info {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            border-top: 1px dashed var(--border-color);
-            padding: 8px 0;
-            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--medium-gray);
+            border-top: 1px dashed rgba(100, 116, 139, 0.15);
+            padding: 8px 0 0 0;
+            margin-top: 12px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .device-id-tag {
-            background: rgba(0,0,0,0.04);
-            padding: 1px 5px;
-            border-radius: 3px;
+            background: rgba(15, 23, 42, 0.05);
+            padding: 1px 6px;
+            border-radius: 4px;
             font-family: monospace;
+            font-weight: 600;
         }
 
-        /* 警報卡片樣式 */
-        .card-alert-danger::before { background: var(--danger-color); }
-        .card-alert-danger .main-val { color: var(--danger-color); }
-        .card-alert-warning::before { background: var(--warning-color); }
-        .card-alert-warning .main-val { color: var(--warning-color); }
-
-        /* 摺疊標準說明區 */
+        /* 摺疊詳解面板 */
         details.spec-details {
             margin-top: 10px;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid rgba(100, 116, 139, 0.1);
             padding-top: 8px;
         }
 
         summary.spec-summary {
             font-size: 0.8rem;
-            color: var(--primary-color);
+            color: var(--secondary-blue);
             font-weight: 700;
             cursor: pointer;
             outline: none;
@@ -315,269 +412,214 @@
         }
 
         summary.spec-summary:hover {
-            color: #0f766e;
+            color: var(--primary-blue);
             text-decoration: underline;
         }
 
         .spec-content {
             background: #f8fafc;
             border-radius: 8px;
-            padding: 10px 12px;
+            padding: 12px;
             margin-top: 8px;
             font-size: 0.82rem;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
+            color: var(--medium-gray);
+            border: 1px solid #e2e8f0;
             line-height: 1.5;
         }
 
-        .spec-content strong {
-            color: var(--text-main);
-        }
-
+        .spec-content strong { color: var(--dark-navy); }
         .spec-quote {
-            border-left: 2px solid var(--primary-color);
-            padding-left: 6px;
-            margin-top: 6px;
+            border-left: 3px solid var(--secondary-blue);
+            padding-left: 8px;
+            margin-top: 8px;
             font-style: italic;
-            background: rgba(0,0,0,0.01);
+            background: rgba(59, 130, 246, 0.02);
             color: #475569;
         }
 
-        /* 模擬上報面板 */
-        .control-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.01);
+        /* ==================== 2. 模擬器上報控制台 ==================== */
+        .simulator-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
         }
 
-        .control-card h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            border-left: 4px solid var(--primary-color);
-            padding-left: 10px;
+        @media (max-width: 768px) {
+            .simulator-layout { grid-template-columns: 1fr; }
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-muted);
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: #ffffff;
-            color: var(--text-main);
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0f766e;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
-        }
-
-        /* ==================== 2. 歷史觀測日誌分頁 ==================== */
+        /* ==================== 3. 歷史觀測日誌分頁 ==================== */
         .history-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.05);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.01);
+            box-shadow: var(--shadow-light);
         }
 
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .history-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.88rem;
-        }
-
-        th {
-            background: #f8fafc;
-            color: var(--text-muted);
-            font-weight: 700;
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-main);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* ==================== 3. 系統說明、流程圖與 FHIR 規範 ==================== */
-        .spec-container-grid {
+        /* ==================== 4. 技術架構與 API 預覽 ==================== */
+        .architecture-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
         }
 
-        .guide-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.01);
-        }
-
-        .guide-card h2 {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 20px;
-            border-left: 4px solid var(--primary-color);
-            padding-left: 10px;
-        }
-
-        .guide-section {
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
-
-        .guide-section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .guide-section h3 {
-            font-size: 1.02rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .guide-section p {
-            font-size: 0.9rem;
-            color: var(--text-main);
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-
-        .quote-block {
-            background: #f8fafc;
-            border-left: 4px solid var(--primary-color);
-            padding: 12px 18px;
-            font-style: italic;
-            font-size: 0.88rem;
-            color: #475569;
-            margin: 12px 0;
-            line-height: 1.6;
-        }
-
-        /* Mermaid 流程圖容器 */
+        /* 可放大顯示的 Mermaid 容器 */
         .mermaid-container {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 15px 0;
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .mermaid-title {
+            align-self: flex-start;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--secondary-blue);
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .mermaid {
+            width: 100%;
+            min-width: 800px;
             display: flex;
             justify-content: center;
         }
 
-        /* API 格式區 */
+        .api-preview-card {
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .api-preview-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--secondary-blue);
+            padding-left: 10px;
+        }
+
         .api-block {
             background: #0f172a;
             color: #f8fafc;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: monospace;
+            border-radius: 10px;
+            padding: 18px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 0.85rem;
             overflow-x: auto;
-            line-height: 1.4;
-            margin-top: 10px;
+            line-height: 1.5;
+            margin: 10px 0 20px 0;
+            border: 1px solid #1e293b;
         }
+
+        .method-tag {
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .method-tag.get {
+            background: #3b82f6;
+        }
+
+        /* ==================== 5. 衛福部與國際醫療標準指引 ==================== */
+        .spec-card {
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .spec-card h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-left: 5px solid var(--secondary-blue);
+            padding-left: 12px;
+            margin-bottom: 25px;
+        }
+
+        .spec-item {
+            margin-bottom: 30px;
+            border-bottom: 1px dashed rgba(100, 116, 139, 0.15);
+            padding-bottom: 25px;
+        }
+
+        .spec-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .spec-item h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+        }
+
+        .spec-item p {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* 列表樣式 */
+        .standard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin: 15px 0;
+        }
+
+        .standard-table th { background: #f1f5f9; padding: 10px 12px; color: var(--text-main); font-weight: 700; border: 1px solid #cbd5e1; }
+        .standard-table td { padding: 10px 12px; border: 1px solid #cbd5e1; color: var(--text-main); }
     </style>
 </head>
 <body>
 
-<!-- 紙張紋理噪點疊加層 -->
 <div class="noise-overlay"></div>
 
 <div class="container">
     
-    <!-- 頂部導航 Header -->
+    <!-- 頂部護理站導航 Header -->
     <header>
         <div class="header-top">
             <div class="header-title">
+                <i class="fas fa-heart-pulse"></i>
                 <h1>MR60-FLIR-FHIR 醫療照護系統 <span class="status-badge">地端測試模式</span></h1>
                 <p>即時生理數據與行為狀態整合面板 (TW Core IG 相容)</p>
             </div>
             <div class="api-info" style="text-align: right;">
-                <p style="font-weight: 700;">公網網址: <span id="displayDomain" style="color: var(--primary-color);">60gigahertz.uk</span></p>
+                <p style="font-weight: 700;">公網網址: <span id="displayDomain" style="color: var(--accent-cyan);">60gigahertz.uk</span></p>
                 <p>本地埠口: <code>localhost:8080</code></p>
             </div>
         </div>
         
         <!-- 分頁 Tab 按鈕 -->
         <div class="tab-bar">
-            <button class="tab-btn active" id="btn-realtimeTab" onclick="switchTab('realtimeTab', this)">🖥️ 護理站即時監護</button>
-            <button class="tab-btn" id="btn-logTab" onclick="switchTab('logTab', this)">📊 FHIR 觀察日誌稽核</button>
-            <button class="tab-btn" id="btn-specTab" onclick="switchTab('specTab', this)">📖 技術架構、傳輸格式與醫學指引</button>
+            <button class="tab-btn active" id="btn-realtimeTab" onclick="switchTab('realtimeTab', this)"><i class="fas fa-desktop"></i> 護理站即時監護</button>
+            <button class="tab-btn" id="btn-simulatorTab" onclick="switchTab('simulatorTab', this)"><i class="fas fa-paper-plane"></i> 模擬器上報控制台</button>
+            <button class="tab-btn" id="btn-logTab" onclick="switchTab('logTab', this)"><i class="fas fa-database"></i> FHIR 歷史觀察日誌</button>
+            <button class="tab-btn" id="btn-architectureTab" onclick="switchTab('architectureTab', this)"><i class="fas fa-project-diagram"></i> 系統架構與 API 預覽</button>
+            <button class="tab-btn" id="btn-specTab" onclick="switchTab('specTab', this)"><i class="fas fa-book-medical"></i> 衛福部與國際醫療標準指引</button>
         </div>
     </header>
 
@@ -588,253 +630,267 @@
 
     <!-- ==================== 分頁面 1：即時監護儀 ==================== -->
     <div id="realtimeTab" class="tab-content active">
-        <div class="dashboard-grid">
-            
-            <!-- 左側：生理與行為卡片 grids -->
-            <div class="telemetry-section">
-                <div class="telemetry-grid">
-                    
-                    <!-- 1. 體溫監控 (FLIR) -->
-                    <div class="monitor-card" id="tempCard">
-                        <div class="card-header">
-                            <span class="card-title">病患體溫監測 (FLIR)</span>
-                            <span class="loinc-tag">LOINC 8310-5</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="tempVal">--</span>
-                            <span class="sub-unit">°C</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>E53-Camera</strong></span>
-                            <span class="device-id-tag">device-camera-01</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>8310-5</code> (Body temperature)<br/>
-                                <strong>計量單位</strong>: 攝氏度 (UCUM: <code>Cel</code>)<br/>
-                                <strong>TW Core IG 規範原話</strong>:
-                                <div class="spec-quote">
-                                    「本 Profile 繼承自 base Observation Resource... valueQuantity 欄位為 Must Support，且單位必須使用 UCUM 系統之 Cel，以實現跨院體溫數據一致性。」
-                                </div>
-                                <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="link-btn">➡️ 前往衛福部規範網頁</a>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- 2. 心率監控 (Radar-01) -->
-                    <div class="monitor-card" id="heartCard">
-                        <div class="card-header">
-                            <span class="card-title">心率脈搏 (Radar)</span>
-                            <span class="loinc-tag">LOINC 8867-4</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="heartVal">--</span>
-                            <span class="sub-unit">bpm</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>MR60-Radar</strong></span>
-                            <span class="device-id-tag">device-radar-01</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>8867-4</code> (Heart rate)<br/>
-                                <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
-                                <strong>TW Core IG 規範原話</strong>:
-                                <div class="spec-quote">
-                                    「生理心率之 Observation.code 必須映射至 LOINC 8867-4，並將心率值寫入 valueQuantity.value，以供心血管系統連續監控稽核。」
-                                </div>
-                                <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="link-btn">➡️ 前往衛福部規範網頁</a>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- 3. 呼吸率監控 (Radar-01) -->
-                    <div class="monitor-card" id="respCard">
-                        <div class="card-header">
-                            <span class="card-title">呼吸頻率 (Radar)</span>
-                            <span class="loinc-tag">LOINC 9279-1</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="respVal">--</span>
-                            <span class="sub-unit">bpm</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>MR60-Radar</strong></span>
-                            <span class="device-id-tag">device-radar-01</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>9279-1</code> (Respiratory rate)<br/>
-                                <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
-                                <strong>TW Core IG 規範原話</strong>:
-                                <div class="spec-quote">
-                                    「呼吸頻率屬核心生理指標 Profile，數據必須強制綁定 Patient 對象，以供急重症監護分析。」
-                                </div>
-                                <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="link-btn">➡️ 前往衛福部規範網頁</a>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- 4. 身體姿態 (FLIR) -->
-                    <div class="monitor-card" id="postureCard">
-                        <div class="card-header">
-                            <span class="card-title">身體姿態 (FLIR)</span>
-                            <span class="loinc-tag">LOINC 8361-8</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="postureVal">--</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>E53-Camera</strong></span>
-                            <span class="device-id-tag">device-camera-01</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>8361-8</code> (Body position)<br/>
-                                <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                                <strong>對照編碼</strong>:<br/>
-                                - 躺著 (Lying position): <code>102538003</code><br/>
-                                - 站立 (Standing): <code>10904000</code><br/>
-                                <strong>HL7 R4 規範定義</strong>:
-                                <div class="spec-quote">
-                                    「用於記錄病患觀察時的物理姿態。狀態類觀測值應使用 valueCodeableConcept 取代數值欄位，宣告對應的 SNOMED 語意代碼。」
-                                </div>
-                                <a href="https://hl7.org/fhir/R4/observation.html" target="_blank" class="link-btn">➡️ 前往 HL7 官方網頁</a>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- 5. 離床監測 (FLIR) -->
-                    <div class="monitor-card" id="bedCard">
-                        <div class="card-header">
-                            <span class="card-title">在床/離床狀態 (FLIR)</span>
-                            <span class="loinc-tag">LOINC 96773-7</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="bedVal">--</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>E53-Camera</strong></span>
-                            <span class="device-id-tag">device-camera-01</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>96773-7</code> (Bed exit status)<br/>
-                                <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                                <strong>對照編碼</strong>:<br/>
-                                - 在床 (Lying in bed): <code>102539006</code><br/>
-                                - 離床 (Out of bed): <code>262068006</code><br/>
-                                <strong>臨床安全指引</strong>:
-                                <div class="spec-quote">
-                                    「監控高風險病患之離床警報，為防範住院跌倒與擅自離院之核心行為指標。」
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- 6. 跌倒監測 (Radar-02) -->
-                    <div class="monitor-card" id="fallCard">
-                        <div class="card-header">
-                            <span class="card-title">跌倒偵測警報 (Radar)</span>
-                            <span class="loinc-tag">LOINC 75276-6</span>
-                        </div>
-                        <div class="value-display">
-                            <span class="main-val" id="fallVal">--</span>
-                        </div>
-                        <div class="device-info">
-                            <span>硬體: <strong>MR60-Fall-Radar</strong></span>
-                            <span class="device-id-tag">device-radar-02</span>
-                        </div>
-                        <details class="spec-details">
-                            <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
-                            <div class="spec-content">
-                                <strong>國際標準代碼</strong>: LOINC <code>75276-6</code> (Accidental fall indicator)<br/>
-                                <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
-                                <strong>對照編碼</strong>:<br/>
-                                - 跌倒 (Accidental fall): <code>242526002</code><br/>
-                                - 有人 (Present): <code>260385009</code><br/>
-                                - 無人 (Absent): <code>272186001</code>
-                                <div class="spec-quote">
-                                    「當感測器偵測到跌倒事件時，此指標需立即映射至 SNOMED 242526002，用以觸發病房緊急警報防護系統。」
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-
+        
+        <!-- 數據統計條 -->
+        <div class="stats-row">
+            <div class="stat-badge total">
+                <div class="stat-icon"><i class="fas fa-hospital-user"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">監控對象</div>
+                    <div class="stat-value" id="statPatient">林某某</div>
                 </div>
             </div>
+            <div class="stat-badge normal">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">正常指標</div>
+                    <div class="stat-value" id="statNormalVal">0 / 6</div>
+                </div>
+            </div>
+            <div class="stat-badge warning">
+                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">預警指標</div>
+                    <div class="stat-value" id="statWarningVal">0 / 6</div>
+                </div>
+            </div>
+            <div class="stat-badge danger">
+                <div class="stat-icon"><i class="fas fa-radiation"></i></div>
+                <div class="stat-info">
+                    <div class="stat-label">緊急警報</div>
+                    <div class="stat-value" id="statDangerVal">無</div>
+                </div>
+            </div>
+        </div>
 
-            <!-- 右側：上報模擬器 -->
-            <div class="control-section">
-                <div class="control-card">
-                    <h3>感測器模擬數據上報</h3>
-                    
-                    <div class="form-group">
-                        <label for="mockMetric">監測指標類別</label>
-                        <select id="mockMetric" onchange="toggleMockValueFields()">
-                            <option value="heart_rate">心率 (bpm) [Radar-01]</option>
-                            <option value="respiration_rate">呼吸率 (bpm) [Radar-01]</option>
-                            <option value="body_temperature">體溫 (°C) [FLIR-Camera]</option>
-                            <option value="posture">身體姿態 [FLIR-Camera]</option>
-                            <option value="bed_exit">在床/離床 [FLIR-Camera]</option>
-                            <option value="fall">跌倒偵測 [Radar-02]</option>
-                        </select>
+        <!-- 6大生理與行為卡片 grids -->
+        <div class="telemetry-grid">
+            
+            <!-- 1. 體溫監控 (FLIR) -->
+            <div class="monitor-card" id="tempCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-thermometer-half"></i> 病患體溫監測 (FLIR)</span>
+                    <span class="status-indicator offline" id="tempInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="tempVal">--</span>
+                    <span class="sub-unit">°C</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8310-5</code> (Body temperature)<br/>
+                        <strong>計量單位</strong>: 攝氏度 (UCUM: <code>Cel</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「本 Profile 繼承自 base Observation Resource... valueQuantity 欄位為 Must Support，且單位必須使用 UCUM 系統之 Cel，以實現跨院體溫數據一致性。」
+                        </div>
                     </div>
+                </details>
+            </div>
 
-                    <!-- 數值型輸入框 -->
-                    <div class="form-group" id="numericInputGroup">
-                        <label for="mockNumVal">數值大小</label>
-                        <input type="number" id="mockNumVal" value="75" step="0.1">
+            <!-- 2. 心率監控 (Radar-01) -->
+            <div class="monitor-card" id="heartCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-heartbeat"></i> 心率脈搏 (Radar)</span>
+                    <span class="status-indicator offline" id="heartInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="heartVal">--</span>
+                    <span class="sub-unit">bpm</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>MR60-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8867-4</code> (Heart rate)<br/>
+                        <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「生理心率之 Observation.code 必須映射至 LOINC 8867-4，並將心率值寫入 valueQuantity.value，以供心血管系統連續監控稽核。」
+                        </div>
                     </div>
+                </details>
+            </div>
 
-                    <!-- 狀態型選擇框 -->
-                    <div class="form-group" id="stateInputGroup" style="display: none;">
-                        <label for="mockStateVal">狀態值</label>
-                        <select id="mockStateVal">
-                            <!-- JS 動態填入 -->
-                        </select>
+            <!-- 3. 呼吸率監控 (Radar-01) -->
+            <div class="monitor-card" id="respCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-wind"></i> 呼吸頻率 (Radar)</span>
+                    <span class="status-indicator offline" id="respInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="respVal">--</span>
+                    <span class="sub-unit">bpm</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>MR60-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>9279-1</code> (Respiratory rate)<br/>
+                        <strong>計量單位</strong>: 次/分 (UCUM: <code>/min</code>)<br/>
+                        <strong>TW Core IG 規範原話</strong>:
+                        <div class="spec-quote">
+                            「呼吸頻率屬核心生理指標 Profile，數據必須強制綁定 Patient 對象，以供急重症監護分析。」
+                        </div>
                     </div>
+                </details>
+            </div>
 
-                    <div class="form-group">
-                        <label for="mockPatient">受測病患</label>
-                        <select id="mockPatient" disabled>
-                            <option value="patient-01">林某某 (Patient/patient-01)</option>
-                        </select>
+            <!-- 4. 身體姿態 (FLIR) -->
+            <div class="monitor-card" id="postureCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-user-check"></i> 身體姿態 (FLIR)</span>
+                    <span class="status-indicator offline" id="postureInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="postureVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>8361-8</code> (Body position)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 躺著 (Lying position): <code>102538003</code><br/>
+                        - 站立 (Standing): <code>10904000</code>
                     </div>
+                </details>
+            </div>
 
-                    <button class="btn btn-primary" id="btnSubmitMock" onclick="submitMockData()">
-                        <span>🚀 發送模擬數據 (POST)</span>
-                    </button>
+            <!-- 5. 離床監測 (FLIR) -->
+            <div class="monitor-card" id="bedCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-bed"></i> 在床/離床狀態 (FLIR)</span>
+                    <span class="status-indicator offline" id="bedInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="bedVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>E53-Camera</strong></span>
+                    <span class="device-id-tag">device-camera-01</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>96773-7</code> (Bed exit status)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 在床 (Lying in bed): <code>102539006</code><br/>
+                        - 離床 (Out of bed): <code>262068006</code>
+                    </div>
+                </details>
+            </div>
+
+            <!-- 6. 跌倒監測 (Radar-02) -->
+            <div class="monitor-card" id="fallCard">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-user-injured"></i> 跌倒偵測警報 (Radar)</span>
+                    <span class="status-indicator offline" id="fallInd"></span>
+                </div>
+                <div class="value-display">
+                    <span class="main-val" id="fallVal">--</span>
+                </div>
+                <div class="device-info">
+                    <span>硬體: <strong>MR60-Fall-Radar</strong></span>
+                    <span class="device-id-tag">device-radar-02</span>
+                </div>
+                <details class="spec-details">
+                    <summary class="spec-summary">ℹ️ 展開醫學標準與指引規範原文</summary>
+                    <div class="spec-content">
+                        <strong>國際標準代碼</strong>: LOINC <code>75276-6</code> (Accidental fall indicator)<br/>
+                        <strong>狀態對照集</strong>: SNOMED CT 概念編碼<br/>
+                        <strong>對照編碼</strong>:<br/>
+                        - 跌倒 (Accidental fall): <code>242526002</code><br/>
+                        - 有人 (Present): <code>260385009</code><br/>
+                        - 無人 (Absent): <code>272186001</code>
+                    </div>
+                </details>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==================== 分頁面 2：模擬器上報控制台 ==================== -->
+    <div id="simulatorTab" class="tab-content">
+        <div class="simulator-layout">
+            
+            <div class="control-card">
+                <h3>模擬感測器數據發送</h3>
+                
+                <div class="form-group">
+                    <label for="mockMetric">監測指標類別</label>
+                    <select id="mockMetric" onchange="toggleMockValueFields()">
+                        <option value="heart_rate">心率 (Heart Rate - LOINC 8867-4) [Radar-01]</option>
+                        <option value="respiration_rate">呼吸率 (Respiratory Rate - LOINC 9279-1) [Radar-01]</option>
+                        <option value="body_temperature">體溫 (Body Temperature - LOINC 8310-5) [FLIR-Camera]</option>
+                        <option value="posture">身體姿態 (Body Position - LOINC 8361-8) [FLIR-Camera]</option>
+                        <option value="bed_exit">在床/離床監測 (Bed Exit - LOINC 96773-7) [FLIR-Camera]</option>
+                        <option value="fall">跌倒偵測警報 (Accidental Fall - LOINC 75276-6) [Radar-02]</option>
+                    </select>
                 </div>
 
-                <div class="control-card" style="background: #f1f5f9; border-color: #cbd5e1;">
-                    <h3>硬體分流規範對照</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px;">
-                        地端部署之實體感測硬體，於後端資料庫登錄之 <code>device_id</code> 分流明細：
-                    </p>
-                    <ul style="font-size: 0.82rem; color: var(--text-main); padding-left: 15px; line-height: 1.5;">
-                        <li><strong>心率/呼吸</strong>: <code>device-radar-01</code> (MR60-Radar)</li>
-                        <li><strong>跌倒偵測</strong>: <code>device-radar-02</code> (MR60-Fall-Radar)</li>
-                        <li><strong>體溫/姿態/離床</strong>: <code>device-camera-01</code> (E53-Camera)</li>
-                    </ul>
+                <!-- 數值型輸入框 -->
+                <div class="form-group" id="numericInputGroup">
+                    <label for="mockNumVal">數值大小</label>
+                    <input type="number" id="mockNumVal" value="75" step="0.1">
                 </div>
+
+                <!-- 狀態型選擇框 -->
+                <div class="form-group" id="stateInputGroup" style="display: none;">
+                    <label for="mockStateVal">狀態值</label>
+                    <select id="mockStateVal">
+                        <!-- JS 動態填入 -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mockPatient">受測病患</label>
+                    <select id="mockPatient" disabled>
+                        <option value="patient-01">林某某 (Patient/patient-01)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="btnSubmitMock" onclick="submitMockData()">
+                    <i class="fas fa-paper-plane"></i> <span>發送模擬數據 (POST)</span>
+                </button>
+            </div>
+
+            <div class="control-card" style="background: #e2e8f0; border-color: var(--border-color);">
+                <h3>模擬測試說明</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--dark-navy);">
+                    當您點選上方指標並送出後，前端將發送符合 FHIR HTTP RESTful 標準的 payload 到後端 Python API。<br/>
+                    後端會<strong>自動映射感測硬體 ID 並且將標準的 LOINC / SNOMED CT 編碼值</strong>寫入 PostgreSQL 的 <code>observations</code> 表格中。<br/>
+                    寫入完成後，即時監控分頁的數據會隨之刷新，並且歷史日誌中會新增審計紀錄。
+                </p>
             </div>
 
         </div>
     </div>
 
-    <!-- ==================== 分頁面 2：歷史觀察日誌 ==================== -->
+    <!-- ==================== 分頁面 3：歷史觀察日誌 ==================== -->
     <div id="logTab" class="tab-content">
         <div class="history-card">
             <div class="history-header">
-                <span class="history-title">PostgreSQL FHIR 臨床觀察日誌 (Observations)</span>
+                <span class="history-title"><i class="fas fa-table"></i> PostgreSQL FHIR 臨床觀察日誌 (Observations)</span>
                 <button class="btn btn-primary" onclick="loadTelemetryLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
-                    🔄 重新整理
+                    <i class="fas fa-sync-alt"></i> 重新整理
                 </button>
             </div>
             <div class="table-container">
@@ -859,82 +915,234 @@
         </div>
     </div>
 
-    <!-- ==================== 分頁面 3：技術架構、傳輸格式與醫學指引 ==================== -->
-    <div id="specTab" class="tab-content">
-        <div class="spec-container-grid">
+    <!-- ==================== 分頁面 4：技術架構與 API 預覽 ==================== -->
+    <div id="architectureTab" class="tab-content">
+        <div class="architecture-grid">
             
-            <div class="guide-card">
-                <h2>地端與雲端系統架構與傳輸規範</h2>
-                
-                <div class="guide-section">
-                    <h3>1. 數據傳輸生命週期與流向圖</h3>
-                    <p>
-                        本系統以非接觸式雷達與熱感影像相機作為採集源頭，透過 Python 伺服器對接資料庫，最終將整合數據渲染至護理面板：
-                    </p>
-                    
-                    <!-- Mermaid 動態繪製圖區 -->
-                    <div class="mermaid-container">
-                        <pre class="mermaid">
-                        sequenceDiagram
-                            autonumber
-                            participant S as 物理感測硬體 (Radar / FLIR E53)
-                            participant B as Python 後端 (server.py)
-                            participant DB as PostgreSQL 資料庫
-                            participant FE as 護理站監控面板 (index.html)
-
-                            S->>B: 1. 傳送 JSON 數據包 (HTTP POST /api)
-                            Note over B: 2. 依指標映射標準代碼與硬體識別碼<br/>- 心率/呼吸 -> device-radar-01<br/>- 跌倒警報 -> device-radar-02<br/>- 體溫/姿態/離床 -> device-camera-01
-                            B->>DB: 3. 執行關聯式資料表寫入 (INSERT INTO observations)
-                            FE->>B: 4. 定期輪詢最新觀測數據 (GET /api)
-                            B->>DB: 5. 跨表查詢最新資料 (SELECT JOIN)
-                            DB-->>B: 6. 回傳病患、設備與生理觀測資料
-                            B-->>FE: 7. 渲染前端分頁與警報 UI
-                        </pre>
-                    </div>
+            <!-- 大尺寸系統流程圖 -->
+            <div class="mermaid-container">
+                <div class="mermaid-title">
+                    <span><i class="fas fa-project-diagram"></i> 數據傳輸生命週期與系統架構流程圖 (Mermaid 繪製)</span>
+                    <span style="font-size: 0.8rem; color: var(--medium-gray);">提示: 可橫向捲動查看完整流程</span>
                 </div>
+                
+                <div class="mermaid">
+                sequenceDiagram
+                    autonumber
+                    participant S as 物理感測器 (Radar/FLIR E53)
+                    participant B as Python 後端 (server.py)
+                    participant DB as PostgreSQL 資料庫
+                    participant FE as 護理站監控面板 (index.html)
 
-                <div class="guide-section">
-                    <h3>2. 感測器數據上報 API 規範</h3>
-                    <p>
-                        地端感測器上報時，向後端發送 HTTP POST 請求。其傳輸規格定義如下：
-                    </p>
-                    <strong>請求端點 (Endpoint)</strong>: <code>POST /api</code><br/>
-                    <strong>Headers</strong>: <code>Content-Type: application/json</code>
-                    <div class="api-block">
-// 範例 1: 心率數據上報 (數值型)
+                    S->>B: 1. 傳送感測器扁平 JSON 數據包 (HTTP POST /api)
+                    Note over B: 2. 根據指標自動分流並映射醫學標準代碼<br/>- 心率/呼吸 -> device-radar-01 (LOINC 8867-4/9279-1)<br/>- 跌倒偵測 -> device-radar-02 (LOINC 75276-6)<br/>- 體溫/姿勢/離床 -> device-camera-01 (LOINC 8310-5/8361-8/96773-7)
+                    B->>DB: 3. 執行關聯式資料表寫入 (INSERT INTO observations)
+                    FE->>B: 4. 定期輪詢獲取最新狀態 (GET /api)
+                    B->>DB: 5. 跨表關聯查詢最新觀測值 (SELECT JOIN)
+                    DB-->>B: 6. 回傳數據與病人、設備資訊
+                    B-->>FE: 7. 渲染前端面板並發布警報 (Mermaid/UI)
+                </div>
+            </div>
+
+            <!-- API 請求格式預覽 -->
+            <div class="api-preview-card">
+                <h3><i class="fas fa-code"></i> API 請求與回應 JSON 格式規格</h3>
+                
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">
+                    <strong>上報數據 API 端點 (POST)</strong>：當感測裝置偵測到信號改變時，向後台推送數據包。
+                </p>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue);">
+                    <span class="method-tag">POST</span> <code>http://60gigahertz.uk/api</code>
+                </div>
+                <pre class="api-block">
+// 數值型生理訊號 (例如心率) 的請求 Payload 格式
 {
   "patient_id": "patient-01",
   "metric_type": "heart_rate",
-  "value": 78.0
+  "value": 75.0
 }
 
-// 範例 2: 姿態辨識上報 (狀態型)
+// 狀態型生理行為 (例如跌倒事件) 的請求 Payload 格式
 {
   "patient_id": "patient-01",
-  "metric_type": "posture",
-  "value": "lying" // 可接受 "lying" (躺著) 或 "standing" (站立)
+  "metric_type": "fall",
+  "value": "fallen" // 可選值: fallen (跌倒) / present (有人) / absent (無人)
 }
-                    </div>
-                </div>
+                </pre>
 
-                <div class="guide-section">
-                    <h3>3. 台灣核心實作指引 (TW Core IG) - 病患基本資料規範</h3>
-                    <div class="quote-block">
-                        <strong>衛福部 TW Core IG 原話指出：</strong><br/>
-                        「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
-                    </div>
-                    <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Patient-twcore.html" target="_blank" class="link-btn">🔗 參考官方連結：台灣核心實作指引病患 Profiles 規範</a>
-                </div>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">
+                    <strong>後端回應 JSON 格式</strong>：
+                </p>
+                <pre class="api-block">
+{
+  "status": "success",
+  "message": "成功寫入觀測資料！指標類型: heart_rate，值: 75.0"
+}
+                </pre>
 
-                <div class="guide-section">
-                    <h3>4. 台灣核心實作指引 (TW Core IG) - 生命徵象觀測規範</h3>
-                    <div class="quote-block">
-                        <strong>衛福部 TW Core IG 原話指出：</strong><br/>
-                        「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
-                    </div>
-                    <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="link-btn">🔗 參考官方連結：台灣核心實作指引生命徵象 Profile</a>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">
+                    <strong>獲取即時觀測列表 API 端點 (GET)</strong>：前端定期發送輪詢請求。
+                </p>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary-blue);">
+                    <span class="method-tag get">GET</span> <code>http://60gigahertz.uk/api</code>
                 </div>
+                <pre class="api-block">
+{
+  "status": "success",
+  "database": "connected",
+  "records": [
+    {
+      "id": 1,
+      "patient_id": "patient-01",
+      "patient_name": "林某某",
+      "device_id": "device-radar-01",
+      "device_model": "MR60-Radar",
+      "status": "final",
+      "category": "vital-signs",
+      "loinc_code": "8867-4",
+      "value_numeric": 75.0,
+      "value_unit": "/min",
+      "value_code": null,
+      "value_display": null,
+      "timestamp": "2026-07-13 11:45:00"
+    }
+  ]
+}
+                </pre>
+            </div>
 
+        </div>
+    </div>
+
+    <!-- ==================== 分頁面 5：衛福部與國際醫療標準指引 ==================== -->
+    <div id="specTab" class="tab-content">
+        <div class="spec-card">
+            <h2>衛生福利部標準規格與 HAPI FHIR 資料庫儲存研析指引</h2>
+            
+            <div class="spec-item">
+                <h3>1. HAPI FHIR JPA Starter 資料庫儲存原理與架構表</h3>
+                <p>
+                    在標準的 HAPI FHIR JPA 伺服器架構中，所有的醫療資源並非使用獨立的 flat table 儲存，而是使用關聯性極高的核心關聯表儲存。核心資料表結構如下：
+                </p>
+                <table class="standard-table">
+                    <thead>
+                        <tr>
+                            <th>核心資料表名稱</th>
+                            <th>儲存內容與技術原理</th>
+                            <th>重要欄位與屬性</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>HFJ_RESOURCE</strong></td>
+                            <td>記錄所有 FHIR 資源的 Metadata，是整個 FHIR JPA Server 的核心主表。</td>
+                            <td><code>RES_ID</code> (PK), <code>RES_TYPE</code> (資源類型), <code>RES_VERSION</code> (目前版本)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_RES_VER</strong></td>
+                            <td>儲存具體資源內容的歷史版本。<strong>FHIR 將原始 JSON/XML 內容以 GZIP 壓縮格式以 BLOB 欄位儲存。</strong></td>
+                            <td><code>RES_TEXT_VC</code> (GZIP 壓縮後之 JSON BLOB), <code>RES_VER</code> (版本號)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_STRING</strong></td>
+                            <td>字串型索引表。用於快速搜尋 Patient.name 等字串屬性，避開對大 XML/JSON 進行全表掃描。</td>
+                            <td><code>SP_NAME</code>, <code>SP_VALUE_NORMALIZED</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_QUANTITY</strong></td>
+                            <td>數值型索引表。專用於對應 Observation.valueQuantity 之數值與 UCUM 單位進行快速範圍查詢。</td>
+                            <td><code>SP_VALUE</code>, <code>SP_SYSTEM</code>, <code>SP_UNITS</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HFJ_SPIDX_TOKEN</strong></td>
+                            <td>Token 索引表。用於比對代碼對（如：LOINC Code 或身分證字號識別元）。</td>
+                            <td><code>SP_SYSTEM</code>, <code>SP_CODE</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="spec-item">
+                <h3>2. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
+                <div class="quote-block">
+                    <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
+                    「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
+                </div>
+                <p>
+                    <strong>對照與合規要件：</strong>在我們的地端資料表 <code>patients</code> 中，<code>mrn</code> (病歷號)、<code>name</code> (姓名) 以及 <code>gender</code> (性別) 均設定為 <code>NOT NULL</code> 強制欄位，完全相容於此規定。
+                </p>
+                <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Patient-twcore.html" target="_blank" class="link-btn"><i class="fas fa-external-link-alt"></i> 前往衛生福利部 臺灣核心實作指引 - Patient 規範</a>
+            </div>
+
+            <div class="spec-item">
+                <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
+                <div class="quote-block">
+                    <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
+                    「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
+                </div>
+                <p>
+                    <strong>對照與合規要件：</strong>我們將體溫、心率及呼吸數據以 <code>value_numeric</code> 及 <code>value_unit</code> (符合 UCUM 標準，如攝氏度填寫 <code>Cel</code>) 形式進行分離儲存與 API 交換，以確保跨系統互通正確。
+                </p>
+                <a href="https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition-Observation-vitalSigns-twcore.html" target="_blank" class="link-btn"><i class="fas fa-external-link-alt"></i> 前往衛生福利部 臺灣核心實作指引 - 生命徵象 規範</a>
+            </div>
+
+            <div class="spec-item">
+                <h3>4. 本專案使用之臨床編碼對照手冊</h3>
+                <table class="standard-table">
+                    <thead>
+                        <tr>
+                            <th>監測項目</th>
+                            <th>標準編碼體系 (System)</th>
+                            <th>指標代碼 (Code)</th>
+                            <th>醫學呈現名稱 (Display)</th>
+                            <th>計量單位/狀態值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>體溫監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>8310-5</code></td>
+                            <td>Body temperature</td>
+                            <td>攝氏度 (UCUM: <code>Cel</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>心率監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>8867-4</code></td>
+                            <td>Heart rate</td>
+                            <td>次/分 (UCUM: <code>/min</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>呼吸監測</strong></td>
+                            <td><code>http://loinc.org</code></td>
+                            <td><code>9279-1</code></td>
+                            <td>Respiratory rate</td>
+                            <td>次/分 (UCUM: <code>/min</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>姿態辨識</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>8361-8</code></td>
+                            <td>Body position</td>
+                            <td>躺著 (<code>102538003</code>) / 站立 (<code>10904000</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>離床監測</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>96773-7</code></td>
+                            <td>Bed exit status</td>
+                            <td>在床 (<code>102539006</code>) / 離床 (<code>262068006</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>跌倒偵測</strong></td>
+                            <td><code>http://snomed.info/sct</code></td>
+                            <td><code>75276-6</code></td>
+                            <td>Accidental fall indicator</td>
+                            <td>跌倒 (<code>242526002</code>) / 有人 (<code>260385009</code>) / 無人 (<code>272186001</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>
@@ -948,7 +1156,7 @@
     window.onload = function() {
         toggleMockValueFields();
         loadTelemetryLogs();
-        setInterval(loadTelemetryLogs, 10000); // 每 10 秒自動刷新
+        setInterval(loadTelemetryLogs, 10000); // 10秒自動更新
     };
 
     // 切換分頁
@@ -962,8 +1170,8 @@
         document.getElementById(tabId).classList.add("active");
         btn.classList.add("active");
 
-        if (tabId === 'specTab') {
-            // 當切換到架構頁時，重新解析與渲染 Mermaid 流程圖，防渲染崩潰
+        if (tabId === 'architectureTab') {
+            // 切換到架構分頁時，手動重繪 Mermaid 圖表防止渲染錯位
             setTimeout(() => {
                 mermaid.contentLoaded();
             }, 50);
@@ -972,7 +1180,7 @@
         }
     }
 
-    // 根據下拉選單切換輸入欄位 (數值型 or 狀態型)
+    // 根據選定指標切換欄位
     function toggleMockValueFields() {
         const metric = document.getElementById("mockMetric").value;
         const numGroup = document.getElementById("numericInputGroup");
@@ -989,7 +1197,6 @@
         } else {
             numGroup.style.display = "none";
             stateGroup.style.display = "flex";
-            
             stateSelect.innerHTML = "";
             
             if (metric === "posture") {
@@ -1039,6 +1246,7 @@
         .then(data => {
             if (data.status === "success") {
                 loadTelemetryLogs();
+                alert("模擬數據發送成功！");
             } else {
                 alert("寫入失敗: " + data.message);
             }
@@ -1049,11 +1257,11 @@
         })
         .finally(() => {
             btn.disabled = false;
-            btn.innerHTML = `<span>🚀 發送模擬數據 (POST)</span>`;
+            btn.innerHTML = `<i class="fas fa-paper-plane"></i> <span>發送模擬數據 (POST)</span>`;
         });
     }
 
-    // 從後端 API 撈取並渲染資料
+    // 後端 API 獲取資料
     function loadTelemetryLogs() {
         fetch(`${API_BASE}/api`)
         .then(res => res.json())
@@ -1069,13 +1277,14 @@
         });
     }
 
-    // 渲染監測儀表板
+    // 渲染儀表板數據與狀態統計
     function renderDashboard(records) {
+        // 1. 渲染歷史表格
         const tbody = document.getElementById("logTableBody");
         tbody.innerHTML = "";
 
         if (records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="no-data">資料庫中尚無監測資料，請使用即時監護面板發送模擬數據。</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="no-data">資料庫中無紀錄。請至模擬器分頁發送模擬數據。</td></tr>`;
             return;
         }
 
@@ -1099,7 +1308,7 @@
             tbody.appendChild(tr);
         });
 
-        // 整理最新五大生理監測數據
+        // 2. 獲取最新觀測值
         const latest = {
             temp: null,
             heart: null,
@@ -1119,38 +1328,85 @@
             if (r.loinc_code === "75276-6" && !latest.fall) latest.fall = r;
         }
 
-        // 更新卡片 UI
-        updateCardUI("tempCard", "tempVal", latest.temp, (val) => val >= 38.0 ? 'danger' : 'normal');
-        updateCardUI("heartCard", "heartVal", latest.heart);
-        updateCardUI("respCard", "respVal", latest.resp);
+        // 3. 更新監測卡片 UI 與狀態指標燈
+        updateCardUI("tempCard", "tempVal", "tempInd", latest.temp, (val) => val >= 38.0 ? 'danger' : 'normal');
+        updateCardUI("heartCard", "heartVal", "heartInd", latest.heart, (val) => (val > 100 || val < 60) ? 'warning' : 'normal');
+        updateCardUI("respCard", "respVal", "respInd", latest.resp, (val) => (val > 24 || val < 10) ? 'warning' : 'normal');
         
-        updateStateCardUI("postureCard", "postureVal", latest.posture);
-        updateStateCardUI("bedCard", "bedVal", latest.bed, (code) => code === "262068006" ? 'warning' : 'normal');
+        updateStateCardUI("postureCard", "postureVal", "postureInd", latest.posture);
+        updateStateCardUI("bedCard", "bedVal", "bedInd", latest.bed, (code) => code === "262068006" ? 'warning' : 'normal');
 
-        // 跌倒偵測警報與全域閃爍條
+        // 跌倒全域警報判定
         const emergencyBar = document.getElementById("fallEmergencyAlert");
+        const dangerValDiv = document.getElementById("statDangerVal");
+        
         if (latest.fall && latest.fall.value_code === "242526002") {
             emergencyBar.style.display = "block";
-            updateStateCardUI("fallCard", "fallVal", latest.fall, () => 'danger');
+            dangerValDiv.innerHTML = `<span style="color: var(--danger-red);"><i class="fas fa-radiation-alt"></i> 跌倒警報中</span>`;
+            updateStateCardUI("fallCard", "fallVal", "fallInd", latest.fall, () => 'danger');
         } else {
             emergencyBar.style.display = "none";
-            updateStateCardUI("fallCard", "fallVal", latest.fall, (code) => code === "260385009" ? 'normal' : 'normal');
+            dangerValDiv.innerText = "無";
+            updateStateCardUI("fallCard", "fallVal", "fallInd", latest.fall, (code) => code === "260385009" ? 'normal' : 'normal');
         }
+
+        // 4. 計算並更新統計 Row
+        calculateStats(latest);
+    }
+
+    // 統計計算
+    function calculateStats(latest) {
+        let normalCount = 0;
+        let warningCount = 0;
+        let totalCount = 0;
+
+        const metrics = [latest.temp, latest.heart, latest.resp, latest.posture, latest.bed, latest.fall];
+
+        metrics.forEach((m, index) => {
+            if (m) {
+                totalCount++;
+                if (index === 0) { // 體溫
+                    if (m.value_numeric >= 38.0) warningCount++; else normalCount++;
+                } else if (index === 1) { // 心率
+                    if (m.value_numeric > 100 || m.value_numeric < 60) warningCount++; else normalCount++;
+                } else if (index === 2) { // 呼吸
+                    if (m.value_numeric > 24 || m.value_numeric < 10) warningCount++; else normalCount++;
+                } else if (index === 3) { // 姿態
+                    normalCount++;
+                } else if (index === 4) { // 離床
+                    if (m.value_code === "262068006") warningCount++; else normalCount++;
+                } else if (index === 5) { // 跌倒
+                    if (m.value_code === "242526002") warningCount++; else normalCount++;
+                }
+            }
+        });
+
+        document.getElementById("statNormalVal").innerText = `${normalCount} / 6`;
+        document.getElementById("statWarningVal").innerText = `${warningCount} / 6`;
     }
 
     // 更新數值卡片
-    function updateCardUI(cardId, valId, record, alertFunc = null) {
+    function updateCardUI(cardId, valId, indicatorId, record, alertFunc = null) {
         const card = document.getElementById(cardId);
         const valSpan = document.getElementById(valId);
+        const indicator = document.getElementById(indicatorId);
 
         card.className = "monitor-card";
+        indicator.className = "status-indicator offline";
 
         if (record) {
             valSpan.innerText = record.value_numeric;
-            if (alertFunc) {
-                const status = alertFunc(record.value_numeric);
-                if (status === 'danger') card.classList.add("card-alert-danger");
-                if (status === 'warning') card.classList.add("card-alert-warning");
+            const status = alertFunc ? alertFunc(record.value_numeric) : 'normal';
+            
+            if (status === 'danger') {
+                card.classList.add("danger");
+                indicator.className = "status-indicator danger";
+            } else if (status === 'warning') {
+                card.classList.add("warning");
+                indicator.className = "status-indicator warning";
+            } else {
+                card.classList.add("normal");
+                indicator.className = "status-indicator normal";
             }
         } else {
             valSpan.innerText = "--";
@@ -1158,18 +1414,28 @@
     }
 
     // 更新狀態卡片
-    function updateStateCardUI(cardId, valId, record, alertFunc = null) {
+    function updateStateCardUI(cardId, valId, indicatorId, record, alertFunc = null) {
         const card = document.getElementById(cardId);
         const valSpan = document.getElementById(valId);
+        const indicator = document.getElementById(indicatorId);
 
         card.className = "monitor-card";
+        indicator.className = "status-indicator offline";
 
         if (record) {
             valSpan.innerText = record.value_display;
-            if (alertFunc) {
-                const status = alertFunc(record.value_code);
-                if (status === 'danger') card.classList.add("card-alert-danger");
-                if (status === 'warning') card.classList.add("card-alert-warning");
+            const status = alertFunc ? alertFunc(record.value_code) : 'normal';
+            
+            if (status === 'danger') {
+                card.classList.add("danger");
+                indicator.className = "status-indicator danger";
+            } else if (status === 'warning') {
+                card.classList.add("card-alert-warning");
+                card.classList.add("warning");
+                indicator.className = "status-indicator warning";
+            } else {
+                card.classList.add("normal");
+                indicator.className = "status-indicator normal";
             }
         } else {
             valSpan.innerText = "--";
