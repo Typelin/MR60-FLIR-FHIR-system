@@ -551,7 +551,18 @@ def launch_cloudflare_tunnel():
         webbrowser.open("http://localhost:8080")
         return
         
-    print(f"偵測到桌面 cloudflared.exe，正在啟動永久命名隧道 [school-fhir]...")
+    token_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tunnel_token.txt"))
+    use_token = False
+    token_val = ""
+    if os.path.exists(token_path):
+        try:
+            with open(token_path, "r", encoding="utf-8") as f:
+                token_val = f.read().strip()
+            if token_val:
+                use_token = True
+                print(f"[Cloudflare] 偵測到 tunnel_token.txt，將使用 Token 模式直接連線，免登入授權！")
+        except Exception as e:
+            print(f"[Cloudflare] 讀取 tunnel_token.txt 失敗: {str(e)}")
 
     global ACTIVE_TUNNEL_URL
     ACTIVE_TUNNEL_URL = "https://60gigahertz.uk"
@@ -560,7 +571,12 @@ def launch_cloudflare_tunnel():
     if sys.platform == "win32":
         creationflags = 0x08000000
 
-    cmd = [cloudflared_path, "tunnel", "run", "--url", "http://localhost:8080", "school-fhir"]
+    if use_token:
+        cmd = [cloudflared_path, "tunnel", "--no-autoupdate", "run", "--token", token_val]
+    else:
+        print(f"偵測到桌面 cloudflared.exe，正在啟動永久命名隧道 [school-fhir]...")
+        cmd = [cloudflared_path, "tunnel", "run", "--url", "http://localhost:8080", "school-fhir"]
+
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
