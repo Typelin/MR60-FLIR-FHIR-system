@@ -20,20 +20,21 @@
     </script>
     <style>
         :root {
-            --primary-blue: #1c19d4;       /* 克萊因深藍 */
-            --secondary-blue: #3b82f6;     /* 醫療藍 */
+            --primary-blue: #0284c7;       /* 醫療亮藍 */
+            --secondary-blue: #3b82f6;     /* 核心醫療藍 */
             --accent-cyan: #06b6d4;        /* 醫療青色 */
-            --dark-navy: #090d16;          /* 深邃黑曜石藍 */
+            --dark-navy: #0c191f;          /* 臨床深森林藍/綠 (Deep Forest Teal) */
             --light-gray: #f8fafc;         /* 暖石灰底色 */
             --medium-gray: #64748b;        /* 輔助灰 */
-            --danger-red: #dc2626;         /* 警報紅色 */
-            --success-green: #059669;      /* 正常綠色 */
-            --warning-yellow: #d97706;      /* 警告黃色 */
+            --danger-red: #ef4444;         /* 警報紅色 */
+            --success-green: #10b981;      /* 正常綠色 */
+            --warning-yellow: #f59e0b;      /* 警告黃色 */
             --white: #ffffff;
-            --border-color: #cbd5e1;
-            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --shadow-medium: 0 10px 30px rgba(15, 23, 42, 0.04);
-            --transition-expo: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --border-color: #e2e8f0;       /* 淺灰線條 */
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --transition-expo: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -51,7 +52,7 @@
             width: 100vw;
             height: 100vh;
             content: "";
-            opacity: 0.02;
+            opacity: 0.015;
             pointer-events: none;
             z-index: 9999;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
@@ -59,7 +60,7 @@
 
         body {
             background-color: #f1f5f9;
-            color: var(--dark-navy);
+            color: #0f172a;
             min-height: 100vh;
             display: flex;
             position: relative;
@@ -74,8 +75,8 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 15% 30%, rgba(6, 182, 212, 0.03) 0%, transparent 60%),
-                radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.03) 0%, transparent 60%);
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.02) 0%, transparent 50%);
             z-index: -1;
             pointer-events: none;
         }
@@ -88,52 +89,52 @@
         }
 
         .sidebar {
-            width: 320px;
+            width: 300px;
             background: var(--dark-navy);
             color: var(--white);
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 25px;
-            border-right: 2px solid rgba(59, 130, 246, 0.25);
+            border-right: 1px solid rgba(226, 232, 240, 0.1);
             position: fixed;
             height: 100vh;
             left: 0;
             top: 0;
             z-index: 100;
-            box-shadow: 4px 0 20px rgba(15, 23, 42, 0.15);
+            box-shadow: 2px 0 10px rgba(15, 23, 42, 0.05);
         }
 
         .workspace-container {
-            margin-left: 320px;
+            margin-left: 300px;
             flex: 1;
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: calc(100% - 320px);
+            width: calc(100% - 300px);
             min-height: 100vh;
         }
 
         /* 側邊欄病患靜態資訊磁貼 (Patient Context Card) */
         .patient-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            background-image: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+            gap: 10px;
+            background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
         }
 
         .patient-card-header {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--accent-cyan);
             font-weight: 800;
             letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 6px;
             display: flex;
             justify-content: space-between;
         }
@@ -141,19 +142,19 @@
         .patient-name-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 1.3rem;
+            gap: 10px;
+            font-size: 1.2rem;
             font-weight: 800;
         }
 
         .patient-details {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.7);
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-            padding-top: 8px;
+            gap: 6px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-top: 6px;
         }
 
         .patient-details div {
@@ -169,17 +170,17 @@
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .menu-item {
             background: transparent;
             color: rgba(255, 255, 255, 0.65);
             border: none;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             cursor: pointer;
             text-align: left;
             display: flex;
@@ -190,29 +191,29 @@
         }
 
         .menu-item i {
-            font-size: 1.15rem;
-            width: 22px;
+            font-size: 1.1rem;
+            width: 20px;
             text-align: center;
         }
 
         .menu-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--white);
         }
 
         .menu-item.active {
             background: var(--primary-blue);
             color: var(--white);
-            box-shadow: 0 4px 12px rgba(28, 25, 212, 0.3);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
             border-left: 4px solid var(--accent-cyan);
         }
 
         /* 頂部控制面板與全域警報 */
         .top-bar {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 18px 24px;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -220,40 +221,40 @@
         }
 
         .top-bar-title h2 {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 800;
-            color: var(--dark-navy);
+            color: #0f172a;
         }
 
         .top-bar-domain {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--medium-gray);
             font-weight: 700;
         }
 
         #fallEmergencyAlert {
             background: #fef2f2;
-            border: 2px solid var(--danger-red);
+            border: 1.5px solid var(--danger-red);
             color: var(--danger-red);
-            padding: 16px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 10px;
             text-align: center;
             font-weight: 800;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             animation: blink 1.2s infinite;
             display: none;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);
         }
 
         @keyframes blink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
-            50% { opacity: 0.5; box-shadow: 0 0 5px rgba(239, 68, 68, 0.05); }
+            0%, 100% { opacity: 1; box-shadow: 0 0 15px rgba(239, 68, 68, 0.15); }
+            50% { opacity: 0.6; box-shadow: 0 0 5px rgba(239, 68, 68, 0.02); }
         }
 
         /* 工作區載入淡入淡出 */
         .tab-content {
             display: none;
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .tab-content.active {
@@ -261,7 +262,7 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -275,7 +276,7 @@
 
         .stat-badge {
             background: var(--white);
-            border: 1px solid rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
             box-shadow: var(--shadow-light);
@@ -285,35 +286,35 @@
         }
 
         .stat-icon {
-            font-size: 1.5rem;
-            width: 44px;
-            height: 44px;
+            font-size: 1.4rem;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
         }
 
-        .stat-badge.total .stat-icon { background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); }
-        .stat-badge.normal .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success-green); }
-        .stat-badge.warning .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning-yellow); }
-        .stat-badge.danger .stat-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
+        .stat-badge.total .stat-icon { background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); }
+        .stat-badge.normal .stat-icon { background: rgba(16, 185, 129, 0.08); color: var(--success-green); }
+        .stat-badge.warning .stat-icon { background: rgba(245, 158, 11, 0.08); color: var(--warning-yellow); }
+        .stat-badge.danger .stat-icon { background: rgba(239, 68, 68, 0.08); color: var(--danger-red); }
 
         .stat-info { flex: 1; }
-        .stat-label { font-size: 0.8rem; color: var(--medium-gray); font-weight: 700; }
-        .stat-value { font-size: 1.45rem; font-weight: 800; color: var(--dark-navy); }
+        .stat-label { font-size: 0.78rem; color: var(--medium-gray); font-weight: 700; }
+        .stat-value { font-size: 1.35rem; font-weight: 800; color: #0f172a; }
 
         .telemetry-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
         }
 
         .monitor-card {
             background: var(--white);
-            border: 2px solid transparent;
-            border-radius: 16px;
-            padding: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 22px;
             box-shadow: var(--shadow-light);
             position: relative;
             overflow: hidden;
@@ -329,73 +330,68 @@
             left: 0;
             top: 0;
             height: 100%;
-            width: 6px;
-            background: var(--secondary-blue);
+            width: 5px;
+            background: var(--primary-blue);
         }
 
         .monitor-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
         }
 
-        .monitor-card.normal { border-color: rgba(16, 185, 129, 0.2); }
+        .monitor-card.normal { border-color: rgba(16, 185, 129, 0.15); }
         .monitor-card.normal::before { background: var(--success-green); }
-        .monitor-card.warning { border-color: rgba(245, 158, 11, 0.3); }
+        .monitor-card.warning { border-color: rgba(245, 158, 11, 0.2); }
         .monitor-card.warning::before { background: var(--warning-yellow); }
-        .monitor-card.danger { border-color: rgba(239, 68, 68, 0.45); animation: pulse-red-border 2s infinite; }
+        .monitor-card.danger { border-color: rgba(239, 68, 68, 0.3); }
         .monitor-card.danger::before { background: var(--danger-red); }
-
-        @keyframes pulse-red-border {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); }
-            50% { box-shadow: 0 0 15px 0 rgba(239, 68, 68, 0.2); }
-        }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .card-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
-            color: var(--dark-navy);
+            color: #0f172a;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .card-title i { color: var(--secondary-blue); }
+        .card-title i { color: var(--primary-blue); }
 
         .status-indicator {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
         }
 
-        .status-indicator.normal { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); animation: indicator-blink 2s infinite; }
-        .status-indicator.warning { background: var(--warning-yellow); box-shadow: 0 0 8px var(--warning-yellow); animation: indicator-blink 1.5s infinite; }
-        .status-indicator.danger { background: var(--danger-red); box-shadow: 0 0 8px var(--danger-red); animation: indicator-blink 0.8s infinite; }
+        .status-indicator.normal { background: var(--success-green); box-shadow: 0 0 6px var(--success-green); }
+        .status-indicator.warning { background: var(--warning-yellow); box-shadow: 0 0 6px var(--warning-yellow); }
+        .status-indicator.danger { background: var(--danger-red); box-shadow: 0 0 6px var(--danger-red); }
         .status-indicator.offline { background: var(--medium-gray); }
 
         .value-display {
             display: flex;
             align-items: baseline;
             gap: 5px;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .main-val {
-            font-size: 2.6rem;
+            font-size: 2.4rem;
             font-weight: 800;
-            color: var(--dark-navy);
+            color: #0f172a;
             letter-spacing: -1px;
         }
 
         .sub-unit {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--medium-gray);
         }
@@ -403,19 +399,19 @@
         /* wave-canvas 生物波形模擬器 */
         .wave-canvas {
             width: 100%;
-            height: 65px;
-            background: #faf9f6;
-            border: 1px solid #cbd5e1;
+            height: 60px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .device-info {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--medium-gray);
-            border-top: 1px dashed rgba(100, 116, 139, 0.15);
+            border-top: 1px dashed rgba(100, 116, 139, 0.12);
             padding: 8px 0 0 0;
-            margin-top: 12px;
+            margin-top: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -430,14 +426,14 @@
         }
 
         details.spec-details {
-            margin-top: 10px;
-            border-top: 1px solid rgba(100, 116, 139, 0.1);
+            margin-top: 8px;
+            border-top: 1px solid rgba(100, 116, 139, 0.08);
             padding-top: 8px;
         }
 
         summary.spec-summary {
-            font-size: 0.82rem;
-            color: var(--secondary-blue);
+            font-size: 0.8rem;
+            color: var(--primary-blue);
             font-weight: 700;
             cursor: pointer;
             outline: none;
@@ -448,18 +444,18 @@
         }
 
         summary.spec-summary:hover {
-            color: var(--primary-blue);
+            color: var(--secondary-blue);
             text-decoration: underline;
         }
 
         .spec-content {
-            background: #f8fafc;
+            background: var(--light-gray);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             margin-top: 8px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: var(--medium-gray);
-            border: 1px solid #cbd5e1;
+            border: 1px solid var(--border-color);
             line-height: 1.5;
         }
 
@@ -478,12 +474,12 @@
         }
 
         .terminal-header {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 800;
             margin-bottom: 12px;
-            border-left: 4px solid var(--secondary-blue);
+            border-left: 4px solid var(--primary-blue);
             padding-left: 10px;
-            color: var(--dark-navy);
+            color: #0f172a;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -499,8 +495,8 @@
 
         .scenario-card {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 20px;
             box-shadow: var(--shadow-light);
             display: flex;
@@ -512,26 +508,26 @@
         .scenario-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-medium);
-            border-color: var(--secondary-blue);
+            border-color: var(--primary-blue);
         }
 
         .scenario-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
-            color: var(--dark-navy);
-            margin-bottom: 12px;
+            color: #0f172a;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
         }
 
-        .scenario-title i { color: var(--secondary-blue); }
+        .scenario-title i { color: var(--primary-blue); }
 
         .scenario-details-list {
             list-style: none;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--medium-gray);
             margin-bottom: 15px;
             display: flex;
@@ -539,14 +535,14 @@
             gap: 5px;
         }
 
-        .scenario-details-list strong { color: var(--dark-navy); }
+        .scenario-details-list strong { color: #0f172a; }
 
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px 14px;
             border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -556,23 +552,23 @@
             transition: var(--transition-expo);
         }
 
-        .btn-primary { background: var(--secondary-blue); color: white; }
-        .btn-primary:hover { background: var(--primary-blue); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+        .btn-primary { background: var(--primary-blue); color: white; }
+        .btn-primary:hover { background: #0270a5; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15); }
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
 
         .manual-config-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 800;
             margin-top: 30px;
             margin-bottom: 15px;
-            border-left: 4px solid var(--secondary-blue);
+            border-left: 4px solid var(--primary-blue);
             padding-left: 10px;
-            color: var(--dark-navy);
+            color: #0f172a;
         }
 
         .control-card {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
             box-shadow: var(--shadow-light);
@@ -591,20 +587,20 @@
             gap: 6px;
         }
 
-        .form-group label { font-size: 0.88rem; font-weight: 700; color: var(--medium-gray); }
+        .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--medium-gray); }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 11px 14px;
+            padding: 10px 12px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
             background: #ffffff;
-            color: var(--dark-navy);
+            color: #0f172a;
         }
 
         /* 批次上報載入層 */
         #batchLoading {
-            background: rgba(9, 13, 22, 0.85);
+            background: rgba(15, 23, 42, 0.8);
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 9999;
@@ -617,7 +613,7 @@
         }
 
         .spinner {
-            width: 44px; height: 44px;
+            width: 40px; height: 40px;
             border: 4px solid rgba(255,255,255,0.2);
             border-radius: 50%;
             border-top-color: white;
@@ -626,12 +622,25 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ==================== 3. 歷史觀測日誌工作區 ==================== */
+        /* ==================== 3. 歷史觀測日誌工作區 (含搜尋與篩選) ==================== */
+        .filter-panel {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;
+            gap: 15px;
+            align-items: flex-end;
+            box-shadow: var(--shadow-light);
+        }
+
         .history-card {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 16px;
-            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
         }
 
@@ -639,22 +648,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
-        .history-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-        .history-title i { color: var(--secondary-blue); }
+        .history-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .history-title i { color: var(--primary-blue); }
 
         .table-container {
             width: 100%;
             overflow-x: auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        th { background: #f8fafc; color: var(--medium-gray); font-weight: 700; padding: 14px 18px; border-bottom: 1px solid #cbd5e1; }
-        td { padding: 14px 18px; border-bottom: 1px solid #cbd5e1; color: var(--dark-navy); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        th { background: #f8fafc; color: var(--medium-gray); font-weight: 700; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: #334155; }
         tr:last-child td { border-bottom: none; }
 
         /* ==================== 4. 技術架構與 API 預覽 ==================== */
@@ -662,9 +671,9 @@
         
         .mermaid-container {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 16px;
-            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
             display: flex;
             flex-direction: column;
@@ -675,63 +684,63 @@
 
         .mermaid-title {
             align-self: flex-start;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--secondary-blue);
+            margin-bottom: 18px;
+            border-left: 4px solid var(--primary-blue);
             padding-left: 10px;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            color: var(--dark-navy);
+            color: #0f172a;
         }
 
         .mermaid { width: 100%; min-width: 900px; display: flex; justify-content: center; }
 
         .api-preview-card {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 16px;
-            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
         }
 
-        .api-preview-card h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 15px; border-left: 4px solid var(--secondary-blue); padding-left: 10px; color: var(--dark-navy); }
+        .api-preview-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; border-left: 4px solid var(--primary-blue); padding-left: 10px; color: #0f172a; }
 
         .api-block {
             background: #0f172a;
             color: #38bdf8;
             border-radius: 10px;
-            padding: 18px;
+            padding: 16px;
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             overflow-x: auto;
             line-height: 1.5;
             margin: 10px 0 20px 0;
             border: 1px solid #1e293b;
         }
 
-        .method-tag { background: #10b981; color: white; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; margin-right: 8px; }
+        .method-tag { background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px; }
         .method-tag.get { background: #3b82f6; }
 
         /* ==================== 5. 醫療合規指引文獻工作區 ==================== */
         .spec-card {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 16px;
-            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
             box-shadow: var(--shadow-light);
         }
 
-        .spec-card h2 { font-size: 1.35rem; font-weight: 800; border-left: 5px solid var(--secondary-blue); padding-left: 12px; margin-bottom: 25px; color: var(--dark-navy); }
-        .spec-item { margin-bottom: 30px; border-bottom: 1px dashed rgba(100, 116, 139, 0.15); padding-bottom: 25px; }
+        .spec-card h2 { font-size: 1.25rem; font-weight: 800; border-left: 5px solid var(--primary-blue); padding-left: 12px; margin-bottom: 20px; color: #0f172a; }
+        .spec-item { margin-bottom: 25px; border-bottom: 1px dashed rgba(100, 116, 139, 0.12); padding-bottom: 20px; }
         .spec-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .spec-item h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
-        .spec-item p { font-size: 0.92rem; line-height: 1.6; margin-bottom: 10px; color: #334155; }
+        .spec-item h3 { font-size: 1.05rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px; }
+        .spec-item p { font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; color: #334155; }
 
-        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 15px 0; }
-        .standard-table th { background: #f1f5f9; padding: 12px; color: var(--dark-navy); font-weight: 700; border: 1px solid #cbd5e1; }
-        .standard-table td { padding: 12px; border: 1px solid #cbd5e1; color: var(--dark-navy); }
+        .standard-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 15px 0; }
+        .standard-table th { background: #f1f5f9; padding: 10px; color: #0f172a; font-weight: 700; border: 1px solid var(--border-color); }
+        .standard-table td { padding: 10px; border: 1px solid var(--border-color); color: #334155; }
     </style>
 </head>
 <body>
@@ -749,8 +758,8 @@
     <!-- EHR 固定左側側邊欄 -->
     <div class="sidebar">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-heart-pulse" style="color: var(--danger-red); font-size: 1.7rem;"></i>
-            <span style="font-size: 1.25rem; font-weight: 900; letter-spacing: 0.5px;">EHR CLINICAL PANEL</span>
+            <i class="fas fa-heart-pulse" style="color: var(--danger-red); font-size: 1.5rem;"></i>
+            <span style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px;">EHR CLINICAL PANEL</span>
         </div>
 
         <!-- 靜態病患 Context Card -->
@@ -805,7 +814,7 @@
                 <h2>臨床電子健康紀錄 (EHR) 護理站監控端</h2>
             </div>
             <div class="top-bar-domain">
-                地端公網域名: <strong style="color: var(--secondary-blue);">60gigahertz.uk</strong>
+                地端公網域名: <strong style="color: var(--primary-blue);">60gigahertz.uk</strong>
             </div>
         </div>
 
@@ -854,7 +863,7 @@
                 <!-- 1. 體溫監控 (FLIR) -->
                 <div class="monitor-card" id="tempCard">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-thermometer-half"></i> 病患體溫監測 (FLIR)</span>
+                        <span class="card-title"><i class="fas fa-thermometer-half"></i> 體溫監測 (FLIR)</span>
                         <span class="status-indicator offline" id="tempInd"></span>
                     </div>
                     <div class="value-display">
@@ -1021,10 +1030,10 @@
                     <div class="terminal-header">
                         <span><i class="fas fa-terminal"></i> 數據串流 API 即時傳輸日誌 (Live API Terminal)</span>
                         <div style="display: flex; gap: 8px;">
-                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <button onclick="copyTerminalText('apiTerminalLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
                                 <i class="fas fa-copy"></i> 複製日誌
                             </button>
-                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.1); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <button onclick="toggleTerminalHeight('apiTerminalLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
                                 <i class="fas fa-arrows-alt-v"></i> 展開/收合
                             </button>
                         </div>
@@ -1039,10 +1048,10 @@
                         <span><i class="fas fa-file-medical"></i> 地端最新 HL7 FHIR Bundle (GET /api/fhir)</span>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 600; margin-right: 4px;">TW Core IG searchset</span>
-                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.1); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <button onclick="copyTerminalText('fhirBundleLog')" style="background: rgba(59, 130, 246, 0.08); color: var(--secondary-blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
                                 <i class="fas fa-copy"></i> 複製 FHIR
                             </button>
-                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.1); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
+                            <button onclick="toggleTerminalHeight('fhirBundleLog')" style="background: rgba(100, 116, 139, 0.08); color: var(--medium-gray); border: 1px solid rgba(100, 116, 139, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-expo);">
                                 <i class="fas fa-arrows-alt-v"></i> 展開/收合
                             </button>
                         </div>
@@ -1111,7 +1120,7 @@
                 </div>
 
                 <!-- 情境 4: 跌倒緊急警報 -->
-                <div class="scenario-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                <div class="scenario-card" style="border-color: rgba(239, 68, 68, 0.2);">
                     <div>
                         <div class="scenario-title" style="color: var(--danger-red);"><i class="fas fa-radiation"></i> 跌倒緊急警報</div>
                         <ul class="scenario-details-list">
@@ -1182,8 +1191,50 @@
 
         </div>
 
-        <!-- ==================== 3. 歷史觀察日誌工作區 ==================== -->
+        <!-- ==================== 3. 歷史觀察日誌工作區 (帶有即時篩選搜尋引擎) ==================== -->
         <div id="logTab" class="tab-content">
+            
+            <!-- 新增：歷史資料查詢與篩選面板 -->
+            <div class="filter-panel">
+                <div class="form-group">
+                    <label>🔍 監護對象姓名</label>
+                    <select id="filterPatient" onchange="filterLogsTable()">
+                        <option value="all">顯示所有對象</option>
+                        <option value="林某某">林某某 (MRN998877)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📡 來源感測硬體</label>
+                    <select id="filterDevice" onchange="filterLogsTable()">
+                        <option value="all">顯示所有硬體</option>
+                        <option value="E53-Camera">E53-Camera (FLIR 熱感)</option>
+                        <option value="MR60-Radar">MR60-Radar (生理雷達)</option>
+                        <option value="MR60-Fall-Radar">MR60-Fall-Radar (跌倒雷達)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📊 臨床指標類別</label>
+                    <select id="filterCategory" onchange="filterLogsTable()">
+                        <option value="all">顯示所有類別</option>
+                        <option value="8310-5">體溫 (LOINC 8310-5)</option>
+                        <option value="8867-4">心率 (LOINC 8867-4)</option>
+                        <option value="9279-1">呼吸率 (LOINC 9279-1)</option>
+                        <option value="8361-8">身體姿態 (LOINC 8361-8)</option>
+                        <option value="96773-7">在床離床 (LOINC 96773-7)</option>
+                        <option value="75276-6">跌倒狀態 (LOINC 75276-6)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 時間/數值/關鍵字模糊搜尋</label>
+                    <input type="text" id="filterText" onkeyup="filterLogsTable()" placeholder="搜尋時間或量測值...">
+                </div>
+                <div>
+                    <button onclick="resetFilters()" style="background: #f1f5f9; color: var(--dark-navy); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-expo); height: 41px;">
+                        <i class="fas fa-undo"></i> 重設
+                    </button>
+                </div>
+            </div>
+
             <div class="history-card">
                 <div class="history-header">
                     <span class="history-title"><i class="fas fa-database"></i> PostgreSQL 臨床觀察審計日誌 (Observations)</span>
@@ -1222,6 +1273,7 @@
                         <span><i class="fas fa-project-diagram"></i> 數據生命週期與傳輸流向圖 (Mermaid 橫向渲染)</span>
                         <span style="font-size: 0.8rem; color: var(--medium-gray);">支援大螢幕縮放滾動</span>
                     </div>
+                    
                     <div class="mermaid">
                     sequenceDiagram
                         autonumber
@@ -1319,7 +1371,7 @@
                         <tbody>
                             <tr>
                                 <td><strong>HFJ_RESOURCE</strong></td>
-                                <td>記錄所有 FHIR 資源的 Metadata，是整個 FHIR JPA Server 的核心主表。</td>
+                                <td>記錄所有 FHIR 資源的原資料 (Metadata)，是整個 FHIR JPA Server 的核心主表。</td>
                                 <td><code>RES_ID</code> (PK), <code>RES_TYPE</code> (資源類型), <code>RES_VERSION</code> (目前版本)</td>
                             </tr>
                             <tr>
@@ -1348,7 +1400,7 @@
 
                 <div class="spec-item">
                     <h3>2. 台灣核心實作指引 (TW Core IG) - 病患 Patient Profile</h3>
-                    <div class="quote-block">
+                    <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
                         <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
                         「本 Profile 繼承自 base Patient Resource，並額外規定：Patient.identifier (至少包含一個病歷號/身分證字號/健保卡號，基數 1..*)、Patient.name (病患中文或英文姓名，基數 1..*)、Patient.gender (生理性別，基數 1..1) 必須填寫，此為 Must Support 核心欄位以供跨院索引與身分核對。」
                     </div>
@@ -1359,7 +1411,7 @@
 
                 <div class="spec-item">
                     <h3>3. 台灣核心實作指引 (TW Core IG) - 生命徵象 Observation Profile</h3>
-                    <div class="quote-block">
+                    <div class="quote-block" style="border-left: 4px solid var(--primary-blue); padding-left: 10px; background: var(--light-gray); padding: 10px; margin-bottom: 10px;">
                         <strong>衛福部 TW Core IG 指引規範原文：</strong><br/>
                         「對於生命徵象的 Observation Profile，其 status (狀態) 基數為 1..1、code (LOINC 代碼) 基數為 1..1、subject (關聯病人) 基數為 1..1，且 valueQuantity (量測數值與符合國際 UCUM 單位) 為強烈建議填寫的 Must Support 欄位，用以維持數據的一致性與可跨院交換性。」
                     </div>
@@ -1435,6 +1487,7 @@
 
 <script>
     const API_BASE = window.location.origin;
+    let allTelemetryRecords = []; // 用於前端歷史日誌模糊搜尋的快取陣列
 
     window.onload = function() {
         toggleMockValueFields();
@@ -1668,7 +1721,9 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
+                allTelemetryRecords = data.records; // 緩存以供前端即時檢索過濾
                 renderDashboard(data.records);
+                filterLogsTable(); // 即時套用當前篩選條件
             } else {
                 console.error("資料庫讀取失敗: " + data.message);
             }
@@ -1692,18 +1747,41 @@
         });
     }
 
-    // 渲染儀表板數據與狀態統計
-    function renderDashboard(records) {
-        // 1. 渲染歷史表格
+    // 歷史資料即時篩選與檢索引擎 (Subpage Search Filter Engine)
+    function filterLogsTable() {
+        const patient = document.getElementById("filterPatient").value;
+        const device = document.getElementById("filterDevice").value;
+        const category = document.getElementById("filterCategory").value;
+        const queryText = document.getElementById("filterText").value.toLowerCase().trim();
+
         const tbody = document.getElementById("logTableBody");
+        if (!tbody) return;
         tbody.innerHTML = "";
 
-        if (records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="no-data">資料庫中無紀錄。請至臨床模擬分頁一鍵生成情境數據。</td></tr>`;
+        // 執行記憶體內過濾
+        const filtered = allTelemetryRecords.filter(rec => {
+            if (patient !== "all" && rec.patient_name !== patient) return false;
+            if (device !== "all" && rec.device_model !== device) return false;
+            if (category !== "all" && rec.loinc_code !== category) return false;
+            
+            if (queryText) {
+                const matchName = rec.patient_name.toLowerCase().includes(queryText);
+                const matchTime = rec.timestamp.toLowerCase().includes(queryText);
+                const matchVal = (rec.value_display || "").toLowerCase().includes(queryText) || 
+                                 String(rec.value_numeric || "").includes(queryText);
+                const matchModel = (rec.device_model || "").toLowerCase().includes(queryText);
+                const matchLoinc = rec.loinc_code.toLowerCase().includes(queryText);
+                if (!matchName && !matchTime && !matchVal && !matchModel && !matchLoinc) return false;
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="no-data" style="text-align:center; padding: 20px; color: var(--medium-gray);">查無符合篩選條件的臨床紀錄。</td></tr>`;
             return;
         }
 
-        records.forEach(rec => {
+        filtered.forEach(rec => {
             let displayVal = "";
             if (rec.value_numeric !== null) {
                 displayVal = `${rec.value_numeric} ${rec.value_unit}`;
@@ -1716,14 +1794,25 @@
                 <td><strong>${rec.patient_name}</strong></td>
                 <td>${rec.timestamp}</td>
                 <td>${rec.category}</td>
-                <td><span class="loinc-tag">${rec.loinc_code}</span></td>
+                <td><span class="loinc-tag" style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; font-family: monospace;">${rec.loinc_code}</span></td>
                 <td><strong>${displayVal}</strong></td>
                 <td>${rec.device_model || "未指定"}</td>
             `;
             tbody.appendChild(tr);
         });
+    }
 
-        // 2. 獲取最新生理與行為數值
+    // 重設篩選器
+    function resetFilters() {
+        document.getElementById("filterPatient").value = "all";
+        document.getElementById("filterDevice").value = "all";
+        document.getElementById("filterCategory").value = "all";
+        document.getElementById("filterText").value = "";
+        filterLogsTable();
+    }
+
+    // 渲染儀表板數據與狀態統計
+    function renderDashboard(records) {
         const latest = {
             temp: null,
             heart: null,
@@ -1863,9 +1952,9 @@
         const rc = respCanvas.getContext("2d");
 
         const width = heartCanvas.width = heartCanvas.clientWidth;
-        const height = heartCanvas.height = 65;
+        const height = heartCanvas.height = 60;
         respCanvas.width = respCanvas.clientWidth;
-        respCanvas.height = 65;
+        respCanvas.height = 60;
 
         const hPoints = new Array(width).fill(height / 2);
         const rPoints = new Array(width).fill(height / 2);
@@ -1873,12 +1962,12 @@
         function drawLoop() {
             requestAnimationFrame(drawLoop);
 
-            hc.fillStyle = "#faf9f6"; hc.fillRect(0, 0, width, height);
-            rc.fillStyle = "#faf9f6"; rc.fillRect(0, 0, width, height);
+            hc.fillStyle = "#f8fafc"; hc.fillRect(0, 0, width, height);
+            rc.fillStyle = "#f8fafc"; rc.fillRect(0, 0, width, height);
 
             // 繪製細微格線
-            hc.strokeStyle = "rgba(100, 116, 139, 0.04)"; hc.lineWidth = 1;
-            rc.strokeStyle = "rgba(100, 116, 139, 0.04)"; rc.lineWidth = 1;
+            hc.strokeStyle = "rgba(100, 116, 139, 0.03)"; hc.lineWidth = 1;
+            rc.strokeStyle = "rgba(100, 116, 139, 0.03)"; rc.lineWidth = 1;
             for (let i = 0; i < width; i += 20) {
                 hc.beginPath(); hc.moveTo(i, 0); hc.lineTo(i, height); hc.stroke();
                 rc.beginPath(); rc.moveTo(i, 0); rc.lineTo(i, height); rc.stroke();
@@ -1922,13 +2011,13 @@
             rPoints.shift(); rPoints.push(respVal);
 
             // 繪製心跳線 (綠色)
-            hc.strokeStyle = "#059669"; hc.lineWidth = 1.8;
+            hc.strokeStyle = "#10b981"; hc.lineWidth = 1.8;
             hc.beginPath(); hc.moveTo(0, hPoints[0]);
             for (let i = 1; i < width; i++) { hc.lineTo(i, hPoints[i]); }
             hc.stroke();
 
             // 繪製呼吸線 (藍色)
-            rc.strokeStyle = "#3b82f6"; rc.lineWidth = 1.8;
+            rc.strokeStyle = "#0284c7"; rc.lineWidth = 1.8;
             rc.beginPath(); rc.moveTo(0, rPoints[0]);
             for (let i = 1; i < width; i++) { rc.lineTo(i, rPoints[i]); }
             rc.stroke();
