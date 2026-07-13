@@ -932,12 +932,12 @@
         <div class="patient-strip-info">
             <div class="patient-strip-title">
                 <i class="fas fa-user-injured" style="color: var(--primary-blue);"></i>
-                <span>林某某</span>
+                <span>蘇先生</span>
             </div>
             <div class="patient-strip-item">病歷編號: <strong>MRN998877</strong></div>
-            <div class="patient-strip-item">生理性別: <strong>女性 (Female)</strong></div>
-            <div class="patient-strip-item">出生日期: <strong>1985-04-12</strong></div>
-            <div class="patient-strip-item">當前年齡: <strong>41 歲</strong></div>
+            <div class="patient-strip-item">生理性別: <strong>男性 (Male)</strong></div>
+            <div class="patient-strip-item">出生日期: <strong>1991-12-25</strong></div>
+            <div class="patient-strip-item">當前年齡: <strong>35 歲</strong></div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
             <span class="patient-status-badge">🟢 毫米波雷達與熱感相機連線中</span>
@@ -946,7 +946,7 @@
 
     <!-- 全域警報條 -->
     <div id="fallEmergencyAlert">
-        ⚠️ 【緊急警報】毫米波感測器 (device-radar-02) 判定病患 [林某某] 發生跌倒事件！請醫護人員立即前往處置！
+        ⚠️ 【緊急警報】毫米波感測器 (device-radar-02) 判定病患 [蘇先生] 發生跌倒事件！請醫護人員立即前往處置！
     </div>
 
     <!-- ==================== 1. 即時生理監控儀工作區 ==================== -->
@@ -957,7 +957,7 @@
                 <div class="stat-icon"><i class="fas fa-hospital-user"></i></div>
                 <div class="stat-info">
                     <div class="stat-label">當前監護對象</div>
-                    <div class="stat-value">林某某</div>
+                    <div class="stat-value">蘇先生</div>
                 </div>
             </div>
             <div class="stat-badge normal">
@@ -1297,7 +1297,7 @@
                     <label>🔍 監護對象姓名</label>
                     <select id="filterPatient" onchange="loadTelemetryLogs()">
                         <option value="all">顯示所有對象</option>
-                        <option value="林某某">林某某 (MRN998877)</option>
+                        <option value="蘇先生">蘇先生 (MRN998877)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1477,7 +1477,7 @@
     {
       "id": 12,
       "patient_id": "patient-01",
-      "patient_name": "林某某",
+      "patient_name": "蘇先生",
       "device_id": "device-radar-01",
       "device_model": "MR60-Radar",
       "category": "vital-signs",
@@ -1490,6 +1490,48 @@
     }
   ]
 }
+                </pre>
+            </div>
+
+            <!-- 資料庫結構與內容卡片 -->
+            <div class="api-preview-card" style="margin-top: 1.25rem;">
+                <h3><i class="fas fa-table"></i> PostgreSQL 地端關聯資料庫結構與預設內容 (schema.sql)</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    本系統在 PostgreSQL 地端資料庫中定義了三個核心實體表，用於儲存生理量測、設備原資料與病患摘要：
+                </p>
+                <pre class="api-block" style="background: #0b0f19; color: #cbd5e1;">
+-- 1. 病患基本資料表 (patients)
+CREATE TABLE patients (
+    id VARCHAR(50) PRIMARY KEY,       -- 'patient-01' (FHIR Patient.id)
+    mrn VARCHAR(50) UNIQUE NOT NULL,  -- 'MRN998877' (病歷號)
+    name VARCHAR(100) NOT NULL,       -- '蘇先生' (姓名)
+    gender VARCHAR(10) NOT NULL,      -- 'male' (生理性別)
+    birth_date DATE NOT NULL          -- '1991-12-25' (出生日期)
+);
+
+-- 2. 監測設備資料表 (devices)
+CREATE TABLE devices (
+    id VARCHAR(50) PRIMARY KEY,       -- 對應 FHIR Device.id
+    serial_number VARCHAR(100) UNIQUE, -- 設備序號
+    manufacturer VARCHAR(100),         -- 'FLIR', 'Infineon'
+    model_number VARCHAR(100),         -- 'E53-Camera', 'MR60-Radar'
+    device_type VARCHAR(100)          -- 'Thermal-Camera', 'Radar'
+);
+
+-- 3. 生理觀測指標資料表 (observations)
+CREATE TABLE observations (
+    id SERIAL PRIMARY KEY,
+    patient_id VARCHAR(50) REFERENCES patients(id),
+    device_id VARCHAR(50) REFERENCES devices(id),
+    status VARCHAR(20) DEFAULT 'final',
+    category VARCHAR(50),             -- 'vital-signs' 或 'survey'
+    loinc_code VARCHAR(20),           -- LOINC Code (如 8867-4)
+    recorded_at TIMESTAMP WITH TIME ZONE,
+    value_numeric NUMERIC(6, 2),      -- 數值型資料 (如體溫 36.5)
+    value_unit VARCHAR(20),           -- 單位 (Cel, /min)
+    value_code VARCHAR(50),           -- 狀態型代碼 (SNOMED CT)
+    value_display VARCHAR(100)        -- 狀態型顯示 (在床, 跌倒)
+);
                 </pre>
             </div>
 
@@ -1507,6 +1549,9 @@
                     以下為中華民國衛生福利部 (MHW) 與台灣 HL7 共同維護的官方 FHIR 範例與規範指引：
                 </p>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <a href="https://github.com/Typelin/MR60-FLIR-FHIR-system" target="_blank" class="external-link-badge" style="background: rgba(15, 23, 42, 0.06); color: var(--dark-navy); border-color: rgba(15, 23, 42, 0.15);">
+                        <i class="fab fa-github"></i> 本專案開源 GitHub 倉庫
+                    </a>
                     <a href="https://twcore.hl7.org.tw/ig/twcore/" target="_blank" class="external-link-badge">
                         <i class="fas fa-external-link-alt"></i> 衛福部 TW Core IG 官方首頁
                     </a>
@@ -1964,8 +2009,8 @@
                     timestamp: time,
                     patient_name: rec.patient_name,
                     patient_id: rec.patient_id,
-                    patient_gender: rec.patient_gender || 'female',
-                    patient_birth: rec.patient_birth || '1985-04-12',
+                    patient_gender: rec.patient_gender || 'male',
+                    patient_birth: rec.patient_birth || '1991-12-25',
                     patient_mrn: rec.patient_mrn || 'MRN998877',
                     records: []
                 };
@@ -2050,8 +2095,8 @@
                         "text": first.patient_name
                     }
                 ],
-                "gender": first.patient_gender || "female",
-                "birthDate": first.patient_birth || "1985-04-12"
+                "gender": first.patient_gender || "male",
+                "birthDate": first.patient_birth || "1991-12-25"
             }
         });
 
@@ -2223,8 +2268,8 @@
                         "text": first.patient_name
                     }
                 ],
-                "gender": first.patient_gender || "female",
-                "birthDate": first.patient_birth || "1985-04-12"
+                "gender": first.patient_gender || "male",
+                "birthDate": first.patient_birth || "1991-12-25"
             }
         });
 

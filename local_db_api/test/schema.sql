@@ -58,10 +58,14 @@ CREATE INDEX idx_obs_time ON observations(recorded_at DESC);
 -- 植入預設測試資料 (Seeding Mock Data)
 -- ==========================================
 
--- 預設病患 (林某某, 生理性別: 女, 生日: 1985-04-12)
+-- 預設病患 (蘇先生, 生生理性別: 男, 生日: 1991-12-25)
 INSERT INTO patients (id, mrn, name, gender, birth_date)
-VALUES ('patient-01', 'MRN998877', '林某某', 'female', '1985-04-12')
-ON CONFLICT (id) DO NOTHING;
+VALUES ('patient-01', 'MRN998877', '蘇先生', 'male', '1991-12-25')
+ON CONFLICT (id) DO UPDATE SET 
+    name = EXCLUDED.name, 
+    gender = EXCLUDED.gender, 
+    birth_date = EXCLUDED.birth_date, 
+    mrn = EXCLUDED.mrn;
 
 -- 預設毫米波雷達設備 (Infineon MR60-Radar)
 INSERT INTO devices (id, serial_number, manufacturer, model_number, device_type)
