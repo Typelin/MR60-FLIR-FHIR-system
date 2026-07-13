@@ -271,14 +271,20 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
 
                     val_desc = f"{val_num} {val_unit}" if val_num is not None else f"{snomed_display}"
 
+                    # 進行防錯處理的類別對應
+                    cat_clean = category.strip().lower() if category else ""
+                    cat_code = "vital-signs"
+                    cat_display = "Vital Signs"
+                    if cat_clean == "social-history":
+                        cat_code = "social-history"
+                        cat_display = "Social History"
+                    elif cat_clean == "survey":
+                        cat_code = "survey"
+                        cat_display = "Survey"
+
                     obs_resource = {
                         "resourceType": "Observation",
                         "id": f"obs-{obs_id}",
-                        "meta": {
-                            "profile": [
-                                "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Observation-vitalSigns-twcore"
-                            ]
-                        },
                         "text": {
                             "status": "generated",
                             "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>量測指標：<b>{display_name}</b>，數值：{val_desc}，時間：{timestamp}。</p></div>'
@@ -289,8 +295,8 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                                 "coding": [
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                                        "code": category,
-                                        "display": "Social History" if category == "social-history" else ("Survey" if category == "survey" else "Vital Signs")
+                                        "code": cat_code,
+                                        "display": cat_display
                                     }
                                 ]
                             }
@@ -318,6 +324,13 @@ class SimpleServerHandler(BaseHTTPRequestHandler):
                             }
                         ]
                     }
+                    
+                    if loinc_code in ["8310-5", "8867-4", "9279-1"]:
+                        obs_resource["meta"] = {
+                            "profile": [
+                                "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Observation-vitalSigns-twcore"
+                            ]
+                        }
                     
                     if val_num is not None:
                         obs_resource["valueQuantity"] = {
