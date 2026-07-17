@@ -3,9 +3,10 @@
 MR60 Dual-Radar WiFi UDP Logger (mr60_logger.py)
 功能:
   1. 啟動 UDP Socket 監聽，接收來自兩台 ESP32 經由 WiFi 熱點傳輸的 MR60 雷達數據。
-  2. 支援動態解析 Comma-Separated Payload: `Sensor_ID,breath_rate,heart_rate,distance`。
-  3. 即時將結果安全地寫入 `mr60_sensor_log.csv` 中。
-  4. 內建自動模擬發送模式 (Simulation Mode)，在沒有硬體或未開啟實體 UDP 接收時依然可以測試功能。
+  2. 啟動時自動獲取並顯示本機在區域網路 (AP 熱點) 下的實體 IP 位址，方便 ESP32 端填寫。
+  3. 支援動態解析 Comma-Separated Payload: `Sensor_ID,breath_rate,heart_rate,distance`。
+  4. 即時將結果安全地寫入 `mr60_sensor_log.csv` 中。
+  5. 內建自動模擬發送模式 (Simulation Mode)，在沒有硬體或未開啟實體 UDP 接收時依然可以測試功能。
 """
 
 import os
@@ -17,13 +18,25 @@ import threading
 from datetime import datetime
 
 # ==================== 參數設定 ====================
-UDP_IP = "0.0.0.0"       # 監聽所有介面的連入連線
 UDP_PORT = 12345         # 與 ESP32 .ino 設定相符的 UDP 連接埠
 CSV_FILE_PATH = "mr60_sensor_log.csv"
 SIMULATION_MODE = False  # 是否強制啟用模擬數據生成模式
 
 # 線程鎖鎖定 CSV 寫入，避免併發寫入衝突
 csv_lock = threading.Lock()
+
+def get_active_local_ip():
+    """自動取得本機在當前 WiFi AP 熱點下分配到的實體 IP 位址"""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 連接外部 IP (不需要真的連通，僅用於引導系統選擇正確的網路卡連線)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = "127.0.0.1"
+    finally:
+        s.close()
+    return local_ip
 
 def initialize_csv():
     """初始化 CSV 檔案並寫入欄位標頭"""
@@ -44,11 +57,14 @@ def log_to_csv(sensor_id, breath, heart, dist):
 
 def run_udp_server():
     """啟動 UDP 接收端伺服器線程"""
-    print(f"[啟動] UDP 伺服器正在監聽 {UDP_IP}:{UDP_PORT} ...")
+    local_ip = get_active_local_ip()
+    print(f"\n📢 [本機 IP 提示] 偵測到您的電腦目前 IP 位址為: {local_ip}")
+    print(f"📌 [設定提示] 請將 ESP32 程式碼 (unit.ino) 中的 udpAddress 改為: \"{local_ip}\"\n")
+    print(f"[啟動] UDP 伺服器正在監聽 0.0.0.0:{UDP_PORT} ...")
     
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((UDP_IP, UDP_PORT))
+        sock.bind(("0.0.0.0", UDP_PORT))
     except Exception as e:
         print(f"❌ 錯誤: 無法綁定 UDP Port {UDP_PORT}: {str(e)}")
         print("      系統將自動切換為 [模擬器模式] 進行測試。")
@@ -59,7 +75,6 @@ def run_udp_server():
         try:
             data, addr = sock.recvfrom(1024)
             payload = data.decode("utf-8", errors="ignore").strip()
-            # 格式: Sensor_ID,breath_rate,heart_rate,distance 或 Sensor_ID,init,message
             parts = payload.split(",")
             
             if len(parts) >= 3:
