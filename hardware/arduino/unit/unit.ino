@@ -6,8 +6,9 @@
 const char* ssid = "Realme";
 const char* password = "RealmeZZZ";
 
-// 目標電腦的 IP 與 UDP Port (Python 接收端)
-const char* udpAddress = "192.168.43.100";  // 請修改為執行 Python 腳本的電腦 IP
+// 使用 UDP 廣播位址 (255.255.255.255)，ESP32 會自動將數據廣播至整個區域網路。
+// 電腦端運行 Python 即可直接接收，無須手動輸入或修改電腦的實體 IP。
+const char* udpAddress = "255.255.255.255";  
 const int udpPort = 12345;
 
 // 當前感測器識別碼 (第二台請改為 "MR60_2")
@@ -73,7 +74,7 @@ void sendUdpInitMessage() {
     udp.print(payload);
     udp.endPacket();
     
-    Serial.println("已發送 UDP 初始化上線訊息");
+    Serial.println("已發送 UDP 初始化上線訊息 (廣播)");
   }
 }
 
@@ -89,7 +90,7 @@ void sendUdpData(float breath, float heart, float dist) {
     udp.print(payload);
     udp.endPacket();
     
-    Serial.println("已發送 UDP 觀測數據包: " + payload);
+    Serial.println("已發送 UDP 觀測數據包 (廣播): " + payload);
   } else {
     Serial.println("WiFi 未連線，無法傳送 UDP 數據");
   }
