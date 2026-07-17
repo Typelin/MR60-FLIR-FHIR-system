@@ -1,16 +1,19 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
-#include <WiFiClientSecure.h>
+#include <WiFiUdp.h>
 #include "Seeed_Arduino_mmWave.h"
 
-// WiFi設定
+// WiFi 熱點設定
 const char* ssid = "Realme";
 const char* password = "RealmeZZZ";
 
-// PHP API URL
-const char* serverUrl = "https://mr60.ngrok.pizza/sensor_to_db/connect.php";
+// 目標電腦的 IP 與 UDP Port (Python 接收端)
+const char* udpAddress = "192.168.43.100";  // 請修改為執行 Python 腳本的電腦 IP
+const int udpPort = 12345;
 
-WiFiClientSecure client;
+// 當前感測器識別碼 (第二台請改為 "MR60_2")
+const char* sensorId = "MR60_1";
+
+WiFiUDP udp;
 
 #ifdef ESP32
 #  include <HardwareSerial.h>
@@ -29,16 +32,16 @@ void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
 
-  Serial.print("正在連接 WiFi");
+  Serial.print("正在連接 WiFi 熱點");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println("\nWiFi 已連接，IP: " + WiFi.localIP().toString());
 
-  client.setInsecure();
-
-  sendInitMessage();
+  // 初始化 UDP 連線
+  udp.begin(udpPort);
+  sendUdpInitMessage();
 
   mmWave.begin(&mmWaveSerial);
 }
@@ -50,71 +53,44 @@ void loop() {
     bool gotHeart = mmWave.getHeartRate(heart_rate);
     bool gotDistance = mmWave.getDistance(distance);
 
-    Serial.printf("breath_rate: %.2f bpm, heart_rate: %.2f bpm, distance: %.2f cm\n",
-                  breath_rate, heart_rate, distance);
+    Serial.printf("[%s] breath_rate: %.2f bpm, heart_rate: %.2f bpm, distance: %.2f cm\n",
+                  sensorId, breath_rate, heart_rate, distance);
 
-    // 只要三個都非零，就送資料
+    // 只要指標非零，就透過 UDP 發送資料
     if (breath_rate != 0 && heart_rate != 0 && distance != 0) {
-      sendData(breath_rate, heart_rate, distance);
+      sendUdpData(breath_rate, heart_rate, distance);
     }
   }
 
   delay(1000);
 }
 
-void sendInitMessage() {
+void sendUdpInitMessage() {
   if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    bool ok = http.begin(client, serverUrl);
-    if (!ok) {
-      Serial.println("http.begin() 初始化失敗！");
-      return;
-    }
-
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String postData = "type=init&message=ESP32已上線";
-
-    int httpResponseCode = http.POST(postData);
-
-    if (httpResponseCode > 0) {
-      String response = http.getString();
-      Serial.println("初始化訊息回應：" + response);
-    } else {
-      Serial.printf("初始化訊息傳送失敗，錯誤碼: %d, 錯誤: %s\n",
-                    httpResponseCode, http.errorToString(httpResponseCode).c_str());
-    }
-    http.end();
-  } else {
-    Serial.println("WiFi 未連線，無法發送初始化訊息");
+    String payload = String(sensorId) + ",init,ESP32已上線";
+    
+    udp.beginPacket(udpAddress, udpPort);
+    udp.print(payload);
+    udp.endPacket();
+    
+    Serial.println("已發送 UDP 初始化上線訊息");
   }
 }
 
-void sendData(float breath, float heart, float dist) {
+void sendUdpData(float breath, float heart, float dist) {
   if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    bool ok = http.begin(client, serverUrl);
-    if (!ok) {
-      Serial.println("http.begin() 初始化失敗！");
-      return;
-    }
-
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-    String postData = "type=data&breath=" + String(breath, 2) +
-                      "&heart=" + String(heart, 2) +
-                      "&distance=" + String(dist, 2);
-
-    int httpResponseCode = http.POST(postData);
-
-    if (httpResponseCode > 0) {
-      String response = http.getString();
-      Serial.println("HTTP 回應：" + response);
-    } else {
-      Serial.printf("HTTP 傳送失敗，錯誤碼: %d, 錯誤: %s\n",
-                    httpResponseCode, http.errorToString(httpResponseCode).c_str());
-    }
-    http.end();
+    // 封裝格式: Sensor_ID,breath_rate,heart_rate,distance
+    String payload = String(sensorId) + "," + 
+                     String(breath, 2) + "," + 
+                     String(heart, 2) + "," + 
+                     String(dist, 2);
+    
+    udp.beginPacket(udpAddress, udpPort);
+    udp.print(payload);
+    udp.endPacket();
+    
+    Serial.println("已發送 UDP 觀測數據包: " + payload);
   } else {
-    Serial.println("WiFi 未連線，無法傳送資料");
+    Serial.println("WiFi 未連線，無法傳送 UDP 數據");
   }
 }
